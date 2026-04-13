@@ -235,6 +235,10 @@ struct sta_info {
 				* transaction identifiers */
 	struct os_reltime sa_query_start;
 
+	//PQC 
+	u8 pqc_choice; // chosen parameters by specific STA
+	bool pqc_negotiated; // Flag: whether the IE in probe request sent by STA was correct
+
 #if defined(CONFIG_INTERWORKING) || defined(CONFIG_DPP)
 #define GAS_DIALOG_MAX 8 /* Max concurrent dialog number */
 	struct gas_dialog_info *gas_dialog;

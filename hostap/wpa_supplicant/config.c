@@ -2848,6 +2848,10 @@ static const struct parse_data ssid_fields[] = {
 #endif /* CONFIG_IEEE8021X_AUTH */
 	{ INT_RANGE(drop_unicast_ip_in_l2_multicast, 0, 1)},
 	{ INT_RANGE(always_use_proxy_arp, 0, 2)},
+
+	/* PQC elements */
+	{ INT(pqc_enabled) },
+	{ INT_RANGE(pqc_choice, 0, 255) },
 };
 
 #undef OFFSET

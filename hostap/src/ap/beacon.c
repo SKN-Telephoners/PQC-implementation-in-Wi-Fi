@@ -1728,6 +1728,26 @@ void handle_probe_req(struct hostapd_data *hapd,
 
 	os_free(hex);
 
+	const u8 *pqc_ie = get_vendor_ie(ie, ie_len, 0x00904C);
+
+	if (pqc_ie && pqc_ie[1] >= 5 && pqc_ie[5] == 0x01) {
+		u8 choice = pqc_ie[6];
+		struct sta_info *sta = ap_get_sta(hapd, mgmt->sa);
+
+		if (!sta) {
+			sta = ap_sta_add(hapd, mgmt->sa);
+		}
+
+		if (sta) {
+			sta->pqc_choice = choice;
+			sta->pqc_negotiated = 1;
+			wpa_printf(MSG_DEBUG, "PQC:  Received correct Probe Request from " MACSTR ". Saved algorithm choice: 0x%02x", MAC2STR(mgmt->sa), choice);
+		 /*
+		 * TO DO: IMPLEMENT KEYS GENERATION
+		 */
+		}
+	}
+
 	os_memset(&params, 0, sizeof(params));
 
 #ifdef CONFIG_IEEE80211BE

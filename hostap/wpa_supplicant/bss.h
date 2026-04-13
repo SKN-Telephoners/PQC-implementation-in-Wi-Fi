@@ -145,6 +145,10 @@ struct wpa_bss {
 		bool disabled;
 	} mld_links[MAX_NUM_MLD_LINKS];
 
+	/* PQC parameters - for beacon parsing*/
+	int has_pqc;
+	u8 ap_pqc_supported;
+
 	/* followed by ie_len octets of IEs */
 	/* followed by beacon_ie_len octets of IEs */
 	u8 ies[];
