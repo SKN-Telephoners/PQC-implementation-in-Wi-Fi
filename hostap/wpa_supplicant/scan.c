@@ -26,6 +26,40 @@
 
 static struct wpabuf * wpa_supplicant_extra_ies(struct wpa_supplicant *wpa_s);
 
+/* 
+PQC IMPLEMENTATION - helper
+*/
+
+/* returns correctly formated byte PQC based on input */
+u8 get_pqc_choice_byte(u8 requested_choice) {
+    u8 kem = requested_choice & 0xF0; /* upper 4 bits(1111 0000) KEM*/
+    u8 dsa = requested_choice & 0x0F; /* lower 4 bits (0000 1111) DSA*/
+
+    int kem_bits = 0;
+    int dsa_bits = 0;
+
+    /* counting bits for KEM */
+    if (kem & 0x80) kem_bits++; /* 1000 0000 - ML KEM 512 */
+    if (kem & 0x40) kem_bits++; /* 0100 0000 - ML KEM 768 */
+    if (kem & 0x20) kem_bits++; /* 0010 0000 - ML KEM 1024 */
+    if (kem & 0x10) kem_bits++; /* 0001 0000 - Not used (treated as configuration error) */
+
+    /* counting bits for DSA */
+    if (dsa & 0x08) dsa_bits++; /* 0000 1000 - ML DSA 44 */
+    if (dsa & 0x04) dsa_bits++; /* 0000 0100 - ML DSA 65 */
+    if (dsa & 0x02) dsa_bits++; /* 0000 0010 - ML DSA 87 */
+    if (dsa & 0x01) dsa_bits++; /* 0000 0001 - Not used (treated as configuration error) */
+
+    /* Verify: if there are more than 1 bit - use default params */
+    if (kem_bits != 1) {
+        kem = 0x80; /* default = ML-KEM 512 (1000 0000) */
+    }
+    if (dsa_bits != 1) {
+        dsa = 0x08; /* default = ML-DSA 44 (0000 1000) */
+    }
+
+    return kem | dsa;
+}
 
 static void wpa_supplicant_gen_assoc_event(struct wpa_supplicant *wpa_s)
 {
@@ -301,6 +335,59 @@ int wpa_supplicant_trigger_scan(struct wpa_supplicant *wpa_s,
 		wpa_dbg(wpa_s, MSG_INFO, "Reject scan trigger since one is already pending");
 		return -1;
 	}
+
+	// check whether the scanning will be done on specific SSID
+	int is_directed_scan = 0;
+	if (params->num_ssids > 0 && params->ssids[0].ssid_len > 0){
+		is_directed_scan = 1;
+	}
+
+	// searching for local config for specific SSID
+	struct wpa_ssid *ssid_conf = wpa_s->conf->ssid; 
+	while (ssid_conf) {
+    	if (ssid_conf->ssid_len == params->ssids[0].ssid_len &&
+        	os_memcmp(ssid_conf->ssid, params->ssids[0].ssid, ssid_conf->ssid_len) == 0)
+        	break;
+    	ssid_conf = ssid_conf->next;
+	}
+	// getting last BSS record for specific SSID 
+	struct wpa_bss *bss = NULL;
+	struct wpa_bss *tmp_bss;
+	dl_list_for_each(tmp_bss, &wpa_s->bss, struct wpa_bss, list) {
+		if (tmp_bss->ssid_len == params->ssids[0].ssid_len && os_memcmp(tmp_bss->ssid, params->ssids[0].ssid, tmp_bss->ssid_len) == 0) {
+            bss = tmp_bss;
+			break;
+	}
+
+	// clear buffer
+	wpabuf_free(wpa_s->vendor_elem[VENDOR_ELEM_PROBE_REQ]);
+	wpa_s->vendor_elem[VENDOR_ELEM_PROBE_REQ] = NULL;
+
+	// choice of PQC parameters
+	if (is_directed_scan && ssid_conf && ssid_conf->pqc_enabled) {
+		u8 final_choice = 0x00;
+		if (ssid_conf->pqc_choice != 0) {
+        	final_choice = ssid_conf->pqc_choice; // from config
+   		} 
+		else if (bss && bss->has_pqc) {
+        	final_choice = bss->ap_pqc_supported; 
+    	}
+		struct wpabuf *pqc_ie = wpabuf_alloc(7);
+		if (pqc_ie) {
+			u8 safe_pqc_byte = get_pqc_choice_byte(final_choice);
+
+			wpabuf_put_u8(pqc_ie, WLAN_EID_VENDOR_SPECIFIC); // =221
+			wpabuf_put_u8(pqc_ie, 5); // length - 5 (OUI 3B + type 1B + payload 1B)
+			wpabuf_put_be24(pqc_ie, 0x00904C); // OUI, also hardcoded but not significant
+			wpabuf_put_u8(pqc_ie, 0x01); // type, version
+			wpabuf_put_u8(pqc_ie, safe_pqc_byte); // chosen KEM & DSA
+
+			wpa_s->vendor_elem[VENDOR_ELEM_PROBE_REQ] = pqc_ie;
+			wpa_printf(MSG_DEBUG, "PQC: added IE to directed Probe request. Byte: 0x%02x", safe_pqc_byte);
+		} else {
+			wpa_printf(MSG_ERROR, "PQC: Error in allocating buffer for Probe Request");
+		}
+	}}
 
 	if (default_ies) {
 		if (params->extra_ies_len) {

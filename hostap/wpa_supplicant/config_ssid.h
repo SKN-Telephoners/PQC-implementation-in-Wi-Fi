@@ -346,6 +346,10 @@ struct wpa_ssid {
 	 */
 	int scan_ssid;
 
+	/*PQC implementation*/
+	u8 pqc_choice;
+	int pqc_enabled;
+
 #ifdef IEEE8021X_EAPOL
 #define EAPOL_FLAG_REQUIRE_KEY_UNICAST BIT(0)
 #define EAPOL_FLAG_REQUIRE_KEY_BROADCAST BIT(1)
