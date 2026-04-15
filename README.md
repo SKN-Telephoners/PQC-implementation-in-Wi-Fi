@@ -156,8 +156,8 @@ OQS_init();
 OQS_SIG *sig = OQS_SIG_new(OQS_SIG_alg_ml_dsa_65);
 
 // Allocate memory for the keypair
-uint8_t *public_key = malloc(sig->length_public_key); // Shared with verifiers
-uint8_t *secret_key = malloc(sig->length_secret_key); // Must be kept private and secure
+uint8_t *public_key = malloc(sig->length_public_key);
+uint8_t *secret_key = malloc(sig->length_secret_key);
 
 // Generate the keys
 OQS_SIG_keypair(sig, public_key, secret_key);
