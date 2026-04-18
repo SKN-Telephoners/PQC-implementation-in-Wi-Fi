@@ -4,7 +4,53 @@ Practical implementation of PQC algorithms based on modifying hostapd and wpa_su
 # Modified and added elements
 This part contains all the changes done
 ## Beacon
-placeholder
+The beacon frame is extended with a Vendor-Specific Information Element (IE) that advertises PQC support and the exact ML‑KEM / ML‑DSA variants supported by the Access Point (AP).
+This allows the STA to negotiate PQC algorithms before PASN/PAKE.
+**hostapd/src/ap/beacon.c**
+Adding a new IE in beacon frame:
+* tailpos = hostapd_eid_pqc_capabilities(hapd, tailpos);
+This IE is placed right after RSNXE to keep all [security‑related IEs grouped together](https://dox.ipxe.org/group__ieee80211__ie.html).
+
+**PQC generator function**
+```c
+u8 * hostapd_eid_pqc_capabilities(struct hostapd_data *hapd, u8 *pos)
+{
+    if (!hapd->conf->pqc_enabled)
+        return pos;
+
+    *pos++ = WLAN_EID_VENDOR_SPECIFIC; // 221
+    *pos++ = 5;                        // OUI (3B) + type (1B) + payload (1B)
+
+    *pos++ = 0x00; // OUI byte 1
+    *pos++ = 0x90; // OUI byte 2
+    *pos++ = 0x4C; // OUI byte 3
+
+    *pos++ = 0x01; // Type: PQC capabilities
+
+    *pos++ = hapd->conf->pqc_choice; // 1‑byte PQC bitmask
+
+    return pos;
+}
+```
+OUI is a producent id.
+
+**PQC IE format/structure**
++--------------+---------+---------------------------+
+| Field        | Length  | Description               |
++--------------+---------+---------------------------+
+| Element ID   | 1 byte  | 221 (Vendor Specific IE)  |
+| Length       | 1 byte  | Number of bytes that      |
+|              |         | follow (here: 5)          |
+| OUI          | 3 bytes | 00 90 4C (test OUI)       |
+| Type         | 1 byte  | 0x01 (PQC capabilities)   |
+| Payload      | 1 byte  | Bitmask of supported PQC  |
++--------------+---------+---------------------------+
+Each bit in the payload byte represents support for a specific PQC algorithm like in Probe Request
+
+**hostapd/src/ap/beacon.h**
+Add declaration
+* u8 * hostapd_eid_pqc_capabilities(struct hostapd_data *hapd, u8 *pos);
+
 
 ## Probe Request
 The frame contains additional vendor specific IE (Information element),   
