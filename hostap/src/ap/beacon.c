@@ -390,6 +390,25 @@ static u8 * hostapd_get_rsnxe(struct hostapd_data *hapd, u8 *pos, size_t len)
 	return pos + 2 + ie[1];
 }
 
+static u8 * hostapd_eid_pqc_capabilities(struct hostapd_data *hapd, u8 *pos)
+{
+	if (!hapd->conf->pqc_enabled)
+			return pos;
+
+		*pos++ = WLAN_EID_VENDOR_SPECIFIC; // 221
+		*pos++ = 5;                        // length: 3B OUI + 1B type + 1B payload
+
+		*pos++ = 0x00;                     // OUI byte 1
+		*pos++ = 0x90;                     // OUI byte 2
+		*pos++ = 0x4C;                     // OUI byte 3
+
+		*pos++ = 0x01;                   
+
+		*pos++ = hapd->conf->pqc_choice;   
+
+		return pos;
+}
+
 
 static u8 * hostapd_get_wpa_ie(struct hostapd_data *hapd, u8 *pos, size_t len)
 {
@@ -2460,6 +2479,7 @@ int ieee802_11_build_ap_params(struct hostapd_data *hapd,
 	tailpos = hostapd_eid_max_cs_time(hapd, tailpos);
 
 	tailpos = hostapd_get_rsnxe(hapd, tailpos, tailend - tailpos);
+	tailpos = hostapd_eid_pqc_capabilities(hapd, tailpos); // TODO: Add this element only if PQC is enabled/configured.
 	tailpos = hostapd_eid_mbssid_config(hapd, tailpos,
 					    params->mbssid.mbssid_elem_count);
 
