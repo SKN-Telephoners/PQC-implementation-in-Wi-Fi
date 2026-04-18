@@ -390,7 +390,7 @@ static u8 * hostapd_get_rsnxe(struct hostapd_data *hapd, u8 *pos, size_t len)
 	return pos + 2 + ie[1];
 }
 
-static u8 * hostapd_eid_pqc_capabilities(struct hostapd_data *hapd, u8 *pos)
+u8 * hostapd_eid_pqc_capabilities(struct hostapd_data *hapd, u8 *pos)
 {
 	if (!hapd->conf->pqc_enabled)
 			return pos;

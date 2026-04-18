@@ -34,17 +34,17 @@ u8 * hostapd_eid_pqc_capabilities(struct hostapd_data *hapd, u8 *pos)
 ```
 OUI is a producent id.
 
-**PQC IE format/structure**
-+--------------+---------+---------------------------+
-| Field        | Length  | Description               |
-+--------------+---------+---------------------------+
-| Element ID   | 1 byte  | 221 (Vendor Specific IE)  |
-| Length       | 1 byte  | Number of bytes that      |
-|              |         | follow (here: 5)          |
-| OUI          | 3 bytes | 00 90 4C (test OUI)       |
-| Type         | 1 byte  | 0x01 (PQC capabilities)   |
-| Payload      | 1 byte  | Bitmask of supported PQC  |
-+--------------+---------+---------------------------+
+**PQC IE format/structure**  
++--------------+---------+---------------------------+  
+| Field        | Length  | Description               |  
++--------------+---------+---------------------------+   
+| Element ID   | 1 byte  | 221 (Vendor Specific IE)  |  
+| Length       | 1 byte  | Number of bytes that      |  
+|              |         | follow (here: 5)          |  
+| OUI          | 3 bytes | 00 90 4C (test OUI)       |  
+| Type         | 1 byte  | 0x01 (PQC capabilities)   |  
+| Payload      | 1 byte  | Bitmask of supported PQC  |  
++--------------+---------+---------------------------+  
 Each bit in the payload byte represents support for a specific PQC algorithm like in Probe Request
 
 **hostapd/src/ap/beacon.h**
