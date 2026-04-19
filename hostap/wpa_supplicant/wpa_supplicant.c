@@ -2962,6 +2962,21 @@ void wpa_supplicant_associate(struct wpa_supplicant *wpa_s,
 	 * before completion of the first association.
 	 */
 	wpa_supplicant_rsn_supp_set_config(wpa_s, ssid);
+	/*  PQC STATE MACHINE INIT */
+    if (ssid && ssid->pqc_enabled) {
+        if (wpa_s->pqc) {
+            pqc_sm_deinit(wpa_s->pqc);
+        }
+        
+        /* initializing new session */
+        wpa_s->pqc = pqc_sm_init(wpa_s, ssid->pqc_choice);
+        
+        if (!wpa_s->pqc) {
+            wpa_msg(wpa_s, MSG_ERROR, "PQC_LOG: Failed to initialize State Machine");
+            return;
+        }
+    }
+    /* END PQC */
 
 #ifdef CONFIG_DPP
 	if (wpas_dpp_check_connect(wpa_s, ssid, bss) != 0)
@@ -5155,6 +5170,12 @@ void wpa_supplicant_deauthenticate(struct wpa_supplicant *wpa_s,
 		wpa_supplicant_event(wpa_s, EVENT_DEAUTH, &event);
 		if (zero_addr)
 			addr = NULL;
+	}
+
+	/* PQC */
+	if (wpa_s->pqc) {
+    	pqc_sm_deinit(wpa_s->pqc);
+    	wpa_s->pqc = NULL;
 	}
 
 	wpa_supplicant_clear_connection(wpa_s, addr);

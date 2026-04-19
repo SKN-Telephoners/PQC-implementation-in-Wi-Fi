@@ -1973,6 +1973,7 @@ OBJS += ../src/drivers/driver_common.o
 OBJS_priv += ../src/drivers/driver_common.o
 
 OBJS += wpa_supplicant.o events.o bssid_ignore.o wpas_glue.o scan.o
+OBJS += pqc_sm.o
 OBJS_t := $(OBJS) $(OBJS_l2) eapol_test.o
 OBJS_t += ../src/radius/radius_client.o
 OBJS_t += ../src/radius/radius.o

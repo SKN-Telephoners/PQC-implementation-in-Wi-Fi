@@ -54,6 +54,7 @@
 #include "dpp_supplicant.h"
 #include "pr_supplicant.h"
 #include "nan_supplicant.h"
+#include "pqc_sm.h"
 
 
 #define MAX_OWE_TRANSITION_BSS_SELECT_COUNT 5
@@ -7148,13 +7149,46 @@ void wpa_supplicant_event(void *ctx, enum wpa_event_type event,
 #endif /* CONFIG_IBSS_RSN */
 
 			if (stype == WLAN_FC_STYPE_ACTION) {
-				wpas_event_rx_mgmt_action(
-					wpa_s, data->rx_mgmt.frame,
-					data->rx_mgmt.frame_len,
-					data->rx_mgmt.freq,
-					data->rx_mgmt.ssi_signal);
-				break;
-			}
+                /* PQC PAKE*/
+                /* Min len: header MAC(24) + Category(1) + OUI(3) + Subtype(1) = 29 bytes */
+                if (data->rx_mgmt.frame_len >= 29) {
+                    const u8 *pos = data->rx_mgmt.frame + 24;
+                    
+                    /* cheching whether category is equal to Vendor Specific (127) */
+                    if (*pos == 127 /* WLAN_ACTION_VENDOR_SPECIFIC */) {
+                        pos++;
+                        
+                        /* checking OUI: 00:90:4C */
+                        if (pos[0] == 0x00 && pos[1] == 0x90 && pos[2] == 0x4C) {
+                            pos += 3;
+                            
+                            /* checking Subtype. 0x02 means PAKE-2 frame */
+                            if (*pos == 0x02) {
+                                pos++;
+                                size_t payload_len = data->rx_mgmt.frame_len - (pos - data->rx_mgmt.frame);
+                                
+                                wpa_printf(MSG_DEBUG, "PQC_LOG: Received PAKE-2 frame (Vendor Action), len=%zu", payload_len);
+                                
+								if (wpa_s->pqc) {
+                                    pqc_sm_rx_pake2(wpa_s->pqc, pos, payload_len);
+                                } else {
+                                    wpa_printf(MSG_ERROR, "PQC_LOG: Error - no initialize PQC session found");
+                                }
+                               
+                            }
+                        }
+                    }
+                }
+                /* PQC PAKE end */
+
+                /* In case it was not PQC frame */
+                wpas_event_rx_mgmt_action(
+                    wpa_s, data->rx_mgmt.frame,
+                    data->rx_mgmt.frame_len,
+                    data->rx_mgmt.freq,
+                    data->rx_mgmt.ssi_signal);
+                break;
+            }
 
 			if (wpa_s->ifmsh) {
 				mesh_mpm_mgmt_rx(wpa_s, &data->rx_mgmt);
