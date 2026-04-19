@@ -1748,26 +1748,49 @@ void handle_probe_req(struct hostapd_data *hapd,
 
 	os_free(hex);
 
-	const u8 *pqc_ie = get_vendor_ie(ie, ie_len, 0x00904C);
+	//PQC
+    if (hapd->conf->pqc_enabled) {
+        const u8 *pos = ie;
+        size_t left = ie_len;
+        
+        /* Declaration of constants */
+        const u8 EXPECTED_IE_LEN = 5; /* 3 bytes of OUI + 1 type byte  + 1 data byte */
+        const u8 PAYLOAD_OFFSET = 6;  /* 2 header bytes  + 4 data bytes = 6 */
 
-	if (pqc_ie && pqc_ie[1] >= 5 && pqc_ie[5] == 0x01) {
-		u8 choice = pqc_ie[6];
-		struct sta_info *sta = ap_get_sta(hapd, mgmt->sa);
+        while (left >= 2) {
+            u8 ie_id = pos[0];
+            u8 ie_len_current = pos[1];
+            
+            if (2 + ie_len_current > left) 
+                break; 
 
-		if (!sta) {
-			sta = ap_sta_add(hapd, mgmt->sa);
-		}
+            /* search for Vendor specific */
+            if (ie_id == WLAN_EID_VENDOR_SPECIFIC && ie_len_current == EXPECTED_IE_LEN) {
 
-		if (sta) {
-			sta->pqc_choice = choice;
-			sta->pqc_negotiated = 1;
-			wpa_printf(MSG_DEBUG, "PQC:  Received correct Probe Request from " MACSTR ". Saved algorithm choice: 0x%02x", MAC2STR(mgmt->sa), choice);
-		 /*
-		 * TO DO: IMPLEMENT KEYS GENERATION
-		 */
-		}
-	}
-
+                u8 choice = pos[PAYLOAD_OFFSET]; 
+                
+                struct sta_info *sta = ap_get_sta(hapd, mgmt->sa);
+                if (!sta) {
+                    sta = ap_sta_add(hapd, mgmt->sa);
+                }
+                
+                if (sta) {
+                    sta->pqc_choice = choice;
+                    sta->pqc_negotiated = 1;
+                    wpa_printf(MSG_INFO, "PQC_LOG: Received correct probe request from " MACSTR 
+                               ". Saved algorithm config: 0x%02x", MAC2STR(mgmt->sa), choice);
+                    
+                    /* TO DO: IMPLEMENT KEYS GENERATION */
+                }
+                break; 
+            }
+            
+            /* pointer logic */
+            pos += 2 + ie_len_current;
+            left -= 2 + ie_len_current;
+        }
+    }
+    // end PQC
 	os_memset(&params, 0, sizeof(params));
 
 #ifdef CONFIG_IEEE80211BE

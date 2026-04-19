@@ -336,6 +336,69 @@ int wpa_supplicant_trigger_scan(struct wpa_supplicant *wpa_s,
 		return -1;
 	}
 
+	// check whether the scanning will be done on specific SSID
+    int is_directed_scan = 0;
+    if (params->num_ssids > 0 && params->ssids[0].ssid_len > 0){
+        is_directed_scan = 1;
+    }
+
+    struct wpa_ssid *ssid_conf = NULL;
+    struct wpa_bss *bss = NULL;
+
+    if (is_directed_scan) {
+        // searching for local config for specific SSID
+        ssid_conf = wpa_s->conf->ssid; 
+        while (ssid_conf) {
+            if (ssid_conf->ssid_len == params->ssids[0].ssid_len &&
+                os_memcmp(ssid_conf->ssid, params->ssids[0].ssid, ssid_conf->ssid_len) == 0) {
+                break;
+            }
+            ssid_conf = ssid_conf->next;
+        }
+
+        // getting last BSS record for specific SSID 
+        struct wpa_bss *tmp_bss;
+        dl_list_for_each(tmp_bss, &wpa_s->bss, struct wpa_bss, list) {
+            if (tmp_bss->ssid_len == params->ssids[0].ssid_len && 
+                os_memcmp(tmp_bss->ssid, params->ssids[0].ssid, tmp_bss->ssid_len) == 0) {
+                bss = tmp_bss;
+                break;
+            } 
+        } 
+    }
+
+    // clear buffer
+    wpabuf_free(wpa_s->vendor_elem[VENDOR_ELEM_PROBE_REQ]);
+    wpa_s->vendor_elem[VENDOR_ELEM_PROBE_REQ] = NULL;
+
+    // choice of PQC parameters
+    if (is_directed_scan && ssid_conf && ssid_conf->pqc_enabled) {
+        u8 final_choice = 0x00;
+        
+        if (ssid_conf->pqc_choice != 0) {
+            final_choice = ssid_conf->pqc_choice; // from config
+        } 
+        else if (bss && bss->has_pqc) {
+            final_choice = bss->ap_pqc_supported; 
+        }
+        
+        struct wpabuf *pqc_ie = wpabuf_alloc(7);
+        if (pqc_ie) {
+            u8 safe_pqc_byte = get_pqc_choice_byte(final_choice);
+
+            wpabuf_put_u8(pqc_ie, WLAN_EID_VENDOR_SPECIFIC); // =221
+            wpabuf_put_u8(pqc_ie, 5); // length - 5 (OUI 3B + type 1B + payload 1B)
+            wpabuf_put_be24(pqc_ie, 0x00904C); // OUI
+            wpabuf_put_u8(pqc_ie, 0x01); // type, version
+            wpabuf_put_u8(pqc_ie, safe_pqc_byte); // chosen KEM & DSA
+
+            wpa_s->vendor_elem[VENDOR_ELEM_PROBE_REQ] = pqc_ie;
+            wpa_printf(MSG_INFO, "PQC_LOG: added IE to directed Probe request. Byte: 0x%02x", safe_pqc_byte);
+        } else {
+            wpa_printf(MSG_ERROR, "PQC_LOG: Error in allocating buffer for Probe Request");
+        }
+    }
+
 	if (default_ies) {
 		if (params->extra_ies_len) {
 			os_free((u8 *) params->extra_ies);
@@ -858,58 +921,6 @@ static struct wpabuf * wpa_supplicant_extra_ies(struct wpa_supplicant *wpa_s)
 		    wpabuf_resize(&extra_ie, wpabuf_len(buf)) == 0)
 			wpabuf_put_buf(extra_ie, buf);
 	}
-
-	//pqc
-    int should_add_pqc = 0;
-    u8 final_choice = 0x00;
-
-    /* searching for local config of specific SSID */
-    if (wpa_s->conf && wpa_s->conf->ssid) {
-        struct wpa_ssid *ssid_conf = wpa_s->conf->ssid;
-        
-        while (ssid_conf) {
-            if (ssid_conf->pqc_enabled) {
-                should_add_pqc = 1;
-                final_choice = ssid_conf->pqc_choice; /* from config */
-                
-                /* if there is 0 in config, search history of SSID */
-                if (final_choice == 0) {
-                    struct wpa_bss *tmp_bss;
-
-                    dl_list_for_each(tmp_bss, &wpa_s->bss, struct wpa_bss, list) {
-                        if (tmp_bss->ssid_len == ssid_conf->ssid_len && 
-                            os_memcmp(tmp_bss->ssid, ssid_conf->ssid, tmp_bss->ssid_len) == 0) {
-                            if (tmp_bss->has_pqc) {
-                                final_choice = tmp_bss->ap_pqc_supported;
-                            }
-                            break; 
-                        }
-                    } 
-                }
-                
-                break; 
-            }
-            ssid_conf = ssid_conf->next;
-        }
-    }
-
-    /* injecting PQC element to IE */
-    if (should_add_pqc) {
-        if (wpabuf_resize(&extra_ie, 7) == 0) {
-            u8 safe_pqc_byte = get_pqc_choice_byte(final_choice);
-
-            wpabuf_put_u8(extra_ie, WLAN_EID_VENDOR_SPECIFIC); /* 221 */
-            wpabuf_put_u8(extra_ie, 5);                        /* length: OUI(3) + typ(1) + payload(1) */
-            wpabuf_put_be24(extra_ie, 0x00904C);               /* OUI */
-            wpabuf_put_u8(extra_ie, 0x01);                     /* Type */
-            wpabuf_put_u8(extra_ie, safe_pqc_byte);            /* Payload: KEM & DSA */
-
-            wpa_printf(MSG_INFO, "PQC_LOG: Added IE to Probe Request, Byte: 0x%02x", safe_pqc_byte);
-        } else {
-            wpa_printf(MSG_ERROR, "PQC_LOG: Error in allocating buffer for Probe Request");
-        }
-    }
-
 
     return extra_ie;
 }
