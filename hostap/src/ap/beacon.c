@@ -406,6 +406,7 @@ u8 * hostapd_eid_pqc_capabilities(struct hostapd_data *hapd, u8 *pos)
 
 		*pos++ = hapd->conf->pqc_choice;   
 
+		wpa_printf(MSG_INFO, "PQC_LOG: Added PQC elements to beacon frame: 0x%02x", hapd->conf->pqc_choice);
 		return pos;
 }
 

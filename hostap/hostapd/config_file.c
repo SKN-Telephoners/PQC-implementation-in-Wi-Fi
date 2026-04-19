@@ -4980,7 +4980,7 @@ static int hostapd_config_fill(struct hostapd_config *conf,
 	} else if (os_strcmp(buf, "pqc_enabled") == 0) { /* parsing AP config (PQC) */
         bss->pqc_enabled = atoi(pos);
     } else if (os_strcmp(buf, "pqc_choice") == 0) {
-        bss->pqc_choice = strtol(pos, NULL, 10);
+        bss->pqc_choice = strtol(pos, NULL, 0);
 	} else {
 		wpa_printf(MSG_ERROR,
 			   "Line %d: unknown configuration item '%s'",
