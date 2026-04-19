@@ -1748,7 +1748,7 @@ void handle_probe_req(struct hostapd_data *hapd,
 
 	os_free(hex);
 
-	//PQC
+	//PQC - parsing IE from probe request
     if (hapd->conf->pqc_enabled) {
         const u8 *pos = ie;
         size_t left = ie_len;
@@ -1770,12 +1770,12 @@ void handle_probe_req(struct hostapd_data *hapd,
                 u8 choice = pos[PAYLOAD_OFFSET]; 
                 
                 struct sta_info *sta = ap_get_sta(hapd, mgmt->sa);
-                if (!sta) {
+                if (!sta) { // new STA
                     sta = ap_sta_add(hapd, mgmt->sa);
                 }
                 
-                if (sta) {
-                    sta->pqc_choice = choice;
+                if (sta) { // known STA
+                    sta->pqc_choice = choice; // saving config associated with specific STA's MAC addr 
                     sta->pqc_negotiated = 1;
                     wpa_printf(MSG_INFO, "PQC_LOG: Received correct probe request from " MACSTR 
                                ". Saved algorithm config: 0x%02x", MAC2STR(mgmt->sa), choice);
@@ -1785,7 +1785,7 @@ void handle_probe_req(struct hostapd_data *hapd,
                 break; 
             }
             
-            /* pointer logic */
+            /* pointer logic - find next IE */
             pos += 2 + ie_len_current;
             left -= 2 + ie_len_current;
         }
