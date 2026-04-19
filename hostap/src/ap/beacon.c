@@ -34,6 +34,7 @@
 #include "dfs.h"
 #include "taxonomy.h"
 #include "ieee802_11_auth.h"
+#include <oqs/oqs.h>
 
 
 #ifdef NEED_AP_MLME
@@ -1756,6 +1757,7 @@ void handle_probe_req(struct hostapd_data *hapd,
         /* Declaration of constants */
         const u8 EXPECTED_IE_LEN = 5; /* 3 bytes of OUI + 1 type byte  + 1 data byte */
         const u8 PAYLOAD_OFFSET = 6;  /* 2 header bytes  + 4 data bytes = 6 */
+    	wpa_printf(MSG_INFO, "PQC_DEBUG: Found IE");
 
         while (left >= 2) {
             u8 ie_id = pos[0];
@@ -1773,14 +1775,54 @@ void handle_probe_req(struct hostapd_data *hapd,
                 if (!sta) {
                     sta = ap_sta_add(hapd, mgmt->sa);
                 }
-                
-                if (sta) {
+                  if (sta) {
                     sta->pqc_choice = choice;
                     sta->pqc_negotiated = 1;
-                    wpa_printf(MSG_INFO, "PQC_LOG: Received correct probe request from " MACSTR 
+                    wpa_printf(MSG_INFO, "PQC_LOG: Received correct probe request from " MACSTR
                                ". Saved algorithm config: 0x%02x", MAC2STR(mgmt->sa), choice);
-                    
-                    /* TO DO: IMPLEMENT KEYS GENERATION */
+
+                	OQS_init();
+
+                	OQS_KEM *kem = OQS_KEM_new(OQS_KEM_alg_ml_kem_512);
+
+                	// Allocate memory for the keypair
+                	uint8_t *kem_public_key = malloc(kem->length_public_key);
+                	uint8_t *kem_secret_key = malloc(kem->length_secret_key);
+
+                	// Generate the public and secret keys
+                	OQS_KEM_keypair(kem, kem_public_key, kem_secret_key);
+                	// After OQS_KEM_keypair:
+                	wpa_printf(MSG_INFO, "PQC_LOG: Generated ML-KEM-512 Public Key (first 8 bytes): "
+							   "%02x %02x %02x %02x %02x %02x %02x %02x",
+							   kem_public_key[0], kem_public_key[1], kem_public_key[2], kem_public_key[3],
+							   kem_public_key[4], kem_public_key[5], kem_public_key[6], kem_public_key[7]);
+
+                	OQS_MEM_secure_free(kem_secret_key, kem->length_secret_key);
+                	free(kem_public_key);
+                	OQS_KEM_free(kem);
+
+                	OQS_destroy();
+
+                	OQS_init();
+
+                	OQS_SIG *sig = OQS_SIG_new(OQS_SIG_alg_ml_dsa_65);
+
+                	// Allocate memory for the keypair
+                	uint8_t *dsa_public_key = malloc(sig->length_public_key);
+                	uint8_t *dsa_secret_key = malloc(sig->length_secret_key);
+
+                	// Generate the keys
+                	OQS_SIG_keypair(sig, dsa_public_key, dsa_secret_key);
+
+                	OQS_MEM_secure_free(dsa_secret_key, sig->length_secret_key);
+                	free(dsa_public_key);
+                	OQS_SIG_free(sig);
+
+                	OQS_destroy();
+
+
+
+
                 }
                 break; 
             }

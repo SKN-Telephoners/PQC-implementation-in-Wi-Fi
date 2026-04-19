@@ -1,0 +1,5 @@
+
+# config files
+
+hostap/hostapd/test-ap.conf
+hostap/wpa_supplicant/test-sta.conf
