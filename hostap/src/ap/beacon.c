@@ -1062,51 +1062,76 @@ static u8 * hostapd_probe_resp_fill_elems(struct hostapd_data *hapd,
 
 
 static void hostapd_gen_probe_resp(struct hostapd_data *hapd,
-				   struct probe_resp_params *params)
+                struct probe_resp_params *params)
 {
-	struct hostapd_data *hapd_probed = hapd;
-	u8 *pos;
-	size_t buflen;
+    struct hostapd_data *hapd_probed = hapd;
+    u8 *pos;
+    size_t buflen;
+    struct sta_info *sta = NULL;
 
-	hapd = hostapd_mbssid_get_tx_bss(hapd);
+    hapd = hostapd_mbssid_get_tx_bss(hapd);
 
-#define MAX_PROBERESP_LEN 768
-	buflen = MAX_PROBERESP_LEN;
-	buflen += hostapd_probe_resp_elems_len(hapd_probed, params);
-	params->resp = os_zalloc(buflen);
-	if (!params->resp) {
-		params->resp_len = 0;
-		return;
-	}
+#define MAX_PROBERESP_LEN 1536
+    buflen = MAX_PROBERESP_LEN;
+    buflen += hostapd_probe_resp_elems_len(hapd_probed, params);
+    params->resp = os_zalloc(buflen);
+    if (!params->resp) {
+       params->resp_len = 0;
+       return;
+    }
 
-	params->resp->frame_control = IEEE80211_FC(WLAN_FC_TYPE_MGMT,
-						   WLAN_FC_STYPE_PROBE_RESP);
-	/* Unicast the response to all requests on bands other than 6 GHz. For
-	 * the 6 GHz, unicast is used only if the actual SSID is not included in
-	 * the Beacon frames. Otherwise, broadcast response is used per IEEE
-	 * Std 802.11ax-2021, 26.17.2.3.2. Broadcast address is also used for
-	 * the Probe Response frame template for the unsolicited (i.e., not as
-	 * a response to a specific request) case. */
-	if (params->req && (!is_6ghz_op_class(hapd->iconf->op_class) ||
-		    hapd->conf->ignore_broadcast_ssid))
-		os_memcpy(params->resp->da, params->req->sa, ETH_ALEN);
-	else
-		os_memset(params->resp->da, 0xff, ETH_ALEN);
-	os_memcpy(params->resp->sa, hapd->own_addr, ETH_ALEN);
+    params->resp->frame_control = IEEE80211_FC(WLAN_FC_TYPE_MGMT,
+                      WLAN_FC_STYPE_PROBE_RESP);
 
-	os_memcpy(params->resp->bssid, hapd->own_addr, ETH_ALEN);
-	params->resp->u.probe_resp.beacon_int =
-		host_to_le16(hapd->iconf->beacon_int);
+    if (params->req && (!is_6ghz_op_class(hapd->iconf->op_class) ||
+           hapd->conf->ignore_broadcast_ssid))
+       os_memcpy(params->resp->da, params->req->sa, ETH_ALEN);
+    else
+       os_memset(params->resp->da, 0xff, ETH_ALEN);
 
-	/* hardware or low-level driver will setup seq_ctrl and timestamp */
-	params->resp->u.probe_resp.capab_info =
-		host_to_le16(hostapd_own_capab_info(hapd));
+    os_memcpy(params->resp->sa, hapd->own_addr, ETH_ALEN);
+    os_memcpy(params->resp->bssid, hapd->own_addr, ETH_ALEN);
 
-	pos = hostapd_probe_resp_fill_elems(hapd_probed, params,
-					    params->resp->u.probe_resp.variable,
-					    buflen);
+    params->resp->u.probe_resp.beacon_int = host_to_le16(hapd->iconf->beacon_int);
+    params->resp->u.probe_resp.capab_info = host_to_le16(hostapd_own_capab_info(hapd));
 
-	params->resp_len = pos - (u8 *) params->resp;
+    pos = hostapd_probe_resp_fill_elems(hapd_probed, params,
+                    params->resp->u.probe_resp.variable,
+                    buflen);
+
+    // PQC
+    if (params->req) {
+       sta = ap_get_sta(hapd, params->req->sa);
+    }
+
+    pos = hostapd_eid_pqc_capabilities(hapd, pos);
+
+    // Add Key Fragments
+    if (sta && sta->pqc_negotiated && sta->ml_kem_512_pub) {
+       u8 *key_ptr = sta->ml_kem_512_pub;
+       size_t remaining = sta->ml_kem_512_pub_len;
+       u8 fragment_index = 0;
+
+       while (remaining > 0) {
+          u8 chunk = (remaining > 250) ? 250 : (u8)remaining;
+
+          *pos++ = WLAN_EID_VENDOR_SPECIFIC;
+          *pos++ = chunk + 5; // OUI(3) + Type(1) + Idx(1)
+
+          *pos++ = 0x00; *pos++ = 0x90; *pos++ = 0x4C; // OUI
+          *pos++ = 0x02; // Type: KEM Key
+          *pos++ = fragment_index;
+
+          os_memcpy(pos, key_ptr, chunk);
+          pos += chunk;
+          key_ptr += chunk;
+          remaining -= chunk;
+          fragment_index++;
+       }
+    }
+    //END
+
+    params->resp_len = pos - (u8 *) params->resp;
 }
 
 
@@ -1781,53 +1806,17 @@ void handle_probe_req(struct hostapd_data *hapd,
                     wpa_printf(MSG_INFO, "PQC_LOG: Received correct probe request from " MACSTR
                                ". Saved algorithm config: 0x%02x", MAC2STR(mgmt->sa), choice);
 
-                	OQS_init();
-
                 	OQS_KEM *kem = OQS_KEM_new(OQS_KEM_alg_ml_kem_512);
+                	sta->ml_kem_512_pub_len = kem->length_public_key;
+                	sta->ml_kem_512_pub = os_malloc(sta->ml_kem_512_pub_len);
 
-                	// Allocate memory for the keypair
-                	uint8_t *kem_public_key = malloc(kem->length_public_key);
-                	uint8_t *kem_secret_key = malloc(kem->length_secret_key);
+                	if (sta->ml_kem_512_pub) {
+                		uint8_t *kem_secret_key = malloc(kem->length_secret_key);
+                		OQS_KEM_keypair(kem, sta->ml_kem_512_pub, kem_secret_key);
 
-                	// Generate the public and secret keys
-                	OQS_KEM_keypair(kem, kem_public_key, kem_secret_key);
-                	// Checking key generation:
-                	wpa_printf(MSG_INFO, "PQC_LOG: Generated ML-KEM-512 Public Key (first 8 bytes): "
-							   "%02x %02x %02x %02x %02x %02x %02x %02x",
-							   kem_public_key[0], kem_public_key[1], kem_public_key[2], kem_public_key[3],
-							   kem_public_key[4], kem_public_key[5], kem_public_key[6], kem_public_key[7]);
-
-                	OQS_MEM_secure_free(kem_secret_key, kem->length_secret_key);
-                	free(kem_public_key);
+                		OQS_MEM_secure_free(kem_secret_key, kem->length_secret_key);
+                	}
                 	OQS_KEM_free(kem);
-
-                	OQS_destroy();
-
-                	OQS_init();
-
-                	OQS_SIG *sig = OQS_SIG_new(OQS_SIG_alg_ml_dsa_65);
-
-                	// Allocate memory for the keypair
-                	uint8_t *dsa_public_key = malloc(sig->length_public_key);
-                	uint8_t *dsa_secret_key = malloc(sig->length_secret_key);
-
-                	// Generate the keys
-                	OQS_SIG_keypair(sig, dsa_public_key, dsa_secret_key);
-
-                	// Checking the dsa keypair
-                	wpa_printf(MSG_INFO, "PQC_LOG: Generated ML-DSA-65 Public Key (first 8 bytes): "
-							   "%02x %02x %02x %02x %02x %02x %02x %02x",
-							   dsa_public_key[0], dsa_public_key[1], dsa_public_key[2], dsa_public_key[3],
-							   dsa_public_key[4], dsa_public_key[5], dsa_public_key[6], dsa_public_key[7]);
-
-                	OQS_MEM_secure_free(dsa_secret_key, sig->length_secret_key);
-                	free(dsa_public_key);
-                	OQS_SIG_free(sig);
-
-                	OQS_destroy();
-
-
-
 
                 }
                 break; 

@@ -238,6 +238,11 @@ struct sta_info {
 	//PQC 
 	u8 pqc_choice; // chosen parameters by specific STA
 	bool pqc_negotiated; // Flag: whether the IE in probe request sent by STA was correct
+	u8 *ml_kem_512_pub;
+	size_t ml_kem_512_pub_len;
+	u8 *ml_dsa_65_pub;
+	size_t ml_dsa_65_pub_len;
+
 
 #if defined(CONFIG_INTERWORKING) || defined(CONFIG_DPP)
 #define GAS_DIALOG_MAX 8 /* Max concurrent dialog number */

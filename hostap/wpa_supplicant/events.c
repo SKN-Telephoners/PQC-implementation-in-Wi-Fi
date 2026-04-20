@@ -7658,3 +7658,37 @@ void wpa_supplicant_event_global(void *ctx, enum wpa_event_type event,
 	if (wpa_s)
 		wpa_supplicant_event(wpa_s, event, data);
 }
+
+void pqc_process_vendor_ie(struct wpa_supplicant *wpa_s, const u8 *ie, size_t ie_len)
+{
+	wpa_printf(MSG_INFO, "PQC_DEBUG: Entered process_ie. Len: %zu, OUI: %02x%02x%02x",
+			   ie_len, ie[0], ie[1], ie[2]);
+
+	if (ie_len < 5 || os_memcmp(ie, "\x00\x90\x4c", 3) != 0) {
+		wpa_printf(MSG_INFO, "PQC_DEBUG: OUI mismatch or too short");
+		return;
+	}
+
+	u8 type = ie[3];
+	u8 frag_idx = ie[4];
+	const u8 *data = &ie[5];
+	size_t data_len = ie_len - 5;
+
+	if (type == 0x02) {
+		size_t offset = frag_idx * 250;
+
+		if (offset + data_len > 800) {
+			wpa_printf(MSG_INFO, "PQC_LOG: Buffer overflow check failed");
+			return;
+		}
+
+		os_memcpy(wpa_s->pqc_kem_buffer + offset, data, data_len);
+		wpa_s->pqc_fragments_mask |= (1 << frag_idx);
+
+
+		if (wpa_s->pqc_fragments_mask == 0x0F) {
+			wpa_printf(MSG_INFO, "PQC_LOG: received a public key and assembled it");
+
+		}
+	}
+}
