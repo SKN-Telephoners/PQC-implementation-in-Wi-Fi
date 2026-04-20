@@ -103,6 +103,8 @@ struct mld_info {
 
 	struct mld_link_info links[MAX_NUM_MLD_LINKS];
 };
+//PQC
+struct hostapd_pqc_sm;
 
 struct sta_info {
 	struct sta_info *next; /* next entry in sta list */
@@ -118,6 +120,7 @@ struct sta_info {
 	u8 supported_rates[WLAN_SUPP_RATES_MAX];
 	int supported_rates_len;
 	u8 qosinfo; /* Valid when WLAN_STA_WMM is set */
+	
 #ifdef CONFIG_ENC_ASSOC
 	bool epp_sta; /* Indicates if the station is an EPP peer */
 #endif /* CONFIG_ENC_ASSOC */
@@ -363,6 +366,8 @@ struct sta_info {
 #ifdef CONFIG_IEEE8021X_AUTH
 	struct eap_over_auth_data eap_auth_data;
 #endif /* CONFIG_IEEE8021X_AUTH */
+//PQC
+	struct hostapd_pqc_sm *pqc;
 };
 
 

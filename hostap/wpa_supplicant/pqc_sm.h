@@ -8,7 +8,7 @@
 
 
 /*
-* main struct used in PQC implementation
+* main struct used in PQC implementation (STA)
 */
 struct wpa_pqc_sm {
     struct wpa_supplicant *wpa_s; // main context

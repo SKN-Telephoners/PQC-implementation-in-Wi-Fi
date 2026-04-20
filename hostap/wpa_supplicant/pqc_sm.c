@@ -131,7 +131,6 @@ struct wpa_pqc_sm * pqc_sm_init(struct wpa_supplicant *wpa_s, struct wpa_ssid *s
 
     /* initialize liboqs */
     OQS_init();
-
     return sm;
 }
 

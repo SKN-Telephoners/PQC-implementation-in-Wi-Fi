@@ -39,6 +39,7 @@
 #include "sta_info.h"
 #include "vlan.h"
 #include "wps_hostapd.h"
+#include "pqc_ap_sm.h"
 
 static void ap_sta_remove_in_other_bss(struct hostapd_data *hapd,
 				       struct sta_info *sta);
@@ -540,6 +541,12 @@ void ap_free_sta(struct hostapd_data *hapd, struct sta_info *sta)
 	wpabuf_clear_free(sta->eap_auth_data.dhss);
 	os_free(sta->eap_auth_data.rsnxe);
 #endif /* CONFIG_IEEE8021X_AUTH */
+
+	//PQC
+	if (sta->pqc) {
+    	pqc_ap_sm_deinit(sta->pqc);
+    	sta->pqc = NULL;
+	}
 
 	os_free(sta);
 }

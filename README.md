@@ -171,9 +171,9 @@ Deinitialized after deauthentication request (both in **wpa_supplicant.c**).
 | Payload (T)    | Variable  | Output value 'T' from 2-round Feistel network |
 
 
-**/wpa_supplicant/pqc.c - static int wpas_pqc_send_pake3**, builds and computes parameters needed for pake3 frame, uses information saved in state machine previously. After that it tries to send Vendor Specific Action frame using ```wpa_drv_send_action``` function.  
+**/wpa_supplicant/pqc_sm.c - static int wpas_pqc_send_pake3**, builds and computes parameters needed for pake3 frame, uses information saved in state machine previously. After that it tries to send Vendor Specific Action frame using ```wpa_drv_send_action``` function.  
   
-**/wpa_supplicant/pqc.c - int pqc_sm_rx_pake2**, used for parsing and processing information (which is later saved in PQC STA state) based on received PAKE2 frame. Saves AP's public DSA key and decrypted sid, generates ML-KEM keys. 
+**/wpa_supplicant/pqc_sm.c - int pqc_sm_rx_pake2**, used for parsing and processing information (which is later saved in PQC STA state) based on received PAKE2 frame. Saves AP's public DSA key and decrypted sid, generates ML-KEM keys. 
 
 **/wpa_supplicant/events.c**
 After receing vendor specific action frame checks are performed in order to determine whether the frame is the one used in PAKE scheme. For now only PAKE-2 is checked (subtype = 0x02). After correct identification PAKE-2 parser function is called.  

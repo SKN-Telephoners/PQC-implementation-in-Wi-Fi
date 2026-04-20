@@ -62,6 +62,7 @@
 #include "comeback_token.h"
 #include "nan_usd_ap.h"
 #include "pasn/pasn_common.h"
+#include "pqc_ap_sm.h"
 
 
 #ifdef CONFIG_FILS
@@ -4596,6 +4597,22 @@ static void handle_auth(struct hostapd_data *hapd,
 		dst = sta->addr;
 #endif /* CONFIG_IEEE80211BE */
 
+	/* PQC STATE MACHINE INIT (AP SIDE) */
+    if (sta && hapd->conf->pqc_enabled) {
+        wpa_printf(MSG_DEBUG, "PQC_AP: Otrzymano Auth Req - inicjalizacja sesji PQC");
+
+        if (sta->pqc) {
+            pqc_ap_sm_deinit(sta->pqc);
+        }
+        
+        /* new state machine for STA */
+        sta->pqc = pqc_ap_sm_init(hapd, sta);
+        
+        if (!sta->pqc) {
+            wpa_printf(MSG_ERROR, "PQC_AP: Blad inicjalizacji maszyny stanow dla " MACSTR, MAC2STR(sa));
+        }
+    }
+    /* END PQC */
 	reply_res = send_auth_reply(hapd, sta, dst, auth_alg,
 				    auth_alg == WLAN_AUTH_SAE ?
 				    auth_transaction : auth_transaction + 1,
@@ -7865,6 +7882,36 @@ static int handle_action(struct hostapd_data *hapd,
 			return 1;
 		break;
 	case WLAN_ACTION_VENDOR_SPECIFIC:
+		{	
+		const u8 *pos = ((const u8 *) mgmt) + IEEE80211_HDRLEN + 1;
+        size_t left = len - (IEEE80211_HDRLEN + 1);
+        /* PQC PAKE INTERCEPTION */
+        /* check OUI (00:90:4C) Subtype (0x03 dla PAKE-3) */
+        if (left >= 4 && pos[0] == 0x00 && pos[1] == 0x90 && pos[2] == 0x4C && pos[3] == 0x03) {
+            if (sta && sta->pqc) {
+                pos += 4; 
+                size_t payload_len = left - 4;
+                    
+                if (payload_len > 32) {
+                    const u8 *s = pos;
+                    const u8 *T = pos + 32;
+                    size_t T_len = payload_len - 32;
+                        
+                    wpa_printf(MSG_DEBUG, "PQC_LOG: Received PAKE-3 frame from: " MACSTR, MAC2STR(mgmt->sa));
+                        
+                        /* handle the frame */
+                    pqc_ap_sm_rx_pake3(sta->pqc, s, 32, T, T_len);
+                } else {
+                    wpa_printf(MSG_ERROR, "PQC_LOG: Zbyt krotki payload PAKE-3");
+                }
+            } else {
+                wpa_printf(MSG_DEBUG, "PQC_LOG: Ignored PAKE-3 (no initialized session for STA)");
+            }
+            
+            return 1;
+        }
+            /* PQC PAKE END */
+		}
 		if (hapd->vendor_action_cb) {
 			if (hapd->vendor_action_cb(hapd->vendor_action_cb_ctx,
 						   (u8 *) mgmt, len, freq) == 0)
