@@ -149,8 +149,9 @@ parse IE in Probe request that was sent by STA and add parameters to specific ST
 OUI verification must be implemented in this part, in the future
 
 ## PQC State Machine 
-Separates PQC-specific operations from standard Wi-Fi authentication flows.  
-Initialized after receiving public PQC key (ML-KEM) in Probe Response from AP, deinitialized after deauthentication request (both in **wpa_supplicant.c**).    
+Separates PQC-specific operations from standard Wi-Fi authentication flows. Saves PQC keys in the structure.  
+Initialized after receiving public PQC key (ML-KEM) in Probe Response from AP, right before sending authentication request.  
+Deinitialized after deauthentication request (both in **wpa_supplicant.c**).    
 **/wpa_supplicant/pqc_sm.h, /wpa_supplicant/pqc_sm.c** - these files can also be used for PQC related functions, structs and other objects.  
 
 **struct wpa_pqc_sm** used as centralized storage for PQC session variables (ML-KEM/ML-DSA keys)  

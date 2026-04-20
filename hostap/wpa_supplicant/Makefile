@@ -1251,6 +1251,8 @@ CFLAGS += -DEAP_TLS_OPENSSL
 OBJS += ../src/crypto/tls_openssl.o
 OBJS += ../src/crypto/tls_openssl_ocsp.o
 LIBS += -lssl
+CFLAGS += -I/../../liboqs/include
+LIBS += -L/../../liboqs/lib -loqs
 endif
 OBJS += ../src/crypto/crypto_openssl.o
 OBJS_p += ../src/crypto/crypto_openssl.o

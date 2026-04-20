@@ -68,6 +68,7 @@
 #include "dpp_supplicant.h"
 #include "pr_supplicant.h"
 #include "nan_supplicant.h"
+#include "pqc_sm.h"
 #ifdef CONFIG_MESH
 #include "ap/ap_config.h"
 #include "ap/hostapd.h"
@@ -2962,21 +2963,6 @@ void wpa_supplicant_associate(struct wpa_supplicant *wpa_s,
 	 * before completion of the first association.
 	 */
 	wpa_supplicant_rsn_supp_set_config(wpa_s, ssid);
-	/*  PQC STATE MACHINE INIT */
-    if (ssid && ssid->pqc_enabled) {
-        if (wpa_s->pqc) {
-            pqc_sm_deinit(wpa_s->pqc);
-        }
-        
-        /* initializing new session */
-        wpa_s->pqc = pqc_sm_init(wpa_s, ssid->pqc_choice);
-        
-        if (!wpa_s->pqc) {
-            wpa_msg(wpa_s, MSG_ERROR, "PQC_LOG: Failed to initialize State Machine");
-            return;
-        }
-    }
-    /* END PQC */
 
 #ifdef CONFIG_DPP
 	if (wpas_dpp_check_connect(wpa_s, ssid, bss) != 0)
@@ -2994,6 +2980,23 @@ void wpa_supplicant_associate(struct wpa_supplicant *wpa_s,
 
 	if ((wpa_s->drv_flags & WPA_DRIVER_FLAGS_SME) &&
 	    ssid->mode == WPAS_MODE_INFRA) {
+
+		/* PQC STATE MACHINE INIT right before sending authentication request */
+        if (ssid->pqc_enabled) {
+            if (wpa_s->pqc) {
+                pqc_sm_deinit(wpa_s->pqc);
+            }
+
+            wpa_s->pqc = pqc_sm_init(wpa_s, ssid);
+            
+            if (!wpa_s->pqc) {
+                wpa_msg(wpa_s, MSG_ERROR, "PQC_LOG: Failed to initialize State Machine");
+            } else {
+                wpa_msg(wpa_s, MSG_INFO, "PQC_LOG: State Machine Ready. Starting Authentication.");
+            }
+        }
+        /* END PQC  */
+		// auth req
 		sme_authenticate(wpa_s, bss, ssid);
 		return;
 	}

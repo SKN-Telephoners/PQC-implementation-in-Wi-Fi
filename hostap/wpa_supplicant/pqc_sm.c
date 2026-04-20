@@ -99,17 +99,35 @@ static int wpas_pqc_send_pake3(struct wpa_pqc_sm *sm,
 
 /* STATE LIFECYCLE */
 
-struct wpa_pqc_sm * pqc_sm_init(struct wpa_supplicant *wpa_s, u8 negotiated_choice) {
+struct wpa_pqc_sm * pqc_sm_init(struct wpa_supplicant *wpa_s, struct wpa_ssid *ssid) {
     struct wpa_pqc_sm *sm;
 
-    wpa_printf(MSG_DEBUG, "PQC_LOG: Initializing State Machine (choice mask: 0x%02x)", negotiated_choice);
+    if(!ssid || !ssid->pqc_enabled) return NULL;
+
+    wpa_printf(MSG_DEBUG, "PQC_LOG: Initializing State Machine (choice mask: 0x%02x)", ssid->pqc_choice);
     
     sm = os_zalloc(sizeof(*sm));
     if (!sm) return NULL;
 
     sm->wpa_s = wpa_s;
-    sm->pqc_choice = negotiated_choice;
+    sm->pqc_choice = ssid->pqc_choice;
     sm->pqc_enabled = 1;
+
+    // AP's pub KEM key (probe response)
+    sm->ap_kem_pub_len = 800; 
+    sm->ap_kem_public_key = os_malloc(sm->ap_kem_pub_len);
+
+    if (sm->ap_kem_public_key) {
+        os_memcpy(sm->ap_kem_public_key, wpa_s->pqc_kem_buffer, sm->ap_kem_pub_len);
+        wpa_printf(MSG_DEBUG, "PQC_LOG: AP KEM Public Key imported from wpa_s buffer");
+    }
+
+    if(ssid->passphrase){
+        sm->pwd_len = os_strlen(ssid->passphrase);
+        os_memcpy(sm->pwd, ssid->passphrase, sm->pwd_len);
+    } else {
+        wpa_printf(MSG_ERROR, "PQC_LOG: Missing password in STA network config");
+    }
 
     /* initialize liboqs */
     OQS_init();
@@ -124,17 +142,21 @@ void pqc_sm_deinit(struct wpa_pqc_sm *sm) {
 
     if (sm->fsid) os_free(sm->fsid);
     
+    if (sm->ap_kem_public_key) os_free(sm->ap_kem_public_key);
+    if (sm->sta_kem_public_key) os_free(sm->sta_kem_public_key);
+    if (sm->sta_second_pub_key) os_free(sm->sta_second_pub_key);
+    if (sm->dsa_public_key) os_free(sm->dsa_public_key);
+
     /* liboqs safe delete */
     if (sm->kem_secret_key) {
         OQS_MEM_secure_free(sm->kem_secret_key, sm->kem_secret_key_len);
     }
-    if (sm->dsa_secret_key) {
-        OQS_MEM_secure_free(sm->dsa_secret_key, sm->dsa_keys_len);
+    if (sm->sta_second_secret_key) {
+        OQS_MEM_secure_free(sm->sta_second_secret_key, sm->sta_second_secret_len);
     }
-    if (sm->dsa_public_key) os_free(sm->dsa_public_key);
 
-    os_memset(sm->pwd, 0, sizeof(sm->pwd));
-    os_memset(sm->K_aes, 0, sizeof(sm->K_aes));
+    forced_memzero(sm->pwd, sizeof(sm->pwd));
+    forced_memzero(sm->K_aes, sizeof(sm->K_aes));
 
     os_free(sm);
 

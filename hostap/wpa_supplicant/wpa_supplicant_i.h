@@ -1737,10 +1737,12 @@ struct wpa_supplicant {
 	u8 pmkid_anonce[NONCE_LEN];
 	bool pmkid_anonce_set;
 #endif /* CONFIG_PMKSA_PRIVACY */
-/*
-* PQC: new machine state used mainly for PQC parameters
-*/
-struct wpa_pqc_sm *pqc;
+	u8 pqc_kem_buffer[800];
+	u8 pqc_fragments_mask;
+	/*
+	* PQC: new machine state used mainly for PQC parameters
+	*/
+	struct wpa_pqc_sm *pqc;
 };
 
 
