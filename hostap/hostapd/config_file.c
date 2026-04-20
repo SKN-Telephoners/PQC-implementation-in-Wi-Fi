@@ -4977,6 +4977,10 @@ static int hostapd_config_fill(struct hostapd_config *conf,
 #endif /* CONFIG_IEEE80211BE */
 	} else if (os_strcmp(buf, "i2r_lmr_policy") == 0) {
 		conf->i2r_lmr_policy = atoi(pos);
+	} else if (os_strcmp(buf, "pqc_enabled") == 0) { /* parsing AP config (PQC) */
+        bss->pqc_enabled = atoi(pos);
+    } else if (os_strcmp(buf, "pqc_choice") == 0) {
+        bss->pqc_choice = strtol(pos, NULL, 0);
 	} else {
 		wpa_printf(MSG_ERROR,
 			   "Line %d: unknown configuration item '%s'",

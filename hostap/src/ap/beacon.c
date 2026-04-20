@@ -390,7 +390,7 @@ static u8 * hostapd_get_rsnxe(struct hostapd_data *hapd, u8 *pos, size_t len)
 	return pos + 2 + ie[1];
 }
 
-static u8 * hostapd_eid_pqc_capabilities(struct hostapd_data *hapd, u8 *pos)
+u8 * hostapd_eid_pqc_capabilities(struct hostapd_data *hapd, u8 *pos)
 {
 	if (!hapd->conf->pqc_enabled)
 			return pos;
@@ -406,6 +406,7 @@ static u8 * hostapd_eid_pqc_capabilities(struct hostapd_data *hapd, u8 *pos)
 
 		*pos++ = hapd->conf->pqc_choice;   
 
+		wpa_printf(MSG_INFO, "PQC_LOG: Added PQC elements to beacon frame: 0x%02x", hapd->conf->pqc_choice);
 		return pos;
 }
 
@@ -1747,26 +1748,49 @@ void handle_probe_req(struct hostapd_data *hapd,
 
 	os_free(hex);
 
-	const u8 *pqc_ie = get_vendor_ie(ie, ie_len, 0x00904C);
+	//PQC - parsing IE from probe request
+    if (hapd->conf->pqc_enabled) {
+        const u8 *pos = ie;
+        size_t left = ie_len;
+        
+        /* Declaration of constants */
+        const u8 EXPECTED_IE_LEN = 5; /* 3 bytes of OUI + 1 type byte  + 1 data byte */
+        const u8 PAYLOAD_OFFSET = 6;  /* 2 header bytes  + 4 data bytes = 6 */
 
-	if (pqc_ie && pqc_ie[1] >= 5 && pqc_ie[5] == 0x01) {
-		u8 choice = pqc_ie[6];
-		struct sta_info *sta = ap_get_sta(hapd, mgmt->sa);
+        while (left >= 2) {
+            u8 ie_id = pos[0];
+            u8 ie_len_current = pos[1];
+            
+            if (2 + ie_len_current > left) 
+                break; 
 
-		if (!sta) {
-			sta = ap_sta_add(hapd, mgmt->sa);
-		}
+            /* search for Vendor specific */
+            if (ie_id == WLAN_EID_VENDOR_SPECIFIC && ie_len_current == EXPECTED_IE_LEN) {
 
-		if (sta) {
-			sta->pqc_choice = choice;
-			sta->pqc_negotiated = 1;
-			wpa_printf(MSG_DEBUG, "PQC:  Received correct Probe Request from " MACSTR ". Saved algorithm choice: 0x%02x", MAC2STR(mgmt->sa), choice);
-		 /*
-		 * TO DO: IMPLEMENT KEYS GENERATION
-		 */
-		}
-	}
-
+                u8 choice = pos[PAYLOAD_OFFSET]; 
+                
+                struct sta_info *sta = ap_get_sta(hapd, mgmt->sa);
+                if (!sta) { // new STA
+                    sta = ap_sta_add(hapd, mgmt->sa);
+                }
+                
+                if (sta) { // known STA
+                    sta->pqc_choice = choice; // saving config associated with specific STA's MAC addr 
+                    sta->pqc_negotiated = 1;
+                    wpa_printf(MSG_INFO, "PQC_LOG: Received correct probe request from " MACSTR 
+                               ". Saved algorithm config: 0x%02x", MAC2STR(mgmt->sa), choice);
+                    
+                    /* TO DO: IMPLEMENT KEYS GENERATION */
+                }
+                break; 
+            }
+            
+            /* pointer logic - find next IE */
+            pos += 2 + ie_len_current;
+            left -= 2 + ie_len_current;
+        }
+    }
+    // end PQC
 	os_memset(&params, 0, sizeof(params));
 
 #ifdef CONFIG_IEEE80211BE

@@ -337,6 +337,8 @@ struct hostapd_bss_config {
 				* EAP Request-Identity */
 	size_t eap_req_id_text_len;
 	int eapol_key_index_workaround;
+	int pqc_enabled;
+    u8 pqc_choice;
 
 #ifdef CONFIG_WEP
 	size_t default_wep_key_len;
