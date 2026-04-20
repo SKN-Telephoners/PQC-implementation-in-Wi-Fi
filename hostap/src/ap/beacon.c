@@ -1749,7 +1749,7 @@ void handle_probe_req(struct hostapd_data *hapd,
 
 	os_free(hex);
 
-	//PQC
+	//PQC - parsing IE from probe request
     if (hapd->conf->pqc_enabled) {
         const u8 *pos = ie;
         size_t left = ie_len;
@@ -1757,7 +1757,6 @@ void handle_probe_req(struct hostapd_data *hapd,
         /* Declaration of constants */
         const u8 EXPECTED_IE_LEN = 5; /* 3 bytes of OUI + 1 type byte  + 1 data byte */
         const u8 PAYLOAD_OFFSET = 6;  /* 2 header bytes  + 4 data bytes = 6 */
-    	wpa_printf(MSG_INFO, "PQC_DEBUG: Found IE");
 
         while (left >= 2) {
             u8 ie_id = pos[0];
@@ -1772,11 +1771,12 @@ void handle_probe_req(struct hostapd_data *hapd,
                 u8 choice = pos[PAYLOAD_OFFSET]; 
                 
                 struct sta_info *sta = ap_get_sta(hapd, mgmt->sa);
-                if (!sta) {
+                if (!sta) { // new STA
                     sta = ap_sta_add(hapd, mgmt->sa);
                 }
-                  if (sta) {
-                    sta->pqc_choice = choice;
+                
+                if (sta) { // known STA
+                    sta->pqc_choice = choice; // saving config associated with specific STA's MAC addr
                     sta->pqc_negotiated = 1;
                     wpa_printf(MSG_INFO, "PQC_LOG: Received correct probe request from " MACSTR
                                ". Saved algorithm config: 0x%02x", MAC2STR(mgmt->sa), choice);
@@ -1791,7 +1791,7 @@ void handle_probe_req(struct hostapd_data *hapd,
 
                 	// Generate the public and secret keys
                 	OQS_KEM_keypair(kem, kem_public_key, kem_secret_key);
-                	// After OQS_KEM_keypair:
+                	// Checking key generation:
                 	wpa_printf(MSG_INFO, "PQC_LOG: Generated ML-KEM-512 Public Key (first 8 bytes): "
 							   "%02x %02x %02x %02x %02x %02x %02x %02x",
 							   kem_public_key[0], kem_public_key[1], kem_public_key[2], kem_public_key[3],
@@ -1814,6 +1814,12 @@ void handle_probe_req(struct hostapd_data *hapd,
                 	// Generate the keys
                 	OQS_SIG_keypair(sig, dsa_public_key, dsa_secret_key);
 
+                	// Checking the dsa keypair
+                	wpa_printf(MSG_INFO, "PQC_LOG: Generated ML-DSA-65 Public Key (first 8 bytes): "
+							   "%02x %02x %02x %02x %02x %02x %02x %02x",
+							   dsa_public_key[0], dsa_public_key[1], dsa_public_key[2], dsa_public_key[3],
+							   dsa_public_key[4], dsa_public_key[5], dsa_public_key[6], dsa_public_key[7]);
+
                 	OQS_MEM_secure_free(dsa_secret_key, sig->length_secret_key);
                 	free(dsa_public_key);
                 	OQS_SIG_free(sig);
@@ -1827,7 +1833,7 @@ void handle_probe_req(struct hostapd_data *hapd,
                 break; 
             }
             
-            /* pointer logic */
+            /* pointer logic - find next IE */
             pos += 2 + ie_len_current;
             left -= 2 + ie_len_current;
         }

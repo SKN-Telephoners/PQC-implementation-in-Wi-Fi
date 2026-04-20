@@ -1,5 +1,48 @@
 # PQC-implementation-in-Wi-Fi
 Practical implementation of PQC algorithms based on modifying hostapd and wpa_supplicant written in C
+# SETUP (tests)
+### virtual wlan cards
+```
+sudo modprobe mac80211_hwsim radios=2
+```
+### dependancies
+Install dependancies (to do)  
+
+### compiling
+Start by compiling code (both in **hostap/hostapd** and **hostap/wpa_supplicant** directories):
+```
+make clean  
+cp defconfig .config
+make -j4 
+```
+### config files
+**/hostap/hostapd** - create new file *test-ap.config:
+```
+interface=wlan0
+driver=nl80211
+ssid=PQC
+channel=1
+hw_mode=g
+pqc_enabled=1
+pqc_choice=136
+```
+**/hostap/wpa_supplicant** - create new file *test-sta.config:
+```
+ctrl_interface=/var/run/wpa_supplicant
+update_config=1
+
+network={
+	ssid="PQC"
+	key_mgmt=NONE
+	pqc_enabled=1
+	pqc_choice=136
+}
+```
+### running virtual AP & STA
+in /hostap/hostapd directory: 
+````sudo ./hostapd -d test-ap.conf````  
+in /hostap/wpa_supplicant directory: 
+````sudo ./wpa_supplicant -i wlan1 -c test-sta.conf -d````
 
 # Modified and added elements
 This part contains all the changes done
@@ -51,10 +94,25 @@ Each bit in the payload byte represents support for a specific PQC algorithm lik
 Add declaration
 * u8 * hostapd_eid_pqc_capabilities(struct hostapd_data *hapd, u8 *pos);
 
+**src/ap/ap_config.h** - struct hostapd_bss_config:  
+used for configuring AP at the start (what PQC parameters will AP be supporting), we need to specify these in test-ap.conf file
+* int pqc_enabled;
+* u8 pqc_choice;
+
+**hostapd/config_file.c** - function hostapd_config_fill:  
+used for reading and parsing configuration of AP from .conf file 
+```C
+else if (os_strcmp(buf, "pqc_enabled") == 0) { 
+        bss->pqc_enabled = atoi(pos);
+} else if (os_strcmp(buf, "pqc_choice") == 0) {
+        bss->pqc_choice = strtol(pos, NULL, 0);
+}  
+```
+
 
 ## Probe Request
 The frame contains additional vendor specific IE (Information element),   
-one byte used for specifying configuration of PQC algorithms (bits 4 and 8 not used):
+one byte used for specifying configuration of PQC algorithms (bits 4 and 8 not used):  
 10000000 - ML KEM 512  
 01000000 - ML KEM 768  
 00100000 - ML KEM 1024  
@@ -63,7 +121,7 @@ one byte used for specifying configuration of PQC algorithms (bits 4 and 8 not u
 00000010 - ML DSA 87
 
 ### STA
-**wpa_supplicant/scan.c**  
+**wpa_supplicant/scan.c** - function wpa_supplicant_extra_ies (new elements):
 Adding special fields (IE) in Probe Request frame
 * wpabuf_put_u8(pqc_ie, WLAN_EID_VENDOR_SPECIFIC); - value = 221 - ID for IE
 * wpabuf_put_u8(pqc_ie, 5); // length - 5	how many bytes till the end of this specific IE, OUI (3B), our payload 1B, type - 1B = 5B
@@ -88,7 +146,9 @@ definition of parameters used in Probe Request parsing
 * bool pqc_negotiated - Flag: whether the IE in probe request sent by STA was correct
 
 **src/ap/beacon.c** - void handle_probe_req:  
-parsing IE in Probe request that was sent by STA
+parse IE in Probe request that was sent by STA and add parameters to specific STA.  
+OUI verification must be implemented in this part, in the future
+Probe request now handles DSA and KEM key generating triggered by the presence of correct IE in probe request frame.
 
 # Helpful functions
 
