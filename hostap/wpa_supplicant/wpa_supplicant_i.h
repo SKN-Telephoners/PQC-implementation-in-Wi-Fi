@@ -1737,7 +1737,12 @@ struct wpa_supplicant {
 	bool pmkid_anonce_set;
 #endif /* CONFIG_PMKSA_PRIVACY */
 	u8 pqc_kem_buffer[800];
-	u8 pqc_fragments_mask;
+	u32 pqc_fragments_mask;
+	size_t pqc_kem_received_len;
+	size_t pqc_kem_expected_len;
+	u8 pqc_kem_expected_frags;
+	bool pqc_kem_complete;
+	bool pqc_auth_started;
 };
 
 

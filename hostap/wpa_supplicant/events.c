@@ -7659,36 +7659,100 @@ void wpa_supplicant_event_global(void *ctx, enum wpa_event_type event,
 		wpa_supplicant_event(wpa_s, event, data);
 }
 
+#define PQC_FRAGMENT_MAX_LEN 200
+
+static void pqc_try_start_auth(struct wpa_supplicant *wpa_s)
+{
+	if (!wpa_s->pqc_kem_complete || wpa_s->pqc_auth_started)
+		return;
+
+	if (!wpa_s->current_ssid || !wpa_s->current_bss)
+		return;
+
+	if (wpa_s->connect_work || radio_work_pending(wpa_s, "sme-connect"))
+		return;
+
+	wpa_s->pqc_auth_started = true;
+	wpa_printf(MSG_INFO,
+		   "PQC_LOG: public key assembled, starting authentication");
+	wpa_supplicant_associate(wpa_s, wpa_s->current_bss, wpa_s->current_ssid);
+}
+
+
 void pqc_process_vendor_ie(struct wpa_supplicant *wpa_s, const u8 *ie, size_t ie_len)
 {
-	wpa_printf(MSG_INFO, "PQC_DEBUG: Entered process_ie. Len: %zu, OUI: %02x%02x%02x",
-			   ie_len, ie[0], ie[1], ie[2]);
+	u8 type, frag_idx;
+	u16 total_len;
+	const u8 *data;
+	size_t data_len, offset, expected_frags, expected_mask;
 
-	if (ie_len < 5 || os_memcmp(ie, "\x00\x90\x4c", 3) != 0) {
-		wpa_printf(MSG_INFO, "PQC_DEBUG: OUI mismatch or too short");
+	// Minimalna długość: OUI(3) + Type(1) + FragIdx(1) + TotalLen(2) = 7 bajtów
+	if (ie_len < 7 || os_memcmp(ie, "\x00\x90\x4c", 3) != 0) {
+		wpa_printf(MSG_INFO, "PQC_LOG: IE validation failed (len=%zu, OUI check=%d)",
+			   ie_len, ie_len >= 3 ? (os_memcmp(ie, "\x00\x90\x4c", 3) == 0) : -1);
 		return;
 	}
 
-	u8 type = ie[3];
-	u8 frag_idx = ie[4];
-	const u8 *data = &ie[5];
-	size_t data_len = ie_len - 5;
+	type = ie[3];
 
-	if (type == 0x02) {
-		size_t offset = frag_idx * 250;
+	// Tylko obsługujemy Type 0x02 (Key Fragment)
+	if (type != 0x02) {
+		wpa_printf(MSG_INFO, "PQC_LOG: Not a key fragment (type=0x%02x)", type);
+		return;
+	}
 
-		if (offset + data_len > 800) {
-			wpa_printf(MSG_INFO, "PQC_LOG: Buffer overflow check failed");
-			return;
-		}
+	frag_idx = ie[4];
+	total_len = WPA_GET_LE16(&ie[5]);
+	data = &ie[7];
+	data_len = ie_len - 7;
 
-		os_memcpy(wpa_s->pqc_kem_buffer + offset, data, data_len);
-		wpa_s->pqc_fragments_mask |= (1 << frag_idx);
+	wpa_printf(MSG_INFO, "PQC_DEBUG: Processing key fragment. Len: %zu, FragIdx=%u, TotalLen=%u, DataLen=%zu",
+			   ie_len, frag_idx, total_len, data_len);
 
+	if (frag_idx == 0) {
+		wpa_s->pqc_fragments_mask = 0;
+		wpa_s->pqc_kem_received_len = 0;
+		wpa_s->pqc_kem_expected_len = total_len;
+		wpa_s->pqc_kem_expected_frags =
+			(total_len + PQC_FRAGMENT_MAX_LEN - 1) / PQC_FRAGMENT_MAX_LEN;
+		wpa_s->pqc_kem_complete = false;
+		wpa_s->pqc_auth_started = false;
+	} else if (wpa_s->pqc_kem_expected_len != total_len) {
+		wpa_printf(MSG_INFO, "PQC_LOG: inconsistent total length");
+		return;
+	}
 
-		if (wpa_s->pqc_fragments_mask == 0x0F) {
-			wpa_printf(MSG_INFO, "PQC_LOG: received a public key and assembled it");
+	offset = (size_t) frag_idx * PQC_FRAGMENT_MAX_LEN;
+	if (offset >= sizeof(wpa_s->pqc_kem_buffer) ||
+	    data_len > sizeof(wpa_s->pqc_kem_buffer) - offset ||
+	    offset + data_len > total_len) {
+		wpa_printf(MSG_INFO, "PQC_LOG: Buffer overflow check failed");
+		return;
+	}
 
-		}
+	os_memcpy(wpa_s->pqc_kem_buffer + offset, data, data_len);
+	wpa_s->pqc_fragments_mask |= (1U << frag_idx);
+	if (offset + data_len > wpa_s->pqc_kem_received_len)
+		wpa_s->pqc_kem_received_len = offset + data_len;
+
+	expected_frags = wpa_s->pqc_kem_expected_frags;
+	if (expected_frags == 0)
+		expected_frags = (total_len + PQC_FRAGMENT_MAX_LEN - 1) / PQC_FRAGMENT_MAX_LEN;
+
+	wpa_printf(MSG_DEBUG,
+		   "PQC_LOG: Fragment %u/%zu received (%zu bytes at offset %zu, total mask=0x%x)",
+		   frag_idx, expected_frags, data_len, offset, wpa_s->pqc_fragments_mask);
+	if (expected_frags >= 32)
+		expected_mask = 0xffffffffU;
+	else
+		expected_mask = (1U << expected_frags) - 1;
+
+	if (wpa_s->pqc_kem_received_len >= wpa_s->pqc_kem_expected_len &&
+	    wpa_s->pqc_fragments_mask == expected_mask) {
+		wpa_s->pqc_kem_complete = true;
+		wpa_printf(MSG_INFO,
+			   "PQC_LOG: received a public key and assembled it (%zu bytes)",
+			   wpa_s->pqc_kem_received_len);
+		pqc_try_start_auth(wpa_s);
 	}
 }

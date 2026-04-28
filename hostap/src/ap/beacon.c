@@ -1106,29 +1106,55 @@ static void hostapd_gen_probe_resp(struct hostapd_data *hapd,
 
     pos = hostapd_eid_pqc_capabilities(hapd, pos);
 
-    // Add Key Fragments
-    if (sta && sta->pqc_negotiated && sta->ml_kem_512_pub) {
-       u8 *key_ptr = sta->ml_kem_512_pub;
-       size_t remaining = sta->ml_kem_512_pub_len;
-       u8 fragment_index = 0;
+	/* Add PQC key fragments */
+	if (sta && sta->pqc_negotiated && sta->ml_kem_512_pub &&
+	    sta->ml_kem_512_pub_len > 0) {
+		const u8 *key_ptr = sta->ml_kem_512_pub;
+		size_t remaining = sta->ml_kem_512_pub_len;
+		u8 fragment_index = 0;
+		u8 *end = params->resp->u.probe_resp.variable + buflen;
+		// Fragment size limited to avoid IE length overflow (255 bytes max)
+		// IE structure: EID(1) + LEN(1) + OUI(3) + Type(1) + FragIdx(1) + TotalLen(2) + Data
+		// Max: 1 + 1 + 3 + 1 + 1 + 2 + chunk <= 255, so chunk <= 245
+		// Using 200 bytes per fragment for safety margin
+		const u8 MAX_FRAGMENT_SIZE = 200;
 
-       while (remaining > 0) {
-          u8 chunk = (remaining > 250) ? 250 : (u8)remaining;
+		while (remaining > 0) {
+			u8 chunk = remaining > MAX_FRAGMENT_SIZE ? MAX_FRAGMENT_SIZE : (u8) remaining;
 
-          *pos++ = WLAN_EID_VENDOR_SPECIFIC;
-          *pos++ = chunk + 5; // OUI(3) + Type(1) + Idx(1)
+			if ((size_t) (end - pos) < 2 + 3 + 1 + 1 + 2 + chunk)
+				break;
 
-          *pos++ = 0x00; *pos++ = 0x90; *pos++ = 0x4C; // OUI
-          *pos++ = 0x02; // Type: KEM Key
-          *pos++ = fragment_index;
+			*pos++ = WLAN_EID_VENDOR_SPECIFIC;
+			*pos++ = 3 + 1 + 1 + 2 + chunk;
 
-          os_memcpy(pos, key_ptr, chunk);
-          pos += chunk;
-          key_ptr += chunk;
-          remaining -= chunk;
-          fragment_index++;
-       }
-    }
+			*pos++ = 0x00;
+			*pos++ = 0x90;
+			*pos++ = 0x4C;
+			*pos++ = 0x02; /* Type: KEM key fragment */
+			*pos++ = fragment_index;
+			WPA_PUT_LE16(pos, sta->ml_kem_512_pub_len);
+			pos += 2;
+
+			os_memcpy(pos, key_ptr, chunk);
+			pos += chunk;
+			key_ptr += chunk;
+			remaining -= chunk;
+			fragment_index++;
+		}
+
+		sta->pqc_pub_frag_count = fragment_index;
+		sta->pqc_pub_sent = remaining == 0;
+		if (sta->pqc_pub_sent) {
+			wpa_printf(MSG_INFO,
+				   "PQC_LOG: Sent %u fragments of ML-KEM public key (%zu bytes total)",
+				   fragment_index, sta->ml_kem_512_pub_len);
+		} else {
+			wpa_printf(MSG_WARNING,
+				   "PQC_LOG: Buffer too small for all fragments (sent %u, remaining %zu bytes)",
+				   fragment_index, remaining);
+		}
+	}
     //END
 
     params->resp_len = pos - (u8 *) params->resp;
@@ -1800,26 +1826,54 @@ void handle_probe_req(struct hostapd_data *hapd,
                     sta = ap_sta_add(hapd, mgmt->sa);
                 }
                 
-                if (sta) { // known STA
-                    sta->pqc_choice = choice; // saving config associated with specific STA's MAC addr
-                    sta->pqc_negotiated = 1;
-                    wpa_printf(MSG_INFO, "PQC_LOG: Received correct probe request from " MACSTR
-                               ". Saved algorithm config: 0x%02x", MAC2STR(mgmt->sa), choice);
+				if (sta) { /* known STA */
+					OQS_KEM *kem;
+					uint8_t *kem_secret_key;
 
-                	OQS_KEM *kem = OQS_KEM_new(OQS_KEM_alg_ml_kem_512);
-                	sta->ml_kem_512_pub_len = kem->length_public_key;
-                	sta->ml_kem_512_pub = os_malloc(sta->ml_kem_512_pub_len);
+					sta->pqc_choice = choice;
+					sta->pqc_negotiated = 1;
+					wpa_printf(MSG_INFO,
+					           "PQC_LOG: Received correct probe request from " MACSTR
+					           ". Saved algorithm config: 0x%02x",
+					           MAC2STR(mgmt->sa), choice);
 
-                	if (sta->ml_kem_512_pub) {
-                		uint8_t *kem_secret_key = malloc(kem->length_secret_key);
-                		OQS_KEM_keypair(kem, sta->ml_kem_512_pub, kem_secret_key);
+					os_free(sta->ml_kem_512_pub);
+					sta->ml_kem_512_pub = NULL;
+					sta->ml_kem_512_pub_len = 0;
+					sta->pqc_pub_ready = false;
+					sta->pqc_pub_sent = false;
+					sta->pqc_pub_frag_count = 0;
 
-                		OQS_MEM_secure_free(kem_secret_key, kem->length_secret_key);
-                	}
-                	OQS_KEM_free(kem);
+					kem = OQS_KEM_new(OQS_KEM_alg_ml_kem_512);
+					if (kem) {
+						sta->ml_kem_512_pub_len = kem->length_public_key;
+						sta->ml_kem_512_pub = os_malloc(sta->ml_kem_512_pub_len);
+						kem_secret_key = malloc(kem->length_secret_key);
 
-                }
-                break; 
+						if (sta->ml_kem_512_pub && kem_secret_key &&
+						    OQS_KEM_keypair(kem, sta->ml_kem_512_pub,
+								    kem_secret_key) == OQS_SUCCESS) {
+							sta->pqc_pub_ready = true;
+										wpa_printf(MSG_INFO,
+											   "PQC_LOG: Generated ML-KEM-512 public key for " MACSTR
+											   " (%zu bytes)",
+											   MAC2STR(sta->addr), sta->ml_kem_512_pub_len);
+						} else {
+							os_free(sta->ml_kem_512_pub);
+							sta->ml_kem_512_pub = NULL;
+							sta->ml_kem_512_pub_len = 0;
+										wpa_printf(MSG_ERROR,
+											   "PQC_LOG: Failed to generate ML-KEM-512 keypair for " MACSTR,
+											   MAC2STR(sta->addr));
+						}
+
+						if (kem_secret_key)
+							OQS_MEM_secure_free(kem_secret_key,
+								    kem->length_secret_key);
+						OQS_KEM_free(kem);
+					}
+				}
+                break;
             }
             
             /* pointer logic - find next IE */
