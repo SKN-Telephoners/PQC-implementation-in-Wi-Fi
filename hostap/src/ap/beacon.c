@@ -1113,10 +1113,6 @@ static void hostapd_gen_probe_resp(struct hostapd_data *hapd,
 		size_t remaining = sta->ml_kem_512_pub_len;
 		u8 fragment_index = 0;
 		u8 *end = params->resp->u.probe_resp.variable + buflen;
-		// Fragment size limited to avoid IE length overflow (255 bytes max)
-		// IE structure: EID(1) + LEN(1) + OUI(3) + Type(1) + FragIdx(1) + TotalLen(2) + Data
-		// Max: 1 + 1 + 3 + 1 + 1 + 2 + chunk <= 255, so chunk <= 245
-		// Using 200 bytes per fragment for safety margin
 		const u8 MAX_FRAGMENT_SIZE = 200;
 
 		while (remaining > 0) {

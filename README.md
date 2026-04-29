@@ -15,7 +15,7 @@ make clean
 cp defconfig .config
 make -j4 
 ```
-### config files
+### config files - added to repository 
 **/hostap/hostapd** - create new file *test-ap.config:
 ```
 interface=wlan0
@@ -29,7 +29,7 @@ pqc_choice=136
 **/hostap/wpa_supplicant** - create new file *test-sta.config:
 ```
 ctrl_interface=/var/run/wpa_supplicant
-update_config=1
+update_config=0
 
 network={
 	ssid="PQC"
@@ -110,7 +110,7 @@ else if (os_strcmp(buf, "pqc_enabled") == 0) {
 ```
 
 
-## Probe Request
+## Probe Request and Probe Response
 The frame contains additional vendor specific IE (Information element),   
 one byte used for specifying configuration of PQC algorithms (bits 4 and 8 not used):  
 10000000 - ML KEM 512  
@@ -138,17 +138,45 @@ added pqc_enabled and pqc_choice
 
 **wpa_supplicant/bss.h** - struct wpa_bss:  
 added has_pqc and ap_pqc_supported fields - for parsing beacon frame
+added detection of PQC support in beacon frame and parsing the parameters of supported algorithms by AP
+
+**wpa_supplicant/events.c** - function pqc_process_vendor_ie:  
+function for collecting key fragments, uses a bitmask to make sure that all pieces were received
+when all fragments are received it triggers the association process
+
+function pqc_try_start_auth - checks if all parameters are received and starts authentication process (PASN/PAKE) if they are
+
+**wpa_supplicant/wpa_supplicant_i.h** - added a buffer and tracking variables to manage the reassembly of the pub key 
+```c
+u8 pqc_kem_buffer[800];
+u32 pqc_fragments_mask;
+size_t pqc_kem_received_len;
+size_t pqc_kem_expected_len;
+u8 pqc_kem_expected_frags;
+bool pqc_kem_complete;
+bool pqc_auth_started;
+```
 
 ### AP
 **src/ap/sta_info.h** - struct sta_info:  
 definition of parameters used in Probe Request parsing
 * u8 pqc_choice - chosen parameters by specific STA
 * bool pqc_negotiated - Flag: whether the IE in probe request sent by STA was correct
+* u8 *ml_kem_512_pub - buffer for storing ML-KEM 512 public key sent by AP in probe response
+* size_t ml_kem_512_pub_len - length of the public key sent by AP in probe response
+* bool pqc_pub_ready - whether the public key sent by AP in probe response is ready to be sent (after generating it)
+* bool pqc_pub_sent - whether the public key sent by AP in probe response was already sent to STA (after sending it, we can free the buffer for public key)
+* size_t pqc_pub_frag_count - how many fragments of public key were sent to STA
+* u8 *ml_dsa_65_pub - buffer for storing ML-DSA 65 public key 
+* size_t ml_dsa_65_pub_len - length of the public key
 
 **src/ap/beacon.c** - void handle_probe_req:  
 parse IE in Probe request that was sent by STA and add parameters to specific STA.  
 OUI verification must be implemented in this part, in the future
 Probe request now handles DSA and KEM key generating triggered by the presence of correct IE in probe request frame.
+
+hostapd_gen_probe_resp: 
+function modified to break the key into smaller chunks and adds their id (WPA_PUT_LE16(pos, sta->ml_kem_512_pub_len)) to the fragment so that it can be sent in probe response
 
 # Helpful functions
 
