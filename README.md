@@ -78,16 +78,15 @@ u8 * hostapd_eid_pqc_capabilities(struct hostapd_data *hapd, u8 *pos)
 OUI is a producent id.
 
 **PQC IE format/structure**  
-+--------------+---------+---------------------------+  
+
 | Field        | Length  | Description               |  
-+--------------+---------+---------------------------+   
+|--------------|---------|---------------------------|   
 | Element ID   | 1 byte  | 221 (Vendor Specific IE)  |  
-| Length       | 1 byte  | Number of bytes that      |  
-|              |         | follow (here: 5)          |  
+| Length       | 1 byte  | Number of bytes that follow (here: 5)      |  
 | OUI          | 3 bytes | 00 90 4C (test OUI)       |  
 | Type         | 1 byte  | 0x01 (PQC capabilities)   |  
 | Payload      | 1 byte  | Bitmask of supported PQC  |  
-+--------------+---------+---------------------------+  
+
 Each bit in the payload byte represents support for a specific PQC algorithm like in Probe Request
 
 **hostapd/src/ap/beacon.h**
@@ -177,6 +176,36 @@ Probe request now handles DSA and KEM key generating triggered by the presence o
 
 hostapd_gen_probe_resp: 
 function modified to break the key into smaller chunks and adds their id (WPA_PUT_LE16(pos, sta->ml_kem_512_pub_len)) to the fragment so that it can be sent in probe response
+
+## PQC State Machine 
+Separates PQC-specific operations from standard Wi-Fi authentication flows. Saves PQC keys in the structure.  
+Initialized after receiving public PQC key (ML-KEM) in Probe Response from AP, right before sending authentication request.  
+Deinitialized after deauthentication request (both in **wpa_supplicant.c**).    
+**/wpa_supplicant/pqc_sm.h, /wpa_supplicant/pqc_sm.c** - these files can also be used for PQC related functions, structs and other objects.  
+
+**struct wpa_pqc_sm** used as centralized storage for PQC session variables (ML-KEM/ML-DSA keys)  
+
+
+## PAKE
+**/wpa_supplicant/pqc.c - static int pqc_2f_network**,  mathematic helper function.  
+
+**PQC PAKE-3 frame format**
+
+| Field          | Length    | Description                                   |
+|----------------|-----------|-----------------------------------------------|
+| Category       | 1 byte    | 127 (Vendor Specific Action Frame)            |
+| OUI            | 3 bytes   | 00 90 4C (test OUI)                           |
+| Type / Subtype | 1 byte    | 0x03 (PAKE-3 identification)                  |
+| Payload (s)    | 32 bytes  | Output value 's' from 2-round Feistel network |
+| Payload (T)    | Variable  | Output value 'T' from 2-round Feistel network |
+
+
+**/wpa_supplicant/pqc_sm.c - static int wpas_pqc_send_pake3**, builds and computes parameters needed for pake3 frame, uses information saved in state machine previously. After that it tries to send Vendor Specific Action frame using ```wpa_drv_send_action``` function.  
+  
+**/wpa_supplicant/pqc_sm.c - int pqc_sm_rx_pake2**, used for parsing and processing information (which is later saved in PQC STA state) based on received PAKE2 frame. Saves AP's public DSA key and decrypted sid, generates ML-KEM keys. 
+
+**/wpa_supplicant/events.c**
+After receing vendor specific action frame checks are performed in order to determine whether the frame is the one used in PAKE scheme. For now only PAKE-2 is checked (subtype = 0x02). After correct identification PAKE-2 parser function is called.  
 
 # Helpful functions
 

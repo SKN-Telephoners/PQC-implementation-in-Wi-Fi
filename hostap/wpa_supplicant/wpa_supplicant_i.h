@@ -41,6 +41,7 @@ struct wpa_scan_results;
 struct hostapd_hw_modes;
 struct wpa_driver_associate_params;
 struct wpa_cred;
+struct wpa_pqc_sm;
 
 /*
  * Forward declarations of private structures used within the ctrl_iface
@@ -1737,6 +1738,10 @@ struct wpa_supplicant {
 	bool pmkid_anonce_set;
 #endif /* CONFIG_PMKSA_PRIVACY */
 	u8 pqc_kem_buffer[800];
+	/*
+	* PQC: new machine state used mainly for PQC parameters
+	*/
+	struct wpa_pqc_sm *pqc;
 	u32 pqc_fragments_mask;
 	size_t pqc_kem_received_len;
 	size_t pqc_kem_expected_len;

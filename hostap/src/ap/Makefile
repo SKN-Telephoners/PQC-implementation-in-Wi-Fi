@@ -56,6 +56,7 @@ LIB_OBJS= \
 	wpa_auth_glue.o \
 	wpa_auth_ie.o \
 	wps_hostapd.o \
-	x_snoop.o
+	x_snoop.o \
+	pqc_ap_sm.o
 
 include ../lib.rules
