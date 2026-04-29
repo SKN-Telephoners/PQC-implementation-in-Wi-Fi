@@ -34,6 +34,7 @@
 #include "dfs.h"
 #include "taxonomy.h"
 #include "ieee802_11_auth.h"
+#include <oqs/oqs.h>
 
 
 #ifdef NEED_AP_MLME
@@ -1061,51 +1062,98 @@ static u8 * hostapd_probe_resp_fill_elems(struct hostapd_data *hapd,
 
 
 static void hostapd_gen_probe_resp(struct hostapd_data *hapd,
-				   struct probe_resp_params *params)
+                struct probe_resp_params *params)
 {
-	struct hostapd_data *hapd_probed = hapd;
-	u8 *pos;
-	size_t buflen;
+    struct hostapd_data *hapd_probed = hapd;
+    u8 *pos;
+    size_t buflen;
+    struct sta_info *sta = NULL;
 
-	hapd = hostapd_mbssid_get_tx_bss(hapd);
+    hapd = hostapd_mbssid_get_tx_bss(hapd);
 
-#define MAX_PROBERESP_LEN 768
-	buflen = MAX_PROBERESP_LEN;
-	buflen += hostapd_probe_resp_elems_len(hapd_probed, params);
-	params->resp = os_zalloc(buflen);
-	if (!params->resp) {
-		params->resp_len = 0;
-		return;
+#define MAX_PROBERESP_LEN 1536
+    buflen = MAX_PROBERESP_LEN;
+    buflen += hostapd_probe_resp_elems_len(hapd_probed, params);
+    params->resp = os_zalloc(buflen);
+    if (!params->resp) {
+       params->resp_len = 0;
+       return;
+    }
+
+    params->resp->frame_control = IEEE80211_FC(WLAN_FC_TYPE_MGMT,
+                      WLAN_FC_STYPE_PROBE_RESP);
+
+    if (params->req && (!is_6ghz_op_class(hapd->iconf->op_class) ||
+           hapd->conf->ignore_broadcast_ssid))
+       os_memcpy(params->resp->da, params->req->sa, ETH_ALEN);
+    else
+       os_memset(params->resp->da, 0xff, ETH_ALEN);
+
+    os_memcpy(params->resp->sa, hapd->own_addr, ETH_ALEN);
+    os_memcpy(params->resp->bssid, hapd->own_addr, ETH_ALEN);
+
+    params->resp->u.probe_resp.beacon_int = host_to_le16(hapd->iconf->beacon_int);
+    params->resp->u.probe_resp.capab_info = host_to_le16(hostapd_own_capab_info(hapd));
+
+    pos = hostapd_probe_resp_fill_elems(hapd_probed, params,
+                    params->resp->u.probe_resp.variable,
+                    buflen);
+
+    // PQC
+    if (params->req) {
+       sta = ap_get_sta(hapd, params->req->sa);
+    }
+
+    pos = hostapd_eid_pqc_capabilities(hapd, pos);
+
+	/* Add PQC key fragments */
+	if (sta && sta->pqc_negotiated && sta->ml_kem_512_pub &&
+	    sta->ml_kem_512_pub_len > 0) {
+		const u8 *key_ptr = sta->ml_kem_512_pub;
+		size_t remaining = sta->ml_kem_512_pub_len;
+		u8 fragment_index = 0;
+		u8 *end = params->resp->u.probe_resp.variable + buflen;
+		const u8 MAX_FRAGMENT_SIZE = 200;
+
+		while (remaining > 0) {
+			u8 chunk = remaining > MAX_FRAGMENT_SIZE ? MAX_FRAGMENT_SIZE : (u8) remaining;
+
+			if ((size_t) (end - pos) < 2 + 3 + 1 + 1 + 2 + chunk)
+				break;
+
+			*pos++ = WLAN_EID_VENDOR_SPECIFIC;
+			*pos++ = 3 + 1 + 1 + 2 + chunk;
+
+			*pos++ = 0x00;
+			*pos++ = 0x90;
+			*pos++ = 0x4C;
+			*pos++ = 0x02; /* Type: KEM key fragment */
+			*pos++ = fragment_index;
+			WPA_PUT_LE16(pos, sta->ml_kem_512_pub_len);
+			pos += 2;
+
+			os_memcpy(pos, key_ptr, chunk);
+			pos += chunk;
+			key_ptr += chunk;
+			remaining -= chunk;
+			fragment_index++;
+		}
+
+		sta->pqc_pub_frag_count = fragment_index;
+		sta->pqc_pub_sent = remaining == 0;
+		if (sta->pqc_pub_sent) {
+			wpa_printf(MSG_INFO,
+				   "PQC_LOG: Sent %u fragments of ML-KEM public key (%zu bytes total)",
+				   fragment_index, sta->ml_kem_512_pub_len);
+		} else {
+			wpa_printf(MSG_WARNING,
+				   "PQC_LOG: Buffer too small for all fragments (sent %u, remaining %zu bytes)",
+				   fragment_index, remaining);
+		}
 	}
+    //END
 
-	params->resp->frame_control = IEEE80211_FC(WLAN_FC_TYPE_MGMT,
-						   WLAN_FC_STYPE_PROBE_RESP);
-	/* Unicast the response to all requests on bands other than 6 GHz. For
-	 * the 6 GHz, unicast is used only if the actual SSID is not included in
-	 * the Beacon frames. Otherwise, broadcast response is used per IEEE
-	 * Std 802.11ax-2021, 26.17.2.3.2. Broadcast address is also used for
-	 * the Probe Response frame template for the unsolicited (i.e., not as
-	 * a response to a specific request) case. */
-	if (params->req && (!is_6ghz_op_class(hapd->iconf->op_class) ||
-		    hapd->conf->ignore_broadcast_ssid))
-		os_memcpy(params->resp->da, params->req->sa, ETH_ALEN);
-	else
-		os_memset(params->resp->da, 0xff, ETH_ALEN);
-	os_memcpy(params->resp->sa, hapd->own_addr, ETH_ALEN);
-
-	os_memcpy(params->resp->bssid, hapd->own_addr, ETH_ALEN);
-	params->resp->u.probe_resp.beacon_int =
-		host_to_le16(hapd->iconf->beacon_int);
-
-	/* hardware or low-level driver will setup seq_ctrl and timestamp */
-	params->resp->u.probe_resp.capab_info =
-		host_to_le16(hostapd_own_capab_info(hapd));
-
-	pos = hostapd_probe_resp_fill_elems(hapd_probed, params,
-					    params->resp->u.probe_resp.variable,
-					    buflen);
-
-	params->resp_len = pos - (u8 *) params->resp;
+    params->resp_len = pos - (u8 *) params->resp;
 }
 
 
@@ -1774,15 +1822,54 @@ void handle_probe_req(struct hostapd_data *hapd,
                     sta = ap_sta_add(hapd, mgmt->sa);
                 }
                 
-                if (sta) { // known STA
-                    sta->pqc_choice = choice; // saving config associated with specific STA's MAC addr 
-                    sta->pqc_negotiated = 1;
-                    wpa_printf(MSG_INFO, "PQC_LOG: Received correct probe request from " MACSTR 
-                               ". Saved algorithm config: 0x%02x", MAC2STR(mgmt->sa), choice);
-                    
-                    /* TO DO: IMPLEMENT KEYS GENERATION */
-                }
-                break; 
+				if (sta) { /* known STA */
+					OQS_KEM *kem;
+					uint8_t *kem_secret_key;
+
+					sta->pqc_choice = choice;
+					sta->pqc_negotiated = 1;
+					wpa_printf(MSG_INFO,
+					           "PQC_LOG: Received correct probe request from " MACSTR
+					           ". Saved algorithm config: 0x%02x",
+					           MAC2STR(mgmt->sa), choice);
+
+					os_free(sta->ml_kem_512_pub);
+					sta->ml_kem_512_pub = NULL;
+					sta->ml_kem_512_pub_len = 0;
+					sta->pqc_pub_ready = false;
+					sta->pqc_pub_sent = false;
+					sta->pqc_pub_frag_count = 0;
+
+					kem = OQS_KEM_new(OQS_KEM_alg_ml_kem_512);
+					if (kem) {
+						sta->ml_kem_512_pub_len = kem->length_public_key;
+						sta->ml_kem_512_pub = os_malloc(sta->ml_kem_512_pub_len);
+						kem_secret_key = malloc(kem->length_secret_key);
+
+						if (sta->ml_kem_512_pub && kem_secret_key &&
+						    OQS_KEM_keypair(kem, sta->ml_kem_512_pub,
+								    kem_secret_key) == OQS_SUCCESS) {
+							sta->pqc_pub_ready = true;
+										wpa_printf(MSG_INFO,
+											   "PQC_LOG: Generated ML-KEM-512 public key for " MACSTR
+											   " (%zu bytes)",
+											   MAC2STR(sta->addr), sta->ml_kem_512_pub_len);
+						} else {
+							os_free(sta->ml_kem_512_pub);
+							sta->ml_kem_512_pub = NULL;
+							sta->ml_kem_512_pub_len = 0;
+										wpa_printf(MSG_ERROR,
+											   "PQC_LOG: Failed to generate ML-KEM-512 keypair for " MACSTR,
+											   MAC2STR(sta->addr));
+						}
+
+						if (kem_secret_key)
+							OQS_MEM_secure_free(kem_secret_key,
+								    kem->length_secret_key);
+						OQS_KEM_free(kem);
+					}
+				}
+                break;
             }
             
             /* pointer logic - find next IE */
