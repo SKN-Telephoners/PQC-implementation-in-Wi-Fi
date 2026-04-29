@@ -7686,7 +7686,6 @@ void pqc_process_vendor_ie(struct wpa_supplicant *wpa_s, const u8 *ie, size_t ie
 	const u8 *data;
 	size_t data_len, offset, expected_frags, expected_mask;
 
-	// Minimalna długość: OUI(3) + Type(1) + FragIdx(1) + TotalLen(2) = 7 bajtów
 	if (ie_len < 7 || os_memcmp(ie, "\x00\x90\x4c", 3) != 0) {
 		wpa_printf(MSG_INFO, "PQC_LOG: IE validation failed (len=%zu, OUI check=%d)",
 			   ie_len, ie_len >= 3 ? (os_memcmp(ie, "\x00\x90\x4c", 3) == 0) : -1);
@@ -7695,7 +7694,6 @@ void pqc_process_vendor_ie(struct wpa_supplicant *wpa_s, const u8 *ie, size_t ie
 
 	type = ie[3];
 
-	// Tylko obsługujemy Type 0x02 (Key Fragment)
 	if (type != 0x02) {
 		wpa_printf(MSG_INFO, "PQC_LOG: Not a key fragment (type=0x%02x)", type);
 		return;
