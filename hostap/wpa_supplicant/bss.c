@@ -905,6 +905,54 @@ wpa_bss_update(struct wpa_supplicant *wpa_s, struct wpa_bss *bss,
 
 	notify_bss_changes(wpa_s, changes, bss);
 
+	/* PQC start */
+	if (bss->ie_len > 0) {
+		const u8 *pqc_pos = bss->ies;
+		size_t pqc_left = bss->ie_len;
+		bool pqc_ie_found = false;
+
+		while (pqc_left >= 2) {
+			u8 id = pqc_pos[0];
+			u8 elen = pqc_pos[1];
+
+			if (2 + elen > pqc_left)
+				break;
+
+			if (id == WLAN_EID_VENDOR_SPECIFIC && elen >= 5 &&
+			    os_memcmp(&pqc_pos[2], "\x00\x90\x4c", 3) == 0) {
+				u8 pqc_type = pqc_pos[5];
+
+				if (pqc_type == 0x01) {
+					// PQC Capabilities
+					pqc_ie_found = true;
+					bss->has_pqc = 1;
+					bss->ap_pqc_supported = 1;
+					wpa_printf(MSG_DEBUG,
+						   "PQC: Found PQC Capabilities IE (type=0x01), length=%u",
+						   elen);
+				} else if (pqc_type == 0x02) {
+					// PQC Key Fragment
+					pqc_ie_found = true;
+					bss->has_pqc = 1;
+					bss->ap_pqc_supported = 1;
+					wpa_printf(MSG_DEBUG,
+						   "PQC: Found PQC Key Fragment IE (type=0x02), length=%u",
+						   elen);
+					pqc_process_vendor_ie(wpa_s, &pqc_pos[2], elen);
+				}
+			}
+
+			pqc_pos += 2 + elen;
+			pqc_left -= 2 + elen;
+		}
+
+		if (pqc_ie_found) {
+			bss->has_pqc = 1;
+			bss->ap_pqc_supported = 1;
+		}
+	}
+	/* END */
+
 	return bss;
 }
 

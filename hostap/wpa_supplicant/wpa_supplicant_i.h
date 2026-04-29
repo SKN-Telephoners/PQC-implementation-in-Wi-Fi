@@ -1736,6 +1736,13 @@ struct wpa_supplicant {
 	u8 pmkid_anonce[NONCE_LEN];
 	bool pmkid_anonce_set;
 #endif /* CONFIG_PMKSA_PRIVACY */
+	u8 pqc_kem_buffer[800];
+	u32 pqc_fragments_mask;
+	size_t pqc_kem_received_len;
+	size_t pqc_kem_expected_len;
+	u8 pqc_kem_expected_frags;
+	bool pqc_kem_complete;
+	bool pqc_auth_started;
 };
 
 
@@ -2158,5 +2165,7 @@ void wpas_update_dfs_ap_info(struct wpa_supplicant *wpa_s, int freq,
 			     enum chan_width ap_ch_width,
 			     bool disconnect_evt);
 void wpas_configure_frame_filters(struct wpa_supplicant *wpa_s);
+
+void pqc_process_vendor_ie(struct wpa_supplicant *wpa_s, const u8 *ie, size_t ie_len);
 
 #endif /* WPA_SUPPLICANT_I_H */
