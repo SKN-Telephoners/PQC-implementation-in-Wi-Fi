@@ -4599,7 +4599,7 @@ static void handle_auth(struct hostapd_data *hapd,
 
 	/* PQC STATE MACHINE INIT (AP SIDE) */
     if (sta && hapd->conf->pqc_enabled) {
-        wpa_printf(MSG_DEBUG, "PQC_AP: Otrzymano Auth Req - inicjalizacja sesji PQC");
+        wpa_printf(MSG_DEBUG, "PQC_LOG: Received Auth Req - PQC session initialization start");
 
         if (sta->pqc) {
             pqc_ap_sm_deinit(sta->pqc);
