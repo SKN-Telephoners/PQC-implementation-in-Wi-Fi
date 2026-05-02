@@ -213,3 +213,37 @@ cleanup:
     if (kem) OQS_KEM_free(kem);
     return ret;
 }
+
+/* PMK derivation based on SM data*/
+int pqc_ap_sm_derive_pmk(struct hostapd_pqc_sm *sm, u8 *pmk_out) {
+    const char *key_prefix = "key derivation";
+
+    /* when shared secret is None */
+    if (!sm || !sm->shared_secret_K) {
+        wpa_printf(MSG_ERROR, "PQC_LOG: No shared_secret_K for PMK derivation");
+        return -1;
+    }
+
+    wpa_printf(MSG_DEBUG, "PQC_LOG: Generating PMK (assoc verification)");
+
+    /* buffer and allocation */
+    size_t Hkey_len = sm->fsid_len + sm->pwd_len + sm->sta_first_kem_pub_len + PQC_R_LEN + sm->T_len + sm->ciphertext_2_len;
+    struct wpabuf *Hkey_data = wpabuf_alloc(Hkey_len);
+    if (!Hkey_data) return -1;
+
+    /* concatenation */
+    if (sm->fsid) wpabuf_put_data(Hkey_data, sm->fsid, sm->fsid_len);
+    wpabuf_put_data(Hkey_data, sm->pwd, sm->pwd_len);
+    wpabuf_put_data(Hkey_data, sm->sta_first_kem_public_key, sm->sta_first_kem_pub_len);
+    wpabuf_put_data(Hkey_data, sm->s, PQC_R_LEN);
+    wpabuf_put_data(Hkey_data, sm->T, sm->T_len);
+    wpabuf_put_data(Hkey_data, sm->ciphertext_2, sm->ciphertext_2_len);
+
+    /* Generating PMK - 32 bytes*/
+    hmac_sha256_kdf(sm->shared_secret_K, sm->shared_secret_K_len, 
+                    key_prefix, wpabuf_head(Hkey_data), wpabuf_len(Hkey_data), 
+                    pmk_out, 32);
+
+    wpabuf_free(Hkey_data);
+    return 0;
+}

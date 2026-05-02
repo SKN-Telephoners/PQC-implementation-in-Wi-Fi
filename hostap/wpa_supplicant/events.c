@@ -6666,6 +6666,11 @@ void wpa_supplicant_event(void *ctx, enum wpa_event_type event,
 
 	switch (event) {
 	case EVENT_AUTH:
+	/* PQC */
+		if (wpa_s->pqc && wpa_s->pqc->pqc_enabled) {
+        wpa_printf(MSG_DEBUG, "PQC_LOG: Received EVENT_AUTH, stopping association for now. Waiting for PAKE phase to end.");
+        break; 
+    }
 #ifdef CONFIG_FST
 		if (!wpas_fst_update_mbie(wpa_s, data->auth.ies,
 					  data->auth.ies_len))
@@ -6703,6 +6708,32 @@ void wpa_supplicant_event(void *ctx, enum wpa_event_type event,
 #endif /* CONFIG_NO_ROBUST_AV */
 		wpa_supplicant_event_assoc(wpa_s, data);
 		wpa_s->assoc_status_code = WLAN_STATUS_SUCCESS;
+		
+        /* PQC */
+        if (wpa_s->pqc && wpa_s->pqc->pqc_enabled) {
+            wpa_printf(MSG_INFO, "PQC_LOG: Association done.");
+
+            /* new pair of KEM keys */
+            if (pqc_sm_assoc_success(wpa_s->pqc) != 0) {
+                wpa_printf(MSG_ERROR, "PQC_LOG: Error in new pairs of KEM keys");
+                wpa_supplicant_deauthenticate(wpa_s, WLAN_REASON_UNSPECIFIED);
+                break; 
+            }
+
+            /* TODO
+             * There has to be PTK gen heree
+             * wpa_drv_set_key(wpa_s, alg, addr, key_idx, set_tx, seq, seq_len, key, key_len);
+             */
+
+            wpa_supplicant_cancel_auth_timeout(wpa_s);
+            wpa_supplicant_set_state(wpa_s, WPA_COMPLETED);
+            
+            wpa_printf(MSG_INFO, "PQC_LOG: Port opened");
+
+            break; 
+        }
+        /* PQC END*/
+
 		if (data &&
 		    (data->assoc_info.authorized ||
 		     (!(wpa_s->drv_flags & WPA_DRIVER_FLAGS_SME) &&
@@ -7161,16 +7192,32 @@ void wpa_supplicant_event(void *ctx, enum wpa_event_type event,
                         /* checking OUI: 00:90:4C */
                         if (pos[0] == 0x00 && pos[1] == 0x90 && pos[2] == 0x4C) {
                             pos += 3;
+
+							u8 subtype = *pos;
+							pos++;
+							size_t payload_len = data->rx_mgmt.frame_len - (pos - data->rx_mgmt.frame);
                             
                             /* checking Subtype. 0x02 means PAKE-2 frame */
-                            if (*pos == 0x02) {
-                                pos++;
-                                size_t payload_len = data->rx_mgmt.frame_len - (pos - data->rx_mgmt.frame);
-                                
+                            if (subtype == 0x02) {
                                 wpa_printf(MSG_DEBUG, "PQC_LOG: Received PAKE-2 frame (Vendor Action), len=%zu", payload_len);
                                 
 								if (wpa_s->pqc) {
                                     pqc_sm_rx_pake2(wpa_s->pqc, pos, payload_len);
+                                } else {
+                                    wpa_printf(MSG_ERROR, "PQC_LOG: Error - no initialize PQC session found");
+                                }
+                            }
+							/* checking Subtype. 0x04 means PAKE-2 frame */
+							if (subtype == 0x04) {
+                                wpa_printf(MSG_DEBUG, "PQC_LOG: Received PAKE-4 frame (Vendor Action), len=%zu", payload_len);
+                                
+								if (wpa_s->pqc) {
+                                    if (pqc_sm_rx_pake4(wpa_s->pqc, pos, payload_len) == 0) {
+                                        wpa_printf(MSG_INFO, "PQC_LOG: PAKE-4 processed successfully. Association triggered.");
+                                    } else {
+										wpa_printf(MSG_ERROR, "PQC_LOG: Error processing PAKE-4! Aborting.");
+                                        wpa_supplicant_set_state(wpa_s, WPA_DISCONNECTED);
+									}
                                 } else {
                                     wpa_printf(MSG_ERROR, "PQC_LOG: Error - no initialize PQC session found");
                                 }

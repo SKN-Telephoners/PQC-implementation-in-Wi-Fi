@@ -4599,7 +4599,7 @@ static void handle_auth(struct hostapd_data *hapd,
 
 	/* PQC STATE MACHINE INIT (AP SIDE) */
     if (sta && hapd->conf->pqc_enabled) {
-        wpa_printf(MSG_DEBUG, "PQC_AP: Otrzymano Auth Req - inicjalizacja sesji PQC");
+        wpa_printf(MSG_DEBUG, "PQC_LOG: Received Auth Req - PQC session initialization start");
 
         if (sta->pqc) {
             pqc_ap_sm_deinit(sta->pqc);
@@ -7107,6 +7107,31 @@ static void handle_assoc(struct hostapd_data *hapd,
 		}
 	}
 #endif /* CONFIG_IEEE80211BE */
+
+	/* =========================================================
+     * PQC: CAPTURING ASSOC REQ AND GENERATING PMK
+     * ========================================================= */
+    if (sta && sta->pqc && hapd->conf->pqc_enabled) {
+        u8 PMK[32];
+        
+        if (pqc_ap_sm_derive_pmk(sta->pqc, PMK) == 0) {
+            wpa_printf(MSG_INFO, "PQC_LOG: PMK for STA " MACSTR " generated.", MAC2STR(mgmt->sa));
+
+#ifdef CONFIG_WPA
+            if (hapd->wpa_auth) {
+                wpa_auth_pmksa_add(hapd->wpa_auth, sta->addr, PMK, sizeof(PMK), 
+                                   0, NULL, 0, hapd->own_addr, WPA_KEY_MGMT_PSK);
+            }
+#endif
+            sta->flags |= WLAN_STA_AUTH;
+
+        } else {
+            wpa_printf(MSG_ERROR, "PQC_LOG: Error in generating PMK, rejecting association.");
+            send_assoc_resp(hapd, sta, mgmt->sa, WLAN_STATUS_UNSPECIFIED_FAILURE, reassoc, pos, left, rssi, omit_rsnxe);
+            return;
+        }
+    }
+    /* PQC END */
 
 #ifdef CONFIG_IEEE80211R_AP
 	if (sta && sta->auth_alg == WLAN_AUTH_FT &&
