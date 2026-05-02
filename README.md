@@ -187,6 +187,225 @@ Deinitialized after deauthentication request (both in **wpa_supplicant.c**).
 
 
 ## PAKE
+
+### PQC PAKE-1
+
+STA generates ID, encrypts it with AES-256, performs ML-KEM.encaps, and sends:
+
+| Field   | Value              |
+|---------|-------------------|
+| Category | 127 (Vendor Specific Action) |
+| OUI | 00 90 4C |
+| Type | 0x10 (PQC/PAKE) |
+| Subtype | 0x01 (PAKE-1) |
+
+**Payload Structure:**
+
+| Field | Length | Description |
+|-------|--------|-------------|
+| Type | 1 byte | 0x01 |
+| c_len | 2 bytes | Ciphertext length |
+| c | Variable | ML-KEM ciphertext |
+| id_len | 2 bytes | Encrypted ID length |
+| {id} | Variable | AES-256(id) |
+
+#### Receiving PAKE-1 in ieee802_11.c
+
+```c
+/* PAKE-1 handler */
+if (sta)
+    hostapd_pqc_rx_pake(hapd, sta, pos, left);
+```
+
+#### Parsing PAKE-1
+
+```c
+static void hostapd_pqc_rx_pake(struct hostapd_data *hapd,
+                                struct sta_info *sta,
+                                const u8 *pos, size_t len)
+{
+    struct pqc_pake1_fields f;
+
+    if (pqc_parse_pake1(pos, len, &f) < 0)
+        return;
+
+    sta->pqc_pake1_ct = os_memdup(f.c, f.c_len);
+    sta->pqc_pake1_ct_len = f.c_len;
+
+    sta->pqc_pake1_enc_id = os_memdup(f.enc_id, f.id_len);
+    sta->pqc_pake1_enc_id_len = f.id_len;
+
+    sta->pqc_pake1_received = true;
+
+    hostapd_pqc_handle_pake1(hapd, sta);
+}
+```
+
+---
+
+### PQC PAKE-2
+
+AP decapsulates ML-KEM, decrypts {id}, generates SID, constructs FSID, and sends:
+
+| Field   | Value              |
+|---------|-------------------|
+| Category | 127 (Vendor Specific Action) |
+| OUI | 00 90 4C |
+| Type | 0x10 (PQC/PAKE) |
+| Subtype | 0x02 (PAKE-2) |
+
+**Payload Structure:**
+
+| Field | Length | Description |
+|-------|--------|-------------|
+| Type | 1 byte | 0x02 |
+| sid_len | 2 bytes | Encrypted SID length |
+| {sid} | Variable | AES-256(sid) |
+| dp_len | 2 bytes | DP length |
+| dp | Variable | FSID or H(FSID) |
+
+#### Generating PAKE-2 (pqc_ap_sm.c)
+
+```c
+int hostapd_pqc_handle_pake1(struct hostapd_data *hapd, struct sta_info *sta)
+{
+    u8 K[64], id[16], sid[16], enc_sid[32];
+    size_t enc_sid_len = 0;
+    u8 fsid[64];
+    size_t fsid_len = 0;
+    u8 buf[1500];
+    size_t buf_len;
+    struct pqc_pake2_fields f;
+
+    /* ML-KEM.decaps */
+    pqc_kem_decaps(hapd->conf->pqc_kem_id,
+                   hapd->conf->pqc_kem_sk,
+                   sta->pqc_pake1_ct, sta->pqc_pake1_ct_len,
+                   K, sizeof(K));
+
+    /* AES-decrypt {id} */
+    pqc_aes_decrypt(sta->pqc_pake1_enc_id,
+                    sta->pqc_pake1_enc_id_len,
+                    id, sizeof(id));
+
+    /* random sid */
+    os_get_random(sid, sizeof(sid));
+
+    /* fsid = sid || id || MAC_AP || MAC_STA */
+    os_memcpy(fsid, sid, 16);
+    os_memcpy(fsid + 16, id, 16);
+    os_memcpy(fsid + 32, hapd->own_addr, ETH_ALEN);
+    os_memcpy(fsid + 32 + ETH_ALEN, sta->addr, ETH_ALEN);
+    fsid_len = 32 + 2 * ETH_ALEN;
+
+    /* encrypt sid */
+    pqc_aes_encrypt(sid, sizeof(sid), enc_sid, &enc_sid_len);
+
+    /* build PAKE-2 */
+    f.pake_type = PQC_PAKE_TYPE_2;
+    f.enc_sid = enc_sid;
+    f.sid_len = enc_sid_len;
+    f.dp = fsid;
+    f.dp_len = fsid_len;
+
+    buf_len = pqc_build_pake2(buf, sizeof(buf), &f);
+
+    return hostapd_pqc_send_pake2(hapd, sta, buf, buf_len);
+}
+```
+
+#### Sending PAKE-2
+
+```c
+int hostapd_pqc_send_pake2(struct hostapd_data *hapd,
+                           struct sta_info *sta,
+                           const u8 *payload, size_t payload_len)
+{
+    struct wpabuf *buf = wpabuf_alloc(5 + payload_len);
+
+    wpabuf_put_u8(buf, WLAN_ACTION_VENDOR_SPECIFIC);
+    wpabuf_put_u8(buf, PQC_OUI_0);
+    wpabuf_put_u8(buf, PQC_OUI_1);
+    wpabuf_put_u8(buf, PQC_OUI_2);
+    wpabuf_put_u8(buf, PQC_OUI_TYPE_PAKE);
+    wpabuf_put_u8(buf, PQC_PAKE_TYPE_2);
+
+    wpabuf_put_data(buf, payload, payload_len);
+
+    return hostapd_drv_send_action(hapd, hapd->iface->freq, 0,
+                                   sta->addr,
+                                   wpabuf_head(buf),
+                                   wpabuf_len(buf));
+}
+```
+
+---
+
+### STA-Side Implementation (wpa_supplicant)
+
+#### Generating PAKE-1
+
+```c
+int wpas_pqc_send_pake1(struct wpa_supplicant *wpa_s)
+{
+    u8 id[16], enc_id[32], c[1024];
+    size_t enc_id_len = 0, c_len = 0;
+    u8 buf[1500];
+    size_t buf_len;
+    struct pqc_pake1_fields f;
+
+    os_get_random(id, sizeof(id));
+    pqc_aes_encrypt(id, sizeof(id), enc_id, &enc_id_len);
+
+    pqc_kem_encaps(wpa_s->pqc->ap_kem_id,
+                   wpa_s->pqc->ap_kem_pub,
+                   c, &c_len,
+                   wpa_s->pqc->shared_secret);
+
+    f.pake_type = PQC_PAKE_TYPE_1;
+    f.c = c;
+    f.c_len = c_len;
+    f.enc_id = enc_id;
+    f.id_len = enc_id_len;
+
+    buf_len = pqc_build_pake1(buf, sizeof(buf), &f);
+
+    return wpa_drv_send_action(wpa_s, 0, 0,
+                               wpa_s->bssid,
+                               buf, buf_len, 0);
+}
+```
+
+#### Receiving PAKE-2
+
+```c
+int pqc_sm_rx_pake2(struct wpa_pqc_sm *sm,
+                    const u8 *enc_sid, size_t sid_len,
+                    const u8 *dp, size_t dp_len)
+{
+    u8 sid[16];
+
+    pqc_aes_decrypt(enc_sid, sid_len, sid, sizeof(sid));
+
+    sm->sid_len = sizeof(sid);
+    os_memcpy(sm->sid, sid, sizeof(sid));
+
+    /* dp = fsid */
+    sm->fsid = os_memdup(dp, dp_len);
+    sm->fsid_len = dp_len;
+
+    /* ML-KEM keygen + 2F */
+    pqc_kem_keygen(sm->kem_id, sm->pk, sm->sk);
+
+    pqc_2f_network(sm->pwd, sm->pwd_len,
+                   sm->r, sm->Z,
+                   sm->s, sm->T);
+
+    return wpas_pqc_send_pake3(sm);
+}
+```
+
+
 **/wpa_supplicant/pqc.c - static int pqc_2f_network**,  mathematic helper function.  
 
 **PQC PAKE-3 frame format**

@@ -40,6 +40,8 @@ struct hostapd_pqc_sm {
 
 struct hostapd_pqc_sm * pqc_ap_sm_init(struct hostapd_data *hapd, struct sta_info *sta);
 void pqc_ap_sm_deinit(struct hostapd_pqc_sm *sm);
+int hostapd_pqc_handle_pake1(struct hostapd_data *hapd, struct sta_info *sta);
+int hostapd_pqc_send_pake2(struct hostapd_data *hapd, struct sta_info *sta, const u8 *payload, size_t payload_len);
 int pqc_ap_sm_rx_pake3(struct hostapd_pqc_sm *sm, const u8 *s, size_t s_len, const u8 *T, size_t T_len);
 
 #endif /* PQC_AP_SM_H */

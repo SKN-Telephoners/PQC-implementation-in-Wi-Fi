@@ -63,6 +63,10 @@
 #include "nan_usd_ap.h"
 #include "pasn/pasn_common.h"
 #include "pqc_ap_sm.h"
+#include "common/pqc_pake.h"
+#include "src/common/pqc_pake.h"
+#include "src/common/pqc_pake.h"
+
 
 
 #ifdef CONFIG_FILS
@@ -7705,7 +7709,55 @@ static int hostapd_action_vs(struct hostapd_data *hapd,
 
 	return -1;
 }
+static void hostapd_pqc_rx_pake1(struct hostapd_data *hapd,
+                struct sta_info *sta,
+                const u8 *pos, size_t len)
+{
+    u8 oui0, oui1, oui2, type, subtype;
+    struct pqc_pake1_fields f;
+    int ret;
 
+    if (len < 5)
+        return;
+
+    oui0 = pos[0];
+    oui1 = pos[1];
+    oui2 = pos[2];
+    type = pos[3];
+    subtype = pos[4];
+
+    if (oui0 != PQC_OUI_0 || oui1 != PQC_OUI_1 || oui2 != PQC_OUI_2)
+        return;
+
+    if (type != PQC_OUI_TYPE_PAKE)
+        return;
+
+    pos += 5;
+    len -= 5;
+
+    if (subtype == PQC_PAKE_TYPE_1) {
+        /* PAKE-1: parse payload */
+        ret = pqc_parse_pake1(pos, len, &f);
+        if (ret < 0)
+            return;
+
+        os_free(sta->pqc_pake1_ct);
+        os_free(sta->pqc_pake1_enc_id);
+
+        sta->pqc_pake1_ct = os_memdup(f.c, f.c_len);
+        sta->pqc_pake1_ct_len = f.c_len;
+
+        sta->pqc_pake1_enc_id = os_memdup(f.enc_id, f.id_len);
+        sta->pqc_pake1_enc_id_len = f.id_len;
+
+        if (!sta->pqc_pake1_ct || !sta->pqc_pake1_enc_id)
+            return;
+
+        sta->pqc_pake1_received = true;
+
+        hostapd_pqc_handle_pake1(hapd, sta);
+    }
+}
 
 static int robust_action_frame(u8 category)
 {
@@ -7886,6 +7938,10 @@ static int handle_action(struct hostapd_data *hapd,
 		const u8 *pos = ((const u8 *) mgmt) + IEEE80211_HDRLEN + 1;
         size_t left = len - (IEEE80211_HDRLEN + 1);
         /* PQC PAKE INTERCEPTION */
+		/*Subtype (0x01 dla PAKE-1)*/
+		if (sta)
+            hostapd_pqc_rx_pake1(hapd, sta, pos, left);
+
         /* check OUI (00:90:4C) Subtype (0x03 dla PAKE-3) */
         if (left >= 4 && pos[0] == 0x00 && pos[1] == 0x90 && pos[2] == 0x4C && pos[3] == 0x03) {
             if (sta && sta->pqc) {

@@ -131,6 +131,128 @@ void pqc_ap_sm_deinit(struct hostapd_pqc_sm *sm) {
     
     OQS_destroy();
 }
+/* handle PAKE-1 and send PAKE-2 */
+int hostapd_pqc_handle_pake1(struct hostapd_data *hapd, struct sta_info *sta)
+{
+    struct hostapd_pqc_sm *sm;
+    u8 K[64];
+    u8 id[16];
+    u8 sid[16];
+    u8 enc_sid[32];
+    size_t enc_sid_len = 0;
+
+    u8 fsid[64];
+    size_t fsid_len = 0;
+
+    u8 buf[1500];
+    size_t buf_len;
+
+    struct pqc_pake2_fields f;
+    int ret;
+
+    if (!sta || !sta->pqc_pake1_received ||
+        !sta->pqc_pake1_ct || !sta->pqc_pake1_enc_id)
+        return -1;
+
+    /* Ensure the state machine exists */
+    if (!sta->pqc)
+        sta->pqc = pqc_ap_sm_init(hapd, sta);
+    if (!sta->pqc)
+        return -1;
+
+    sm = sta->pqc;
+
+    /*  ML‑KEM.decaps(c, sk_AP) → K */
+    ret = pqc_kem_decaps(hapd->conf->pqc_kem_id,
+                         hapd->conf->pqc_kem_sk,
+                         sta->pqc_pake1_ct, sta->pqc_pake1_ct_len,
+                         K, sizeof(K));
+    if (ret < 0)
+        return -1;
+
+    os_memcpy(sm->shared_secret_K, K, sizeof(K));
+    sm->shared_secret_K_len = sizeof(K);
+
+    /*  {id} → id */
+    ret = pqc_aes_decrypt(sta->pqc_pake1_enc_id,
+                          sta->pqc_pake1_enc_id_len,
+                          id, sizeof(id));
+    if (ret < 0)
+        return -1;
+
+    /* random sid */
+    if (os_get_random(sid, sizeof(sid)) < 0)
+        return -1;
+
+    /* fsid = sid || id || MAC_AP || MAC_STA */
+    os_memcpy(fsid, sid, 16);
+    os_memcpy(fsid + 16, id, 16);
+    os_memcpy(fsid + 32, hapd->own_addr, ETH_ALEN);
+    os_memcpy(fsid + 32 + ETH_ALEN, sta->addr, ETH_ALEN);
+    fsid_len = 32 + 2 * ETH_ALEN;
+
+    /*  fsid in SM */
+    sm->fsid = os_memdup(fsid, fsid_len);
+    sm->fsid_len = fsid_len;
+
+    /* Encrypt sid to {sid} */
+    ret = pqc_aes_encrypt(sid, sizeof(sid), enc_sid, &enc_sid_len);
+    if (ret < 0)
+        return -1;
+
+    /* PAKE‑2 payload */
+    f.pake_type = PQC_PAKE_TYPE_2;
+    f.enc_sid = enc_sid;
+    f.sid_len = enc_sid_len;
+    f.dp = fsid;
+    f.dp_len = fsid_len;
+
+    buf_len = pqc_build_pake2(buf, sizeof(buf), &f);
+    if (buf_len == 0)
+        return -1;
+
+    /* send PAKE‑2 */
+    ret = hostapd_pqc_send_pake2(hapd, sta, buf, buf_len);
+    if (ret == 0)
+        sta->pqc_pake2_sent = true;
+
+    return ret;
+}
+/*send PAKE-2 - function*/
+int hostapd_pqc_send_pake2(struct hostapd_data *hapd,
+                           struct sta_info *sta,
+                           const u8 *payload, size_t payload_len)
+{
+    struct wpabuf *buf;
+    int res;
+
+    buf = wpabuf_alloc(5 + payload_len);
+    if (!buf)
+        return -1;
+
+    /* Category */
+    wpabuf_put_u8(buf, WLAN_ACTION_VENDOR_SPECIFIC);
+
+    /* OUI + Type + Subtype */
+    wpabuf_put_u8(buf, PQC_OUI_0);
+    wpabuf_put_u8(buf, PQC_OUI_1);
+    wpabuf_put_u8(buf, PQC_OUI_2);
+    wpabuf_put_u8(buf, PQC_OUI_TYPE_PAKE);
+    wpabuf_put_u8(buf, PQC_PAKE_TYPE_2);
+
+    /* Payload */
+    wpabuf_put_data(buf, payload, payload_len);
+
+    res = hostapd_drv_send_action(hapd,
+                                  hapd->iface->freq,
+                                  0,
+                                  sta->addr,
+                                  wpabuf_head(buf),
+                                  wpabuf_len(buf));
+
+    wpabuf_free(buf);
+    return res;
+}
 
 /* after receiving PAKE-3 */
 

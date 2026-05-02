@@ -120,6 +120,15 @@ struct sta_info {
 	u8 supported_rates[WLAN_SUPP_RATES_MAX];
 	int supported_rates_len;
 	u8 qosinfo; /* Valid when WLAN_STA_WMM is set */
+	u8 *pqc_pake1_ct;        /* pointer to ML-KEM ciphertext c */
+    size_t pqc_pake1_ct_len;
+
+    u8 *pqc_pake1_enc_id;    /* pointer to encrypted id {id} */
+    size_t pqc_pake1_enc_id_len;
+
+    u8 pqc_shared_secret[64]; /* ML-KEM shared secret K */
+    bool pqc_pake1_received;
+    bool pqc_pake2_sent;
 	
 #ifdef CONFIG_ENC_ASSOC
 	bool epp_sta; /* Indicates if the station is an EPP peer */
