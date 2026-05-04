@@ -49,6 +49,7 @@ PKG_CONFIG ?= pkg-config
 CFLAGS += $(EXTRA_CFLAGS)
 CFLAGS += -I$(abspath ../src)
 CFLAGS += -I$(abspath ../src/utils)
+CFLAGS += -I/usr/local/include
 
 ifndef CONFIG_NO_GITVER
 # Add VERSION_STR postfix for builds from a git repository
@@ -59,6 +60,7 @@ CFLAGS += -DGIT_VERSION_STR_POSTFIX=\"-$(GITVER)\"
 endif
 endif
 endif
+
 
 ifdef CONFIG_TESTING_OPTIONS
 CFLAGS += -DCONFIG_TESTING_OPTIONS
@@ -123,6 +125,8 @@ OBJS_c = wpa_cli.o ../src/common/wpa_ctrl.o
 OBJS_c += ../src/utils/wpa_debug.o
 OBJS_c += ../src/utils/common.o
 OBJS_c += ../src/common/cli.o
+OBJS += pqc_sm.o
+OBJS += ../src/common/pqc_pake.o
 
 ifndef CONFIG_OS
 ifdef CONFIG_NATIVE_WINDOWS

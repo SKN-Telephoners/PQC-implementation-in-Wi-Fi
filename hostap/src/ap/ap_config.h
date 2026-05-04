@@ -339,6 +339,9 @@ struct hostapd_bss_config {
 	int eapol_key_index_workaround;
 	int pqc_enabled;
     u8 pqc_choice;
+	/* PQC configuration */
+	int pqc_kem_id;
+	u8 pqc_kem_sk[256]; 
 
 #ifdef CONFIG_WEP
 	size_t default_wep_key_len;

@@ -2,6 +2,8 @@
 
 #include "includes.h"
 #include "common.h"
+#include <oqs/oqs.h>
+#include "crypto/aes.h"
 #include "pqc_pake.h"
 
 size_t pqc_build_pake1(u8 *buf, size_t buf_len,
@@ -141,3 +143,57 @@ int pqc_parse_pake2(const u8 *buf, size_t len,
 
     return 0;
 }
+int pqc_kem_decaps(int kem_id,
+                   const u8 *sk,
+                   const u8 *ct,
+                   u8 *ss)
+{
+    (void) kem_id; /* jeśli na razie ignorujesz wybór algorytmu */
+
+    OQS_KEM *kem = OQS_KEM_new(OQS_KEM_alg_ml_kem_768);
+    if (!kem)
+        return -1;
+
+    int ret = OQS_KEM_decaps(kem, ss, ct, sk);
+
+    OQS_KEM_free(kem);
+    return ret ? -1 : 0;
+}
+int pqc_aes_encrypt(const u8 *in, size_t in_len,
+                    u8 *out, size_t *out_len)
+{
+    u8 key[32];
+    void *ctx;
+
+    os_memset(key, 0x11, sizeof(key)); /* placeholder */
+
+    ctx = aes_encrypt_init(key, sizeof(key));
+    if (!ctx)
+        return -1;
+
+    aes_encrypt(ctx, in, out);
+    aes_encrypt_deinit(ctx);
+
+    *out_len = in_len;
+    return 0;
+}
+
+int pqc_aes_decrypt(const u8 *in, size_t in_len,
+                    u8 *out, size_t *out_len)
+{
+    u8 key[32];
+    void *ctx;
+
+    os_memset(key, 0x11, sizeof(key)); /* placeholder */
+
+    ctx = aes_decrypt_init(key, sizeof(key));
+    if (!ctx)
+        return -1;
+
+    aes_decrypt(ctx, in, out);
+    aes_decrypt_deinit(ctx);
+
+    *out_len = in_len;
+    return 0;
+}
+

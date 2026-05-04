@@ -1,9 +1,9 @@
 
-
 #ifndef PQC_PAKE_H
 #define PQC_PAKE_H
 
-#include "utils/common.h"
+#include <stddef.h>
+#include "../utils/common.h"
 
 /* OUI used for PQC Vendor-Specific Action Frames */
 #define PQC_OUI_0              0x00
@@ -62,5 +62,17 @@ size_t pqc_build_pake2(u8 *buf, size_t buf_len,
 
 int pqc_parse_pake2(const u8 *buf, size_t len,
             struct pqc_pake2_fields *out);
+    
+int pqc_kem_decaps(int kem_id,
+                   const u8 *sk,
+                   const u8 *ct,
+                   u8 *ss);
+
+int pqc_aes_encrypt(const u8 *in, size_t in_len,
+                    u8 *out, size_t *out_len);
+
+int pqc_aes_decrypt(const u8 *in, size_t in_len,
+                    u8 *out, size_t *out_len);
+
 
 #endif /* PQC_PAKE_H */

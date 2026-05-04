@@ -64,9 +64,6 @@
 #include "pasn/pasn_common.h"
 #include "pqc_ap_sm.h"
 #include "common/pqc_pake.h"
-#include "src/common/pqc_pake.h"
-#include "src/common/pqc_pake.h"
-
 
 
 #ifdef CONFIG_FILS

@@ -23,6 +23,7 @@ endif
 
 CFLAGS += $(EXTRA_CFLAGS)
 CFLAGS += -I$(abspath ../src)
+#CFLAGS += -I/usr/local/include
 CFLAGS += -I$(abspath ../src/utils)
 
 export BINDIR ?= /usr/local/bin/
@@ -86,6 +87,7 @@ OBJS += ../src/ap/neighbor_db.o
 OBJS += ../src/ap/rrm.o
 OBJS += ../src/common/ptksa_cache.o
 OBJS += ../src/ap/pqc_ap_sm.o
+OBJS += ../src/common/pqc_pake.o
 
 OBJS_c = hostapd_cli.o
 OBJS_c += ../src/common/wpa_ctrl.o
@@ -366,7 +368,7 @@ OBJS += $(DRV_AP_OBJS)
 CFLAGS += $(DRV_AP_CFLAGS)
 LDFLAGS += $(DRV_AP_LDFLAGS)
 LIBS += $(DRV_AP_LIBS)
-
+CFLAGS += -I/usr/local/include
 ifdef CONFIG_L2_PACKET
 ifdef CONFIG_DNET_PCAP
 ifdef CONFIG_L2_FREEBSD
@@ -382,7 +384,7 @@ endif
 else
 OBJS += ../src/l2_packet/l2_packet_none.o
 endif
-
+LIBS += -L/usr/local/lib -loqs
 
 ifdef CONFIG_ERP
 CFLAGS += -DCONFIG_ERP

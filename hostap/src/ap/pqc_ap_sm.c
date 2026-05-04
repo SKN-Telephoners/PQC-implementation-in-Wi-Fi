@@ -9,6 +9,8 @@
 #include "ap_drv_ops.h"
 #include "pqc_ap_sm.h"
 #include <oqs/oqs.h>
+#include "../common/pqc_pake.h"
+
 
 /**
  * get_oqs_kem_alg - Maps the PQC bitmask to liboqs algorithm string
@@ -135,7 +137,7 @@ void pqc_ap_sm_deinit(struct hostapd_pqc_sm *sm) {
 int hostapd_pqc_handle_pake1(struct hostapd_data *hapd, struct sta_info *sta)
 {
     struct hostapd_pqc_sm *sm;
-    u8 K[64];
+    u8 K[64] = {0};
     u8 id[16];
     u8 sid[16];
     u8 enc_sid[32];
@@ -146,6 +148,7 @@ int hostapd_pqc_handle_pake1(struct hostapd_data *hapd, struct sta_info *sta)
 
     u8 buf[1500];
     size_t buf_len;
+    u8 ss[64];
 
     struct pqc_pake2_fields f;
     int ret;
@@ -164,9 +167,10 @@ int hostapd_pqc_handle_pake1(struct hostapd_data *hapd, struct sta_info *sta)
 
     /*  ML‑KEM.decaps(c, sk_AP) → K */
     ret = pqc_kem_decaps(hapd->conf->pqc_kem_id,
-                         hapd->conf->pqc_kem_sk,
-                         sta->pqc_pake1_ct, sta->pqc_pake1_ct_len,
-                         K, sizeof(K));
+                     hapd->conf->pqc_kem_sk,
+                     sta->pqc_pake1_ct,
+                     ss);
+
     if (ret < 0)
         return -1;
 
@@ -174,9 +178,13 @@ int hostapd_pqc_handle_pake1(struct hostapd_data *hapd, struct sta_info *sta)
     sm->shared_secret_K_len = sizeof(K);
 
     /*  {id} → id */
+    size_t id_len = sizeof(id);
+
     ret = pqc_aes_decrypt(sta->pqc_pake1_enc_id,
-                          sta->pqc_pake1_enc_id_len,
-                          id, sizeof(id));
+                      sta->pqc_pake1_enc_id_len,
+                      id,
+                      &id_len);
+
     if (ret < 0)
         return -1;
 
