@@ -55,6 +55,7 @@ struct wpa_pqc_sm {
 }; 
 struct wpa_pqc_sm * pqc_sm_init(struct wpa_supplicant *wpa_s, struct wpa_ssid *ssid);
 void pqc_sm_deinit(struct wpa_pqc_sm *sm);
+int pqc_sm_rx_auth_req(struct wpa_pqc_sm *sm);
 int pqc_sm_rx_pake2(struct wpa_pqc_sm *sm, const u8 *enc_sid, size_t enc_sid_len); 
 int pqc_sm_rx_pake4(struct wpa_pqc_sm *sm, const u8 *payload, size_t payload_len);
 int pqc_sm_assoc_success(struct wpa_pqc_sm *sm);

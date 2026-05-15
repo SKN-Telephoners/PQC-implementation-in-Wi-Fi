@@ -6669,7 +6669,8 @@ void wpa_supplicant_event(void *ctx, enum wpa_event_type event,
 	/* PQC */
 		if (wpa_s->pqc && wpa_s->pqc->pqc_enabled) {
         wpa_printf(MSG_DEBUG, "PQC_LOG: Received EVENT_AUTH, stopping association for now. Waiting for PAKE phase to end.");
-		// wpas_pqc_send_pake1(wpa_s);
+		wpa_supplicant_set_state(wpa_s, WPA_AUTHENTICATING);
+		pqc_sm_rx_auth_req(wpa_s->pqc);
         break; 
     }
 #ifdef CONFIG_FST
@@ -7757,7 +7758,7 @@ static void pqc_try_start_auth(struct wpa_supplicant *wpa_s)
 	wpa_s->pqc_auth_started = true;
 	wpa_printf(MSG_INFO,
 		   "PQC_LOG: public key assembled, starting authentication");
-	wpa_supplicant_authenticate(wpa_s, wpa_s->current_bss, wpa_s->current_ssid);
+	wpa_supplicant_associate(wpa_s, wpa_s->current_bss, wpa_s->current_ssid);
 }
 
 
