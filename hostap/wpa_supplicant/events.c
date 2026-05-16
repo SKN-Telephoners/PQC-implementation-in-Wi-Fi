@@ -55,6 +55,7 @@
 #include "pr_supplicant.h"
 #include "nan_supplicant.h"
 #include "pqc_sm.h"
+#include "pqc_pake.h"
 
 
 #define MAX_OWE_TRANSITION_BSS_SELECT_COUNT 5

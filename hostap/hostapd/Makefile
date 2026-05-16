@@ -86,6 +86,8 @@ OBJS += ../src/ap/neighbor_db.o
 OBJS += ../src/ap/rrm.o
 OBJS += ../src/common/ptksa_cache.o
 OBJS += ../src/ap/pqc_ap_sm.o
+OBJS += ../src/common/pqc_help.o
+OBJS += ../src/ap/pqc_pake.o
 
 OBJS_c = hostapd_cli.o
 OBJS_c += ../src/common/wpa_ctrl.o

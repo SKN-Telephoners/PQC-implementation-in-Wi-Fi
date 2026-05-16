@@ -63,6 +63,7 @@
 #include "nan_usd_ap.h"
 #include "pasn/pasn_common.h"
 #include "pqc_ap_sm.h"
+#include "pqc_pake.h"
 
 
 #ifdef CONFIG_FILS
