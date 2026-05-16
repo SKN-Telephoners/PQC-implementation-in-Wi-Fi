@@ -7912,8 +7912,10 @@ static int handle_action(struct hostapd_data *hapd,
         size_t left = len - (IEEE80211_HDRLEN + 1);
         /* PQC PAKE INTERCEPTION */
         /* check OUI (00:90:4C) */
-        if (left >= 4 && pos[0] == 0x00 && pos[1] == 0x90 && pos[2] == 0x4C) {
-            u8 subtype = pos[3];
+        if (left >= 6 && pos[0] == 9 && pos[1] == 0x00 && pos[2] == 0x90 && pos[3] == 0x4C && pos[4] == 0x10) {
+            u8 subtype = pos[5];
+            const u8 *payload = pos + 6;
+            size_t payload_len = left - 6;
 
             /* --- PAKE-1 INTERCEPTION --- */
             if (subtype == 0x01) {
@@ -7934,10 +7936,7 @@ static int handle_action(struct hostapd_data *hapd,
             } 
             /* --- PAKE-3 INTERCEPTION --- */
             else if (subtype == 0x03) {
-                if (sta && sta->pqc) {
-                    const u8 *payload = pos + 4; 
-                    size_t payload_len = left - 4;
-                    
+                if (sta && sta->pqc) {                    
                     if (payload_len > 32) {
                         const u8 *s = payload;
                         const u8 *T = payload + 32;
