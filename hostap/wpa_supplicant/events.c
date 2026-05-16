@@ -7184,37 +7184,37 @@ void wpa_supplicant_event(void *ctx, enum wpa_event_type event,
 			if (stype == WLAN_FC_STYPE_ACTION) {
                 /* PQC PAKE*/
                 /* Min len: header MAC(24) + Category(1) + OUI(3) + Subtype(1) = 29 bytes */
-                if (data->rx_mgmt.frame_len >= 29) {
+                if (data->rx_mgmt.frame_len >= 31) {
                     const u8 *pos = data->rx_mgmt.frame + 24;
                     
                     /* cheching whether category is equal to Vendor Specific (127) */
-                    if (*pos == 127 /* WLAN_ACTION_VENDOR_SPECIFIC */) {
-                        pos++;
-                        
-                        /* checking OUI: 00:90:4C */
-                        if (pos[0] == 0x00 && pos[1] == 0x90 && pos[2] == 0x4C) {
-                            pos += 3;
+                    if (pos[0] == WLAN_ACTION_PUBLIC && 
+                        pos[1] == WLAN_PA_VENDOR_SPECIFIC && 
+                        pos[2] == PQC_OUI_0 && 
+                        pos[3] == PQC_OUI_1 && 
+                        pos[4] == PQC_OUI_2 && 
+                        pos[5] == PQC_OUI_TYPE_PAKE) {
 
-							u8 subtype = *pos;
-							pos++;
-							size_t payload_len = data->rx_mgmt.frame_len - (pos - data->rx_mgmt.frame);
-                            
+                        u8 subtype = pos[6];
+						const u8 *payload = pos + 7;
+						size_t payload_len = data->rx_mgmt.frame_len - 24 - 7;
+
                             /* checking Subtype. 0x02 means PAKE-2 frame */
-                            if (subtype == 0x02) {
+                            if (subtype == PQC_PAKE_TYPE_2) {
                                 wpa_printf(MSG_DEBUG, "PQC_LOG: Received PAKE-2 frame (Vendor Action), len=%zu", payload_len);
                                 
 								if (wpa_s->pqc) {
-                                    pqc_sm_rx_pake2(wpa_s->pqc, pos, payload_len);
+                                    pqc_sm_rx_pake2(wpa_s->pqc, payload, payload_len);
                                 } else {
                                     wpa_printf(MSG_ERROR, "PQC_LOG: Error - no initialize PQC session found");
                                 }
                             }
 							/* checking Subtype. 0x04 means PAKE-2 frame */
-							if (subtype == 0x04) {
+							if (subtype == PQC_PAKE_TYPE_4) {
                                 wpa_printf(MSG_DEBUG, "PQC_LOG: Received PAKE-4 frame (Vendor Action), len=%zu", payload_len);
                                 
 								if (wpa_s->pqc) {
-                                    if (pqc_sm_rx_pake4(wpa_s->pqc, pos, payload_len) == 0) {
+                                    if (pqc_sm_rx_pake4(wpa_s->pqc, payload, payload_len) == 0) {
                                         wpa_printf(MSG_INFO, "PQC_LOG: PAKE-4 processed successfully. Association triggered.");
                                     } else {
 										wpa_printf(MSG_ERROR, "PQC_LOG: Error processing PAKE-4! Aborting.");
@@ -7225,7 +7225,7 @@ void wpa_supplicant_event(void *ctx, enum wpa_event_type event,
                                 }
                                
                             }
-                        }
+                        
                     }
                 }
                 /* PQC PAKE end */
