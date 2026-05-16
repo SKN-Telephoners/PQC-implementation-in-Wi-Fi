@@ -7912,10 +7912,10 @@ static int handle_action(struct hostapd_data *hapd,
         size_t left = len - (IEEE80211_HDRLEN + 1);
         /* PQC PAKE INTERCEPTION */
         /* check OUI (00:90:4C) */
-        if (left >= 6 && pos[0] == 9 && pos[1] == 0x00 && pos[2] == 0x90 && pos[3] == 0x4C && pos[4] == 0x10) {
-            u8 subtype = pos[5];
-            const u8 *payload = pos + 6;
-            size_t payload_len = left - 6;
+        if (left >= 7 && pos[0] == 4 && pos[1] == 9 && pos[2] == 0x00 && pos[3] == 0x90 && pos[4] == 0x4C && pos[5] == 0x10) {
+            u8 subtype = pos[6];
+            const u8 *payload = pos + 7;
+            size_t payload_len = left - 7;
 
             /* --- PAKE-1 INTERCEPTION --- */
             if (subtype == 0x01) {
