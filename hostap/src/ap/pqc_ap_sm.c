@@ -123,29 +123,52 @@ int pqc_ap_sm_rx_pake1(struct hostapd_pqc_sm *sm, struct hostapd_data *hapd, str
    /* --- KEM Decapsulation: (Kses) = ML-KEM-decaps(c, sk) --- */
     kem = OQS_KEM_new(get_oqs_kem_alg(sm->pqc_choice)); 
     if (!kem) {
-        wpa_printf(MSG_ERROR, "PQC_LOG: Error in KEM initialization");
+        wpa_printf(MSG_ERROR, "PQC_LOG: Blad inicjalizacji KEM w liboqs");
         return -1;
     }
-    
-    /* debug */
-    wpa_printf(MSG_DEBUG, "PQC_LOG: Pointers - kem:%p, K_aes:%p, c:%p, sk:%p", 
-               kem, sm->K_aes, c, sm->kem_secret_key);
 
-    /*  (AVX2 Alignment Fault) */
+    /* Zabezpieczenie przed niewyrównaną pamięcią (wymóg AVX2)
+     * os_malloc gwarantuje bezpieczne wyrównanie pamięci dla instrukcji wektorowych */
     u8 *c_aligned = os_malloc(kem->length_ciphertext);
-    if (!c_aligned) {
-        wpa_printf(MSG_ERROR, "PQC_LOG: No mem for c_aligned");
+    u8 *sk_aligned = os_malloc(kem->length_secret_key);
+    u8 *ss_aligned = os_malloc(kem->length_shared_secret); /* Bezpieczny bufor na K_aes */
+
+    if (!c_aligned || !sk_aligned || !ss_aligned) {
+        wpa_printf(MSG_ERROR, "PQC_LOG: Brak pamieci na wyrownane bufory KEM!");
+        if (c_aligned) os_free(c_aligned);
+        if (sk_aligned) os_free(sk_aligned);
+        if (ss_aligned) os_free(ss_aligned);
         goto cleanup;
     }
-    os_memcpy(c_aligned, c, c_len);
 
-    /* decapsulation */
-    int decaps_status = OQS_KEM_decaps(kem, sm->K_aes, c_aligned, sm->kem_secret_key);
+    /* Kopiowanie szyfrogramu z ramki */
+    os_memcpy(c_aligned, c, kem->length_ciphertext);
+    
+    /* Diagnostyka klucza prywatnego - sprawdzamy, czy nie został przypadkiem ucięty */
+    size_t copy_sk_len = (sm->kem_secret_key_len < kem->length_secret_key) ? sm->kem_secret_key_len : kem->length_secret_key;
+    if (copy_sk_len < kem->length_secret_key) {
+        wpa_printf(MSG_WARNING, "PQC_LOG: UWAGA! Klucz prywatny jest ZA KROTKI! Ma %zu, wymagane %zu bajtow", 
+                   copy_sk_len, kem->length_secret_key);
+    }
+    os_memset(sk_aligned, 0, kem->length_secret_key); /* Wypełnienie zerami reszty bufora */
+    os_memcpy(sk_aligned, sm->kem_secret_key, copy_sk_len);
+    
+    int decaps_status = OQS_KEM_decaps(kem, ss_aligned, c_aligned, sk_aligned);
+    
+    if (decaps_status == OQS_SUCCESS) {
+        /* Przenosimy wyliczony sekret do docelowej tablicy w strukturze stanu */
+        os_memcpy(sm->K_aes, ss_aligned, kem->length_shared_secret);
+        wpa_printf(MSG_DEBUG, "PQC_LOG: KEM decapsulation success! Derived K_aes.");
+    } else {
+        wpa_printf(MSG_ERROR, "PQC_LOG: Error in liboqs OQS_KEM_decaps: %d", decaps_status);
+    }
+
+    /* Sprzątanie wyrównanych buforów tymczasowych */
     os_free(c_aligned);
+    OQS_MEM_secure_free(sk_aligned, kem->length_secret_key);
+    OQS_MEM_secure_free(ss_aligned, kem->length_shared_secret);
 
-    /* status*/
     if (decaps_status != OQS_SUCCESS) {
-        wpa_printf(MSG_ERROR, "PQC_LOG: Error in liboqs: %d", decaps_status);
         goto cleanup;
     }
     
