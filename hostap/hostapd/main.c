@@ -32,6 +32,7 @@
 #include "config_file.h"
 #include "eap_register.h"
 #include "ctrl_iface.h"
+#include <oqs/oqs.h>
 
 
 struct hapd_global {
@@ -838,6 +839,9 @@ int main(int argc, char *argv[])
 
 	if (os_program_init())
 		return -1;
+	// PQC init OQS
+	wpa_printf(MSG_DEBUG, "PQC_LOG: Global OQS_init() started");
+    OQS_init();
 
 	os_memset(&interfaces, 0, sizeof(interfaces));
 	interfaces.reload_config = hostapd_reload_config;
@@ -1141,6 +1145,9 @@ int main(int argc, char *argv[])
 	fst_global_deinit();
 
 	crypto_unload();
+	// PQC deinit OQS
+	wpa_printf(MSG_DEBUG, "PQC_LOG: Global OQS_destroy() executing");
+    OQS_destroy();
 	os_program_deinit();
 
 	return ret;

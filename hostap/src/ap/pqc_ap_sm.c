@@ -152,7 +152,7 @@ int pqc_ap_sm_rx_pake1(struct hostapd_pqc_sm *sm, struct hostapd_data *hapd, str
     }
     os_memset(sk_aligned, 0, kem->length_secret_key); /* Wypełnienie zerami reszty bufora */
     os_memcpy(sk_aligned, sm->kem_secret_key, copy_sk_len);
-    
+
     int decaps_status = OQS_KEM_decaps(kem, ss_aligned, c_aligned, sk_aligned);
     
     if (decaps_status == OQS_SUCCESS) {
@@ -312,8 +312,6 @@ struct hostapd_pqc_sm * pqc_ap_sm_init(struct hostapd_data *hapd, struct sta_inf
         wpa_printf(MSG_ERROR, "PQC_LOG: Missing KEM keys in sta_info during SM init");
     }
 
-    // OQS init done once per SM creation
-    OQS_init();
     return sm;
 }
 
@@ -343,8 +341,7 @@ void pqc_ap_sm_deinit(struct hostapd_pqc_sm *sm) {
 
     forced_memzero(sm->pwd, sizeof(sm->pwd));
     os_free(sm);
-    
-    OQS_destroy();
+
 }
 
 /* after receiving PAKE-3 */
