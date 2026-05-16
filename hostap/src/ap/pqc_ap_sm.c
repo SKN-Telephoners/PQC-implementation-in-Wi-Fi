@@ -127,19 +127,27 @@ int pqc_ap_sm_rx_pake1(struct hostapd_pqc_sm *sm, struct hostapd_data *hapd, str
         return -1;
     }
 
-    /* Zabezpieczenie przed niewyrównaną pamięcią (wymóg AVX2)
-     * os_malloc gwarantuje bezpieczne wyrównanie pamięci dla instrukcji wektorowych */
-    u8 *c_aligned = os_malloc(kem->length_ciphertext);
-    u8 *sk_aligned = os_malloc(kem->length_secret_key);
-    u8 *ss_aligned = os_malloc(kem->length_shared_secret); /* Bezpieczny bufor na K_aes */
+    /* Wymuszenie rygorystycznego wyrównania do 32 bajtów dla AVX2 w liboqs */
+    u8 *c_aligned = NULL;
+    u8 *sk_aligned = NULL;
+    u8 *ss_aligned = NULL;
+
+    if (posix_memalign((void **)&c_aligned, 32, kem->length_ciphertext) != 0) c_aligned = NULL;
+    if (posix_memalign((void **)&sk_aligned, 32, kem->length_secret_key) != 0) sk_aligned = NULL;
+    if (posix_memalign((void **)&ss_aligned, 32, kem->length_shared_secret) != 0) ss_aligned = NULL;
 
     if (!c_aligned || !sk_aligned || !ss_aligned) {
-        wpa_printf(MSG_ERROR, "PQC_LOG: Brak pamieci na wyrownane bufory KEM!");
-        if (c_aligned) os_free(c_aligned);
-        if (sk_aligned) os_free(sk_aligned);
-        if (ss_aligned) os_free(ss_aligned);
+        wpa_printf(MSG_ERROR, "PQC_LOG: Brak pamieci lub blad wyrównania (posix_memalign) na bufory KEM!");
+        if (c_aligned) free(c_aligned);
+        if (sk_aligned) free(sk_aligned);
+        if (ss_aligned) free(ss_aligned);
         goto cleanup;
     }
+
+    /* Dodatkowy log diagnostyczny, który weryfikuje adresy w pamięci */
+    wpa_printf(MSG_DEBUG, "PQC_LOG: Pointers alignment: c=%p (mod 32 = %lu), sk=%p (mod 32 = %lu)", 
+               (void*)c_aligned, (unsigned long)c_aligned % 32, 
+               (void*)sk_aligned, (unsigned long)sk_aligned % 32);
 
     /* Kopiowanie szyfrogramu z ramki */
     os_memcpy(c_aligned, c, kem->length_ciphertext);
