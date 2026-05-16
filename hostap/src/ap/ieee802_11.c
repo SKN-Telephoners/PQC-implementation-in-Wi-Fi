@@ -7838,6 +7838,36 @@ static int handle_action(struct hostapd_data *hapd,
 		return 1;
 #endif /* CONFIG_FST */
 	case WLAN_ACTION_PUBLIC:
+		const u8 *pos = ((const u8 *) mgmt) + IEEE80211_HDRLEN + 1;
+        size_t left = len - (IEEE80211_HDRLEN + 1);
+
+        /* PQC PAKE INTERCEPTION */
+        u8 category = *((const u8 *)mgmt + IEEE80211_HDRLEN);
+			if (left >= 6 && 
+            pos[0] == WLAN_PA_VENDOR_SPECIFIC && 
+            pos[1] == PQC_OUI_0 && pos[2] == PQC_OUI_1 && pos[3] == PQC_OUI_2 && 
+            pos[4] == PQC_OUI_TYPE_PAKE) {
+            
+            u8 subtype = pos[5];
+            const u8 *payload = pos + 6; /* payload offset */
+            size_t payload_len = left - 6;
+
+            /* --- PAKE-1 INTERCEPTION --- */
+            if (subtype == PQC_PAKE_TYPE_1) {
+                wpa_printf(MSG_DEBUG, "PQC_LOG: Received PAKE-1 (Public Action) od: " MACSTR, MAC2STR(mgmt->sa));
+                if (sta) {
+                    if (!sta->pqc) {
+                        sta->pqc = pqc_ap_sm_init(hapd, sta);
+                    }
+                    if (sta->pqc) {
+                        pqc_ap_sm_rx_pake1(sta->pqc, hapd, sta, payload, payload_len);
+                    } else {
+                        wpa_printf(MSG_ERROR, "PQC_LOG: Failed to init SM for PAKE-1");
+                    }
+                }
+                return 1; 
+            }
+		}
 	case WLAN_ACTION_PROTECTED_DUAL:
 		if (len >= IEEE80211_HDRLEN + 2 &&
 		    mgmt->u.action.u.public_action.action ==
@@ -7914,7 +7944,7 @@ static int handle_action(struct hostapd_data *hapd,
         /* PQC PAKE INTERCEPTION */
         u8 category = *((const u8 *)mgmt + IEEE80211_HDRLEN);
         
-        if (category == WLAN_ACTION_PUBLIC && left >= 6 && 
+        if (left >= 6 && 
             pos[0] == WLAN_PA_VENDOR_SPECIFIC && 
             pos[1] == PQC_OUI_0 && pos[2] == PQC_OUI_1 && pos[3] == PQC_OUI_2 && 
             pos[4] == PQC_OUI_TYPE_PAKE) {
@@ -7922,24 +7952,9 @@ static int handle_action(struct hostapd_data *hapd,
             u8 subtype = pos[5];
             const u8 *payload = pos + 6; /* payload offset */
             size_t payload_len = left - 6;
-
-            /* --- PAKE-1 INTERCEPTION --- */
-            if (subtype == PQC_PAKE_TYPE_1) {
-                wpa_printf(MSG_DEBUG, "PQC_LOG: Received PAKE-1 (Public Action) od: " MACSTR, MAC2STR(mgmt->sa));
-                if (sta) {
-                    if (!sta->pqc) {
-                        sta->pqc = pqc_ap_sm_init(hapd, sta);
-                    }
-                    if (sta->pqc) {
-                        pqc_ap_sm_rx_pake1(sta->pqc, hapd, sta, payload, payload_len);
-                    } else {
-                        wpa_printf(MSG_ERROR, "PQC_LOG: Failed to init SM for PAKE-1");
-                    }
-                }
-                return 1; 
-            } 
+            
             /* --- PAKE-3 INTERCEPTION --- */
-            else if (subtype == PQC_PAKE_TYPE_3) {
+            if (subtype == PQC_PAKE_TYPE_3) {
                 wpa_printf(MSG_DEBUG, "PQC_LOG: PQC_LOG: Received PAKE-3 frame from: " MACSTR, MAC2STR(mgmt->sa));
                 if (sta && sta->pqc) {
                     if (payload_len >= 32) {
