@@ -385,9 +385,12 @@ static int wpas_pqc_send_pake3(struct wpa_pqc_sm *sm,
     /* * Sending frame
     * Parameters: wpa_s, freq, wait, dst_mac, src_mac, bssid, data, data_len, no_cck
     */
-    ret = wpa_drv_send_action(sm->wpa_s, freq, 0, 
-                              sm->wpa_s->bssid, sm->wpa_s->own_addr, sm->wpa_s->bssid, 
-                              wpabuf_head(buf), wpabuf_len(buf), 0);
+
+    wpa_drv_send_action(sm->wpa_s, freq, 0,
+                    sm->wpa_s->pending_bssid, 
+                    sm->wpa_s->own_addr, 
+                    sm->wpa_s->pending_bssid,
+                    wpabuf_head(buf), wpabuf_len(buf), 0);
     wpabuf_free(buf);
     return ret;
 }

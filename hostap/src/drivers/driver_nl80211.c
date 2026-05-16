@@ -2835,9 +2835,11 @@ static int nl80211_mgmt_subscribe_non_ap(struct i802_bss *bss)
 					  (u8 *) "\x04\x09\x50\x6f\x9a\x09",
 					  6) < 0)
 		ret = -1;
+		
 	/* PQC Public Action (Cat: 4, Action: 9, OUI: 00:90:4C) */
     if (nl80211_register_action_frame(bss, (const u8 *) "\x04\x09\x00\x90\x4c", 5) < 0)
         ret = -1; // HARDCODED
+
 	/* P2P Action */
 	if (nl80211_register_action_frame(bss,
 					  (u8 *) "\x7f\x50\x6f\x9a\x09",
