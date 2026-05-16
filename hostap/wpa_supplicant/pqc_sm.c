@@ -11,6 +11,7 @@
 #include "rsn_supp/wpa.h"
 #include "sme.h"
 #include "../src/common/pqc_help.h"
+#include "pqc_pake.h"
 
 
 /* STATE LIFECYCLE */
