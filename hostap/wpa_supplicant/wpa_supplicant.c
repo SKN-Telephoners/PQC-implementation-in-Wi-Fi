@@ -2994,6 +2994,18 @@ void wpa_supplicant_associate(struct wpa_supplicant *wpa_s,
             } else {
                 wpa_msg(wpa_s, MSG_INFO, "PQC_LOG: State Machine Ready. Starting Authentication.");
             }
+			u8 pqc_frame_match[] = { 
+				WLAN_ACTION_PUBLIC, 
+				WLAN_PA_VENDOR_SPECIFIC, 
+				PQC_OUI_0, 
+				PQC_OUI_1, 
+				PQC_OUI_2 
+			};
+
+			/* frame registration */
+			wpa_drv_action_catch(wpa_s, pqc_frame_match, sizeof(pqc_frame_match));
+
+			wpa_printf(MSG_INFO, "PQC_LOG: Registered to receive PAKE-2 Action Frames");
         }
         /* END PQC  */
 		// auth req
