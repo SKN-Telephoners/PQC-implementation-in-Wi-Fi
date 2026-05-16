@@ -243,11 +243,15 @@ struct sta_info {
 	bool pqc_negotiated; // Flag: whether the IE in probe request sent by STA was correct
 	u8 *ml_kem_512_pub;
 	size_t ml_kem_512_pub_len;
+	u8 *ml_kem_secr;
+	size_t ml_kem_secr_len;
 	bool pqc_pub_ready;
 	bool pqc_pub_sent;
 	size_t pqc_pub_frag_count;
 	u8 *ml_dsa_65_pub;
 	size_t ml_dsa_65_pub_len;
+	u8 *ml_dsa_secret;
+	size_t ml_dsa_secret_len;
 
 
 #if defined(CONFIG_INTERWORKING) || defined(CONFIG_DPP)

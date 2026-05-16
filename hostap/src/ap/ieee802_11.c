@@ -4609,7 +4609,7 @@ static void handle_auth(struct hostapd_data *hapd,
         sta->pqc = pqc_ap_sm_init(hapd, sta);
         
         if (!sta->pqc) {
-            wpa_printf(MSG_ERROR, "PQC_AP: Blad inicjalizacji maszyny stanow dla " MACSTR, MAC2STR(sa));
+            wpa_printf(MSG_ERROR, "PQC_LOG: Error in initializing state machine on AP for " MACSTR, MAC2STR(sa));
         }
     }
     /* END PQC */
@@ -7911,31 +7911,52 @@ static int handle_action(struct hostapd_data *hapd,
 		const u8 *pos = ((const u8 *) mgmt) + IEEE80211_HDRLEN + 1;
         size_t left = len - (IEEE80211_HDRLEN + 1);
         /* PQC PAKE INTERCEPTION */
-        /* check OUI (00:90:4C) Subtype (0x03 dla PAKE-3) */
-        if (left >= 4 && pos[0] == 0x00 && pos[1] == 0x90 && pos[2] == 0x4C && pos[3] == 0x03) {
-            if (sta && sta->pqc) {
-                pos += 4; 
-                size_t payload_len = left - 4;
+        /* check OUI (00:90:4C) */
+        if (left >= 4 && pos[0] == 0x00 && pos[1] == 0x90 && pos[2] == 0x4C) {
+            u8 subtype = pos[3];
+
+            /* --- PAKE-1 INTERCEPTION --- */
+            if (subtype == 0x01) {
+                wpa_printf(MSG_DEBUG, "PQC_LOG: Received PAKE-1 frame from: " MACSTR, MAC2STR(mgmt->sa));
+                if (sta) {
+                    /* if there is no state machine: */
+                    if (!sta->pqc) {
+                        sta->pqc = pqc_ap_sm_init(hapd, sta);
+                    }
                     
-                if (payload_len > 32) {
-                    const u8 *s = pos;
-                    const u8 *T = pos + 32;
-                    size_t T_len = payload_len - 32;
+                    if (sta->pqc) {
+                        pqc_ap_sm_rx_pake1(sta->pqc, hapd, sta, pos + 4, left - 4);
+                    } else {
+                        wpa_printf(MSG_ERROR, "PQC_LOG: Failed to initialize PQC SM for STA");
+                    }
+                }
+                return 1;
+            } 
+            /* --- PAKE-3 INTERCEPTION --- */
+            else if (subtype == 0x03) {
+                if (sta && sta->pqc) {
+                    const u8 *payload = pos + 4; 
+                    size_t payload_len = left - 4;
+                    
+                    if (payload_len > 32) {
+                        const u8 *s = payload;
+                        const u8 *T = payload + 32;
+                        size_t T_len = payload_len - 32;
                         
-                    wpa_printf(MSG_DEBUG, "PQC_LOG: Received PAKE-3 frame from: " MACSTR, MAC2STR(mgmt->sa));
+                        wpa_printf(MSG_DEBUG, "PQC_LOG: Received PAKE-3 frame from: " MACSTR, MAC2STR(mgmt->sa));
                         
                         /* handle the frame */
-                    pqc_ap_sm_rx_pake3(sta->pqc, s, 32, T, T_len);
+                        pqc_ap_sm_rx_pake3(sta->pqc, s, 32, T, T_len);
+                    } else {
+                        wpa_printf(MSG_ERROR, "PQC_LOG: too shaor PAKE-3 payload");
+                    }
                 } else {
-                    wpa_printf(MSG_ERROR, "PQC_LOG: Zbyt krotki payload PAKE-3");
+                    wpa_printf(MSG_DEBUG, "PQC_LOG: Ignored PAKE-3 (no initialized session for STA)");
                 }
-            } else {
-                wpa_printf(MSG_DEBUG, "PQC_LOG: Ignored PAKE-3 (no initialized session for STA)");
+                return 1; 
             }
-            
-            return 1;
         }
-            /* PQC PAKE END */
+        /* PQC PAKE END */
 		}
 		if (hapd->vendor_action_cb) {
 			if (hapd->vendor_action_cb(hapd->vendor_action_cb_ctx,

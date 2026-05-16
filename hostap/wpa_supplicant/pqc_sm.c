@@ -23,6 +23,13 @@ static const char* get_oqs_kem_alg(u8 pqc_choice) {
     return NULL;
 }
 
+static const char* get_oqs_dsa_alg(u8 pqc_choice) {
+    if (pqc_choice & 0x08) return OQS_SIG_alg_ml_dsa_44;
+    if (pqc_choice & 0x04) return OQS_SIG_alg_ml_dsa_65;
+    if (pqc_choice & 0x02) return OQS_SIG_alg_ml_dsa_87;
+    return NULL;
+}
+
 /**
  * pqc_2f_network - Implements the Double Feistel Network (2F)
  * T = M (dot) H1(K, r)
@@ -123,92 +130,101 @@ void pqc_sm_deinit(struct wpa_pqc_sm *sm) {
     OQS_destroy();
 }
 
-/* after receiving authentication response  */
 
-int pqc_sm_rx_auth_req(struct wpa_pqc_sm *sm) {
-    OQS_KEM *kem = NULL;
-    u8 *ciphertext = NULL;
-    u8 enc_id[16];
+/* building and sending PAKE1 */
+static int wpas_pqc_send_pake1(struct wpa_pqc_sm *sm, const u8 *c, size_t c_len, const u8 *enc_id, size_t enc_id_len) {
     struct wpabuf *buf = NULL;
     int ret = -1;
 
-    wpa_printf(MSG_DEBUG, "PQC_LOG: State Machine processing Auth Response, saving parameters to pqc state machine");
+    wpa_printf(MSG_DEBUG, "PQC_LOG: Rozpoczecie budowy ramki PAKE-1");
+
+    /* Length: Cat (1) + Action (1) + OUI (3) + Type (1) + Subtype (1) + c_len (2) + c + id_len (2) + enc_id */
+    size_t frame_len = 1 + 1 + 3 + 1 + 1 + 2 + c_len + 2 + enc_id_len;
+    buf = wpabuf_alloc(frame_len);
+    if (!buf) return -1;
+
+    wpabuf_put_u8(buf, WLAN_ACTION_PUBLIC);          // Cat: 4
+    wpabuf_put_u8(buf, WLAN_PA_VENDOR_SPECIFIC);     // Action: 9
+    
+    wpabuf_put_u8(buf, PQC_OUI_0);                   // OUI 0
+    wpabuf_put_u8(buf, PQC_OUI_1);                   // OUI 1
+    wpabuf_put_u8(buf, PQC_OUI_2);                   // OUI 2
+    
+    wpabuf_put_u8(buf, PQC_OUI_TYPE_PAKE);           // PQC Type
+    wpabuf_put_u8(buf, PQC_PAKE_TYPE_1);             // Subtype: PAKE-1
+
+    /* Payload */
+    wpabuf_put_be16(buf, c_len);
+    wpabuf_put_data(buf, c, c_len);
+    
+    wpabuf_put_be16(buf, enc_id_len);
+    wpabuf_put_data(buf, enc_id, enc_id_len);
+
+    unsigned int freq = sm->wpa_s->current_bss ? sm->wpa_s->current_bss->freq : 2412;
+    const u8 *target_bssid = sm->wpa_s->pending_bssid;
+    
+    static const u8 zero_mac[ETH_ALEN] = {0, 0, 0, 0, 0, 0};
+    if (os_memcmp(target_bssid, zero_mac, ETH_ALEN) == 0 && sm->wpa_s->current_bss) {
+        target_bssid = sm->wpa_s->current_bss->bssid;
+    }
+
+    wpa_printf(MSG_INFO, "PQC_LOG: Sending Public Action frame (PAKE-1) to: " MACSTR, MAC2STR(target_bssid));
+
+    ret = wpa_drv_send_action(sm->wpa_s, freq, 0, target_bssid, 
+                              sm->wpa_s->own_addr, target_bssid, 
+                              wpabuf_head(buf), wpabuf_len(buf), 0);
+
+    wpabuf_free(buf);
+    return ret;
+}
+
+/* after receiving authentication response  */
+int pqc_sm_rx_auth_req(struct wpa_pqc_sm *sm) {
+    OQS_KEM *kem = NULL;
+    u8 *ciphertext = NULL;
+    u8 enc_id[PQC_SID_LEN]; // 16B
+    int ret = -1;
+
+    wpa_printf(MSG_DEBUG, "PQC_LOG: State Machine processing Auth Response, preparing PAKE-1 data");
 
     if (!sm || !sm->ap_kem_public_key) {
         wpa_printf(MSG_ERROR, "PQC_LOG: Missing AP KEM public key");
         return -1;
     }
 
-    /* Initialization of chosen ML-KEM algorithm */
     const char *alg_name = get_oqs_kem_alg(sm->pqc_choice);
-    if (!alg_name) {
-        wpa_printf(MSG_ERROR, "PQC_LOG: Error in mapping PQC algorithm for PAKE-1");
-        return -1;
-    }
-
     kem = OQS_KEM_new(alg_name);
-    if (!kem) {
-        wpa_printf(MSG_ERROR, "PQC_LOG: Error in initializing OQS KEM for PAKE-1");
-        return -1;
-    }
+    if (!kem) return -1;
 
     ciphertext = os_malloc(kem->length_ciphertext);
     if (!ciphertext) goto cleanup;
 
-    /* Encapsulation of public AP's key 
-     * Kses saved to sm->K_aes
-     */
+    /* KEM Encapsulation -> (c, Kses) */
     if (OQS_KEM_encaps(kem, ciphertext, sm->K_aes, sm->ap_kem_public_key) != OQS_SUCCESS) {
-        wpa_printf(MSG_ERROR, "PQC_LOG: Error in KEM encapsulation");
+        wpa_printf(MSG_ERROR, "PQC_LOG: KEM encaps failed");
         goto cleanup;
     }
 
     wpa_printf(MSG_DEBUG, "PQC_LOG: KEM Encapsulation successful, K_aes derived");
 
-    /* Generating random id value */
-    if (os_get_random(sm->id, sizeof(sm->id)) < 0) {
+    /* Generating random STA id */
+    if (os_get_random(sm->id, PQC_SID_LEN) < 0) {
         wpa_printf(MSG_ERROR, "PQC_LOG: Failed to generate random STA id");
         goto cleanup;
     }
 
-    /* Encrypting id with earlier derived key 
-     */
+    /* Encryption of id */
     void *aes_ctx = aes_encrypt_init(sm->K_aes, 32);
-    if (!aes_ctx) {
-        wpa_printf(MSG_ERROR, "PQC_LOG: Failed to initialize AES ctx for PAKE-1");
-        goto cleanup;
-    }
-    
+    if (!aes_ctx) goto cleanup;
     aes_encrypt(aes_ctx, sm->id, enc_id);
     aes_encrypt_deinit(aes_ctx);
 
-    /* only testing */
-    unsigned int freq = sm->wpa_s->current_bss ? sm->wpa_s->current_bss->freq : 2412;
-    
-
-    size_t frame_len = 1 + 3 + 1 + kem->length_ciphertext + sizeof(enc_id);
-    buf = wpabuf_alloc(frame_len);
-    if (!buf) goto cleanup;
-
-    wpabuf_put_u8(buf, WLAN_ACTION_VENDOR_SPECIFIC); 
-    wpabuf_put_be24(buf, 0x00904C);                 
-    wpabuf_put_u8(buf, 0x01);                       
-
-    wpabuf_put_data(buf, ciphertext, kem->length_ciphertext);
-    wpabuf_put_data(buf, enc_id, sizeof(enc_id));
-
-    wpa_printf(MSG_INFO, "PQC_LOG: Sending PAKE-1 Action Frame to " MACSTR " on freq %d",
-               MAC2STR(sm->wpa_s->bssid), freq);
-
-    ret = wpa_drv_send_action(sm->wpa_s, freq, 0, 
-                              sm->wpa_s->bssid, sm->wpa_s->own_addr, sm->wpa_s->bssid, 
-                              wpabuf_head(buf), wpabuf_len(buf), 0);
+    /* sending function call */
+    ret = wpas_pqc_send_pake1(sm, ciphertext, kem->length_ciphertext, enc_id, sizeof(enc_id));
 
 cleanup:
     if (ciphertext) os_free(ciphertext);
-    if (buf) wpabuf_free(buf);
     if (kem) OQS_KEM_free(kem);
-
     return ret;
 }
 

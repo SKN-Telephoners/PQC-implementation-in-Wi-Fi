@@ -7,6 +7,21 @@
 #define PQC_SID_LEN 16
 
 
+/* OUI used for PQC Vendor-Specific Action Frames */
+#define PQC_OUI_0              0x00
+#define PQC_OUI_1              0x90
+#define PQC_OUI_2              0x4C
+
+/* Vendor-specific Action type for PQC/PAKE */
+#define PQC_OUI_TYPE_PAKE      0x10
+
+/* PAKE subtypes */
+#define PQC_PAKE_TYPE_1        0x01  /* PAKE-1: STA -> AP */
+#define PQC_PAKE_TYPE_2        0x02  /* PAKE-2: AP -> STA */
+#define PQC_PAKE_TYPE_3        0x03  /* already used in PAKE-3 */
+#define PQC_PAKE_TYPE_4        0x04  /* reserved for PAKE-4 */
+
+
 /*
 * main struct used in PQC implementation (STA)
 */
