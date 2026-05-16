@@ -385,12 +385,20 @@ static int wpas_pqc_send_pake3(struct wpa_pqc_sm *sm,
     /* * Sending frame
     * Parameters: wpa_s, freq, wait, dst_mac, src_mac, bssid, data, data_len, no_cck
     */
+    const u8 *target_bssid = sm->wpa_s->pending_bssid;
+    
+    static const u8 zero_mac[ETH_ALEN] = {0, 0, 0, 0, 0, 0};
+    if (os_memcmp(target_bssid, zero_mac, ETH_ALEN) == 0 && sm->wpa_s->current_bss) {
+        target_bssid = sm->wpa_s->current_bss->bssid;
+    }
+
 
     wpa_drv_send_action(sm->wpa_s, freq, 0,
-                    sm->wpa_s->pending_bssid, 
+                    target_bssid, 
                     sm->wpa_s->own_addr, 
-                    sm->wpa_s->pending_bssid,
+                    target_bssid,
                     wpabuf_head(buf), wpabuf_len(buf), 0);
+
     wpabuf_free(buf);
     return ret;
 }
