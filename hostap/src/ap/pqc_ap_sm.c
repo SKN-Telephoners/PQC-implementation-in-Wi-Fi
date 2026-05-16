@@ -120,14 +120,36 @@ int pqc_ap_sm_rx_pake1(struct hostapd_pqc_sm *sm, struct hostapd_data *hapd, str
 
     wpa_printf(MSG_DEBUG, "PQC_LOG: Parsing of PAKE-1 ended (c_len: %d, id_len: %d)", c_len, id_len);
 
-    /* KEM Decapsulation: (Kses) = ML-KEM-decaps(c, sk) */
+   /* --- KEM Decapsulation: (Kses) = ML-KEM-decaps(c, sk) --- */
     kem = OQS_KEM_new(get_oqs_kem_alg(sm->pqc_choice)); 
-    if (!kem) return -1;
+    if (!kem) {
+        wpa_printf(MSG_ERROR, "PQC_LOG: Error in KEM initialization");
+        return -1;
+    }
     
-    if (OQS_KEM_decaps(kem, sm->K_aes, c, sm->kem_secret_key) != OQS_SUCCESS) {
-        wpa_printf(MSG_ERROR, "PQC_LOG: Error in KEM decapsulation");
+    /* debug */
+    wpa_printf(MSG_DEBUG, "PQC_LOG: Pointers - kem:%p, K_aes:%p, c:%p, sk:%p", 
+               kem, sm->K_aes, c, sm->kem_secret_key);
+
+    /*  (AVX2 Alignment Fault) */
+    u8 *c_aligned = os_malloc(kem->length_ciphertext);
+    if (!c_aligned) {
+        wpa_printf(MSG_ERROR, "PQC_LOG: No mem for c_aligned");
         goto cleanup;
     }
+    os_memcpy(c_aligned, c, c_len);
+
+    /* decapsulation */
+    int decaps_status = OQS_KEM_decaps(kem, sm->K_aes, c_aligned, sm->kem_secret_key);
+    os_free(c_aligned);
+
+    /* status*/
+    if (decaps_status != OQS_SUCCESS) {
+        wpa_printf(MSG_ERROR, "PQC_LOG: Error in liboqs: %d", decaps_status);
+        goto cleanup;
+    }
+    
+    wpa_printf(MSG_DEBUG, "PQC_LOG: KEM decapsulation success, derived K_aes.");
     
 
     /* Decryption of STA id */
