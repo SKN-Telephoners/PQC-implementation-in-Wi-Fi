@@ -352,7 +352,6 @@ cleanup:
 /**
  * wpas_pqc_send_pake3 - Building and sending Vendor specific action frame
  */
-/* Wysłanie ramki Action (jak poprzednio) */
 static int wpas_pqc_send_pake3(struct wpa_pqc_sm *sm, 
                                 const u8 *s, size_t s_len, 
                                 const u8 *T, size_t T_len) {
@@ -371,9 +370,13 @@ static int wpas_pqc_send_pake3(struct wpa_pqc_sm *sm,
         return -1;
 
     /* Action Frame header */
-    wpabuf_put_u8(buf, WLAN_ACTION_VENDOR_SPECIFIC); // 127
-    wpabuf_put_be24(buf, 0x00904C); // test OUI = 00:90:4C
-    wpabuf_put_u8(buf, 0x03);       // Subtype: 0x03 = PAKE-3 
+    wpabuf_put_u8(buf, WLAN_ACTION_PUBLIC);          // Cat: 4
+    wpabuf_put_u8(buf, WLAN_PA_VENDOR_SPECIFIC);     // Action: 9
+    wpabuf_put_u8(buf, PQC_OUI_0);
+    wpabuf_put_u8(buf, PQC_OUI_1);
+    wpabuf_put_u8(buf, PQC_OUI_2);
+    wpabuf_put_u8(buf, PQC_OUI_TYPE_PAKE); // (Zależnie czy na AP używasz tego dodatkowego bajtu typu)
+    wpabuf_put_u8(buf, PQC_PAKE_TYPE_3);     // Subtype: 0x03 = PAKE-3 
 
     /* Payload PQC */
     wpabuf_put_data(buf, s, s_len);
@@ -393,7 +396,7 @@ static int wpas_pqc_send_pake3(struct wpa_pqc_sm *sm,
     }
 
 
-    wpa_drv_send_action(sm->wpa_s, freq, 0,
+    ret = wpa_drv_send_action(sm->wpa_s, freq, 0,
                     target_bssid, 
                     sm->wpa_s->own_addr, 
                     target_bssid,

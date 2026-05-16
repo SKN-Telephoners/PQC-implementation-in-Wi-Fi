@@ -194,21 +194,25 @@ static int hostapd_pqc_send_pake4(struct hostapd_pqc_sm *sm,
     /*Frame structure: 
      * Category (1B) + OUI (3B) + Subtype/ID (1B) + Payload (c2 + tag)
      */
-    size_t frame_len = 1 + 3 + 1 + c_len + tag_len;
+    size_t frame_len = 1 + 1 + 3 + 1 + 1 + c_len + tag_len;
     buf = wpabuf_alloc(frame_len);
     if (!buf) 
         return -1;
 
     /* Action Frame header */
-    wpabuf_put_u8(buf, WLAN_ACTION_VENDOR_SPECIFIC); // 127
-    wpabuf_put_be24(buf, 0x00904C); // test OUI = 00:90:4C
-    wpabuf_put_u8(buf, 0x04);       // Subtype: 0x04 = PAKE-4
+    wpabuf_put_u8(buf, WLAN_ACTION_PUBLIC);          // Cat: 4
+    wpabuf_put_u8(buf, WLAN_PA_VENDOR_SPECIFIC);     // Action: 9
+    wpabuf_put_u8(buf, PQC_OUI_0);                   // 0x00
+    wpabuf_put_u8(buf, PQC_OUI_1);                   // 0x90
+    wpabuf_put_u8(buf, PQC_OUI_2);                   // 0x4C
+    wpabuf_put_u8(buf, PQC_OUI_TYPE_PAKE);           // 0x10 (lub jak masz to zdefiniowane w .h)
+    wpabuf_put_u8(buf, PQC_PAKE_TYPE_4);             // Subtype: 0x04 = PAKE-4
 
     /* Payload PQC */
     wpabuf_put_data(buf, c, c_len);
     wpabuf_put_data(buf, tag, tag_len);
 
-    wpa_printf(MSG_DEBUG, "PQC_LOG: Sending PAKE-3 Action Frame");
+    wpa_printf(MSG_DEBUG, "PQC_LOG: Sending PAKE-4 Action Frame");
 
     /* * Sending frame
     * Parameters: wpa_s, freq, wait, dst_mac, src_mac, bssid, data, data_len, no_cck
