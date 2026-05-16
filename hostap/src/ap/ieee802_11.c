@@ -7910,41 +7910,42 @@ static int handle_action(struct hostapd_data *hapd,
 		{	
 		const u8 *pos = ((const u8 *) mgmt) + IEEE80211_HDRLEN + 1;
         size_t left = len - (IEEE80211_HDRLEN + 1);
+
         /* PQC PAKE INTERCEPTION */
-        /* check OUI (00:90:4C) */
-        if (left >= 7 && pos[0] == 4 && pos[1] == 9 && pos[2] == 0x00 && pos[3] == 0x90 && pos[4] == 0x4C && pos[5] == 0x10) {
-            u8 subtype = pos[6];
-            const u8 *payload = pos + 7;
-            size_t payload_len = left - 7;
+        u8 category = *((const u8 *)mgmt + IEEE80211_HDRLEN);
+        
+        if (category == WLAN_ACTION_PUBLIC && left >= 6 && 
+            pos[0] == WLAN_PA_VENDOR_SPECIFIC && 
+            pos[1] == PQC_OUI_0 && pos[2] == PQC_OUI_1 && pos[3] == PQC_OUI_2 && 
+            pos[4] == PQC_OUI_TYPE_PAKE) {
+            
+            u8 subtype = pos[5];
+            const u8 *payload = pos + 6; /* payload offset */
+            size_t payload_len = left - 6;
 
             /* --- PAKE-1 INTERCEPTION --- */
-            if (subtype == 0x01) {
-                wpa_printf(MSG_DEBUG, "PQC_LOG: Received PAKE-1 frame from: " MACSTR, MAC2STR(mgmt->sa));
+            if (subtype == PQC_PAKE_TYPE_1) {
+                wpa_printf(MSG_DEBUG, "PQC_LOG: Received PAKE-1 (Public Action) od: " MACSTR, MAC2STR(mgmt->sa));
                 if (sta) {
-                    /* if there is no state machine: */
                     if (!sta->pqc) {
                         sta->pqc = pqc_ap_sm_init(hapd, sta);
                     }
-                    
                     if (sta->pqc) {
-                        pqc_ap_sm_rx_pake1(sta->pqc, hapd, sta, pos + 4, left - 4);
+                        pqc_ap_sm_rx_pake1(sta->pqc, hapd, sta, payload, payload_len);
                     } else {
-                        wpa_printf(MSG_ERROR, "PQC_LOG: Failed to initialize PQC SM for STA");
+                        wpa_printf(MSG_ERROR, "PQC_LOG: Failed to init SM for PAKE-1");
                     }
                 }
-                return 1;
+                return 1; 
             } 
             /* --- PAKE-3 INTERCEPTION --- */
-            else if (subtype == 0x03) {
-                if (sta && sta->pqc) {                    
-                    if (payload_len > 32) {
+            else if (subtype == PQC_PAKE_TYPE_3) {
+                wpa_printf(MSG_DEBUG, "PQC_LOG: PQC_LOG: Received PAKE-3 frame from: " MACSTR, MAC2STR(mgmt->sa));
+                if (sta && sta->pqc) {
+                    if (payload_len >= 32) {
                         const u8 *s = payload;
                         const u8 *T = payload + 32;
                         size_t T_len = payload_len - 32;
-                        
-                        wpa_printf(MSG_DEBUG, "PQC_LOG: Received PAKE-3 frame from: " MACSTR, MAC2STR(mgmt->sa));
-                        
-                        /* handle the frame */
                         pqc_ap_sm_rx_pake3(sta->pqc, s, 32, T, T_len);
                     } else {
                         wpa_printf(MSG_ERROR, "PQC_LOG: too shaor PAKE-3 payload");
