@@ -120,67 +120,14 @@ int pqc_ap_sm_rx_pake1(struct hostapd_pqc_sm *sm, struct hostapd_data *hapd, str
 
     wpa_printf(MSG_DEBUG, "PQC_LOG: Parsing of PAKE-1 ended (c_len: %d, id_len: %d)", c_len, id_len);
 
-   /* --- KEM Decapsulation: (Kses) = ML-KEM-decaps(c, sk) --- */
+    /* KEM Decapsulation: (Kses) = ML-KEM-decaps(c, sk) */
     kem = OQS_KEM_new(get_oqs_kem_alg(sm->pqc_choice)); 
-    if (!kem) {
-        wpa_printf(MSG_ERROR, "PQC_LOG: Blad inicjalizacji KEM w liboqs");
-        return -1;
-    }
-
-    /* Wymuszenie rygorystycznego wyrównania do 32 bajtów dla AVX2 w liboqs */
-    u8 *c_aligned = NULL;
-    u8 *sk_aligned = NULL;
-    u8 *ss_aligned = NULL;
-
-    if (posix_memalign((void **)&c_aligned, 32, kem->length_ciphertext) != 0) c_aligned = NULL;
-    if (posix_memalign((void **)&sk_aligned, 32, kem->length_secret_key) != 0) sk_aligned = NULL;
-    if (posix_memalign((void **)&ss_aligned, 32, kem->length_shared_secret) != 0) ss_aligned = NULL;
-
-    if (!c_aligned || !sk_aligned || !ss_aligned) {
-        wpa_printf(MSG_ERROR, "PQC_LOG: Brak pamieci lub blad wyrównania (posix_memalign) na bufory KEM!");
-        if (c_aligned) free(c_aligned);
-        if (sk_aligned) free(sk_aligned);
-        if (ss_aligned) free(ss_aligned);
+    if (!kem) return -1;
+    
+    if (OQS_KEM_decaps(kem, sm->K_aes, c, sm->kem_secret_key) != OQS_SUCCESS) {
+        wpa_printf(MSG_ERROR, "PQC_LOG: Error in KEM decapsulation");
         goto cleanup;
     }
-
-    /* Dodatkowy log diagnostyczny, który weryfikuje adresy w pamięci */
-    wpa_printf(MSG_DEBUG, "PQC_LOG: Pointers alignment: c=%p (mod 32 = %lu), sk=%p (mod 32 = %lu)", 
-               (void*)c_aligned, (unsigned long)c_aligned % 32, 
-               (void*)sk_aligned, (unsigned long)sk_aligned % 32);
-
-    /* Kopiowanie szyfrogramu z ramki */
-    os_memcpy(c_aligned, c, kem->length_ciphertext);
-    
-    /* Diagnostyka klucza prywatnego - sprawdzamy, czy nie został przypadkiem ucięty */
-    size_t copy_sk_len = (sm->kem_secret_key_len < kem->length_secret_key) ? sm->kem_secret_key_len : kem->length_secret_key;
-    if (copy_sk_len < kem->length_secret_key) {
-        wpa_printf(MSG_WARNING, "PQC_LOG: UWAGA! Klucz prywatny jest ZA KROTKI! Ma %zu, wymagane %zu bajtow", 
-                   copy_sk_len, kem->length_secret_key);
-    }
-    os_memset(sk_aligned, 0, kem->length_secret_key); /* Wypełnienie zerami reszty bufora */
-    os_memcpy(sk_aligned, sm->kem_secret_key, copy_sk_len);
-
-    int decaps_status = OQS_KEM_decaps(kem, ss_aligned, c_aligned, sk_aligned);
-    
-    if (decaps_status == OQS_SUCCESS) {
-        /* Przenosimy wyliczony sekret do docelowej tablicy w strukturze stanu */
-        os_memcpy(sm->K_aes, ss_aligned, kem->length_shared_secret);
-        wpa_printf(MSG_DEBUG, "PQC_LOG: KEM decapsulation success! Derived K_aes.");
-    } else {
-        wpa_printf(MSG_ERROR, "PQC_LOG: Error in liboqs OQS_KEM_decaps: %d", decaps_status);
-    }
-
-    /* Sprzątanie wyrównanych buforów tymczasowych */
-    os_free(c_aligned);
-    OQS_MEM_secure_free(sk_aligned, kem->length_secret_key);
-    OQS_MEM_secure_free(ss_aligned, kem->length_shared_secret);
-
-    if (decaps_status != OQS_SUCCESS) {
-        goto cleanup;
-    }
-    
-    wpa_printf(MSG_DEBUG, "PQC_LOG: KEM decapsulation success, derived K_aes.");
     
 
     /* Decryption of STA id */
