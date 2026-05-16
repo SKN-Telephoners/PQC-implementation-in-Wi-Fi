@@ -6669,7 +6669,7 @@ void wpa_supplicant_event(void *ctx, enum wpa_event_type event,
 	/* PQC */
 		if (wpa_s->pqc && wpa_s->pqc->pqc_enabled) {
         wpa_printf(MSG_DEBUG, "PQC_LOG: Received EVENT_AUTH, stopping association for now. Waiting for PAKE phase to end.");
-		wpa_supplicant_req_auth_timeout(wpa_s, 15, 0);
+		sme_pqc_extend_auth_timeout(wpa_s, 15);
 		wpa_supplicant_set_state(wpa_s, WPA_AUTHENTICATING);
 		pqc_sm_rx_auth_req(wpa_s->pqc);
         break; 
