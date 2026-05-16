@@ -361,10 +361,10 @@ static int wpas_pqc_send_pake3(struct wpa_pqc_sm *sm,
     /* Getting channel frequency */
     unsigned int freq = sm->wpa_s->current_bss ? sm->wpa_s->current_bss->freq : 2412;
     
-    /*Frame structure: 
-     * Category (1B) + OUI (3B) + Subtype/ID (1B) + Payload (s + T)
+    /* Frame structure: 
+     * Category (1B) + Action (1B) + OUI (3B) + OUI_TYPE (1B) + Subtype/ID (1B) + Payload (s + T)
      */
-    size_t frame_len = 1 + 3 + 1 + s_len + T_len;
+    size_t frame_len = 1 + 1 + 3 + 1 + 1 + s_len + T_len;
     buf = wpabuf_alloc(frame_len);
     if (!buf) 
         return -1;
