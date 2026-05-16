@@ -8,6 +8,8 @@
 
 #ifndef SME_H
 #define SME_H
+void sme_pqc_extend_auth_timeout(struct wpa_supplicant *wpa_s, int sec);
+
 
 #ifdef CONFIG_SME
 
@@ -44,8 +46,6 @@ void sme_external_auth_mgmt_rx(struct wpa_supplicant *wpa_s,
 			       const u8 *auth_frame, size_t len);
 
 #else /* CONFIG_SME */
-void sme_pqc_extend_auth_timeout(struct wpa_supplicant *wpa_s, int sec);
-
 
 static inline void sme_authenticate(struct wpa_supplicant *wpa_s,
 				    struct wpa_bss *bss,
