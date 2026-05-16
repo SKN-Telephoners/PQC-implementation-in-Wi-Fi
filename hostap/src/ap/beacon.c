@@ -1866,7 +1866,6 @@ void handle_probe_req(struct hostapd_data *hapd,
 
 						if (kem_secret_key) {
 							sta->ml_kem_secr = kem_secret_key;
-							OQS_MEM_secure_free(kem_secret_key, kem->length_secret_key);
 							wpa_printf(MSG_INFO, "PQC_LOG: Saved secret key to sta_info struct");
 						}
 							
