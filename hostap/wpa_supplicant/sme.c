@@ -53,6 +53,15 @@ static void sme_stop_sa_query(struct wpa_supplicant *wpa_s);
 static int sme_validate_basic_mle(const struct ieee802_11_elems *elems,
 				  const u8 *addr);
 
+void sme_pqc_extend_auth_timeout(struct wpa_supplicant *wpa_s, int sec)
+{
+    wpa_printf(MSG_DEBUG, "PQC_LOG: Extending SME auth timer to %d seconds", sec);
+    /* Anuluj obecny, 5-sekundowy timer */
+    eloop_cancel_timeout(sme_auth_timer, wpa_s, NULL);
+    /* Ustaw nowy, np. 15-sekundowy */
+    eloop_register_timeout(sec, 0, sme_auth_timer, wpa_s, NULL);
+}
+
 
 #ifdef CONFIG_SAE
 

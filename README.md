@@ -178,56 +178,87 @@ hostapd_gen_probe_resp:
 function modified to break the key into smaller chunks and adds their id (WPA_PUT_LE16(pos, sta->ml_kem_512_pub_len)) to the fragment so that it can be sent in probe response
 
 ## PQC State Machine 
-Separates PQC-specific operations from standard Wi-Fi authentication flows. Saves PQC keys in the structure.  
-Initialized after receiving public PQC key (ML-KEM) in Probe Response from AP, right before sending authentication request.  
-Deinitialized after deauthentication request (both in **wpa_supplicant.c**).    
-**/wpa_supplicant/pqc_sm.h, /wpa_supplicant/pqc_sm.c** - these files can also be used for PQC related functions, structs and other objects (STA side).  
+Separates PQC-specific operations from standard Wi-Fi authentication flows. Saves PQC keys and session variables in dedicated structures.  
 
-**struct wpa_pqc_sm** used as centralized storage for PQC session variables (ML-KEM/ML-DSA keys) - STA side
+### STA
+```wpa_supplicant/pqc_sm.h```, ```wpa_supplicant/pqc_sm.c```
 
-**/src/ap/pqc_ap_sm.h, /src/ap/pqc_ap_sm.c** - these files can also be used for PQC related functions, structs and other objects (AP side).
+**struct wpa_pqc_sm**: Centralized storage for PQC session variables (ML-KEM/ML-DSA keys, passwords, identifiers) on the STA side. Initialized in pqc_sm_init() after receiving the public PQC key (ML-KEM) in the Probe Response from the AP, right before sending the authentication request. Deinitialized in pqc_sm_deinit() after a deauthentication request.
 
-**struct hostapd_pqc_sm** used as centralized storage for PQC session variables (ML-KEM/ML-DSA keys) - AP side 
+### AP 
+```src/ap/pqc_ap_sm.h```, ```src/ap/pqc_ap_sm.c```
 
+**struct hostapd_pqc_sm**: Centralized storage for PQC session variables on the AP side. Initialized in pqc_ap_sm_init() after successfully intercepting the PAKE-1 frame. Imports the password and ML-KEM and ML-DSA keys previously generated and stored in ```sta_info``` during the Probe Request phase. Deinitialized in pqc_ap_sm_deinit().
 
 ## PAKE
-**/wpa_supplicant/pqc.c - static int pqc_2f_network**,  mathematic helper function.  
+Due to Linux kernel (mac80211) restrictions, standard Vendor Specific Action frames (Category 127) are dropped before the ASSOCIATED state. Therefore, the entire PAKE exchange utilizes Public Action Frames (Category 4, Action 9).
 
-**PQC PAKE-3 frame format**
+**PQC PAKE frame format**
 
 | Field          | Length    | Description                                   |
 |----------------|-----------|-----------------------------------------------|
-| Category       | 1 byte    | 127 (Vendor Specific Action Frame)            |
+| Category       | 1 byte    | 4 (Vendor Specific Action Frame)              |
+| Action         | 1 byte    | 9                                             |
 | OUI            | 3 bytes   | 00 90 4C (test OUI)                           |
-| Type / Subtype | 1 byte    | 0x03 (PAKE-3 identification)                  |
-| Payload (s)    | 32 bytes  | Output value 's' from 2-round Feistel network |
-| Payload (T)    | Variable  | Output value 'T' from 2-round Feistel network |
+| Type           | 1 byte    | 0x10                                          |
+| Subtype        | 1 byte    | 0x01 / 0x02 / 0x03 / 0x04                     |
+| Payload        | 32 bytes  | Variable (based on which PAKE frame it is)    |
 
+### PAKE-1
+#### STA:  
+After intercepting authentication request and stopping assosciation function (that also authenticates STA) checks are performed to determine whether PQC is used, if it is:  
 
-**/wpa_supplicant/pqc_sm.c - static int wpas_pqc_send_pake3**, builds and computes parameters needed for pake3 frame, uses information saved in state machine previously. After that it tries to send Vendor Specific Action frame using ```wpa_drv_send_action``` function.  
-  
-**/wpa_supplicant/pqc_sm.c - int pqc_sm_rx_pake2**, used for parsing and processing information (which is later saved in PQC STA state) based on received PAKE2 frame. Saves AP's public DSA key and decrypted sid, generates ML-KEM keys. 
+**wpa_supplicant/pqc_sm.c**: ```pqc_sm_rx_auth_req``` prepares the crypto payload (ML-KEM encapsulation, random ID generation).
 
-**/wpa_supplicant/pqc_sm.c - int pqc_sm_rx_pake4**, used for parsing and processing information (which is later saved in PQC STA state) based on received PAKE4 frame. Saves ciphertext2 and tag received from AP, generates PMK based on tag verification. Sets wpa_supplicant's supplicant as ```WPA_ASSOCIATING``` which starts association phase.
+**wpa_supplicant/pqc_pake.c**: ```wpas_pqc_send_pake1``` builds the Public Action frame with subtype 0x01 and sends it via wpa_drv_send_action. It stops the standard SME loop to wait for the AP's response.
 
-**/wpa_supplicant/pqc_sm.c - int pqc_sm_assoc_success**, works after association request is heard. Generates second pair of KEM keys.  
+#### AP:
+**src/ap/ieee802_11.c**: Intercepted at the very beginning of the ```handle_action function``` (before standard hostapd parsing) by checking Category 4, Action 9, OUI, and Type 0x10.
 
-**/wpa_supplicant/events.c**  
-After receing vendor specific action frame checks are performed in order to determine whether the frame is the one used in PAKE scheme.  
-PAKE-2 is checked (```subtype = 0x02```). After correct identification PAKE-2 parser function is called.  
-PAKE-4 is checked (```subtype = 0x04```). After correct identification PAKE-4 parser function is called.  
+**src/ap/pqc_ap_sm.c**: ```pqc_ap_sm_rx_pake1``` parses the payload, performs KEM decapsulation, and triggers the PAKE-2 response.
+
+### PAKE-2
+#### AP: 
+**src/ap/pqc_ap_sm.c**: ```hostapd_pqc_send_pake2``` builds and sends the frame (subtype 0x02) containing the encrypted sid and ML-DSA public key directly after processing PAKE-1.
+
+#### STA: 
+**wpa_supplicant/events.c**: Intercepted in ```wpa_supplicant_event``` (RX_MGMT action frame) by validating the Public Action headers and subtype 0x02.
+
+**wpa_supplicant/pqc_pake.c**: ```pqc_sm_rx_pake2``` parses the payload, decrypts the sid, saves the AP's DSA public key, and generates the STA's ML-KEM keys for the next phase.
+
+### PAKE-3
+#### STA: 
+**wpa_supplicant/pqc_pake.c**: ```wpas_pqc_send_pake3``` builds the frame (subtype 0x03) with payload parameters s and T generated by the Double Feistel Network.
+
+#### AP: 
+**src/ap/ieee802_11.c**: Intercepted at the top of ```handle_action``` (subtype 0x03).
+
+**src/ap/pqc_ap_sm.c**: ```pqc_ap_sm_rx_pake3``` parses the frame, verifies the Feistel network parameters, and triggers PAKE-4.
+
+### PAKE-4
+#### AP: 
+**src/ap/pqc_ap_sm.c**: ```hostapd_pqc_send_pake4``` generates ciphertext and verification tags, then builds and sends the PAKE-4 Public Action frame (subtype 0x04).
+
+#### STA: 
+**wpa_supplicant/events.c**: Intercepted in the RX_MGMT event handler the same as before (subtype 0x04).
+
+**wpa_supplicant/pqc_pake.c**: ```pqc_sm_rx_pake4``` parses the payload, performs final KEM decapsulation, verifies the HMAC tag, and derives the PMK.
 
 ## Association 
+Instead of the standard 4-Way Handshake deriving the PMK from a PSK, the PQC authentication injects the PMK negotiated during the PAKE phase.
 
-**/src/ap/pqc_ap_sm.c - int pqc_ap_sm_derive_pmk**, derivates PMK after receiving association request from STA 
+### STA
+**wpa_supplicant/pqc_pake.c**: At the end of ```pqc_sm_rx_pake4```, the newly derived PMK is injected into the WPA state machine using ```wpa_sm_set_pmk()```. It then manually triggers the association process using ```sme_associate()``` (it was stopped before).
 
-**/src/ap/ieee802_11.c - handle association**, after association request is received at AP's side pqc_enabled flag is checked. If the flag is enabled, PMK is generated by calling ```pqc_ap_sm_derive_pmk``` function
+**wpa_supplicant/pqc_sm.c**: ```pqc_sm_assoc_success``` is called after a successful association response to generate the second pair of KEM keys.
 
-**/wpa_supplicant/pqc_sm.c - int pqc_sm_assoc_success**, works after association request is heard. Generates second pair of KEM keys. 
+### AP
+**src/ap/pqc_ap_sm.c**: ```pqc_ap_sm_derive_pmk``` derives the PMK locally using session parameters (fsid, Feistel outputs, ciphertext) saved in state machine.
 
-**/wpa_supplicant/events.c - wpa_supplicant_event (EVENT_ASSOC)**, when association request is received, this function calls ```pqc_sm_assoc_success``` and ends association phase. PTK derivation has to be added here.
+**src/ap/ieee802_11.c** (handle association): Modified to check the ```pqc_enabled``` flag. If enabled, it calls ```pqc_ap_sm_derive_pmk()``` to finalize the PAKE phase.
 
 # Helpful functions
+All mathematical and configuration helper functions (our own) are grouped in src/common/pqc_help.c and pqc_help.h:
 
 ### int os_get_random(unsigned char *buf, size_t len)
 **/src/utils/os.h**  
@@ -235,6 +266,15 @@ Used for delivering randomness, in the future, change to download randomness fro
 * buf: Buffer for pseudo random data
 * len: Length of the buffer
 * returns: 0 - success, -1 - failure
+
+### get_oqs_kem_alg(u8 pqc_choice) / get_oqs_dsa_alg(u8 pqc_choice):
+Translates the 1-byte bitmask (e.g., 0x88) negotiated in Probe Request/Response into the exact algorithm string identifiers required by the liboqs library.
+
+### pqc_2f_network(...) / pqc_2f_inverse(...): 
+Implements the Double Feistel Network (2F) using HMAC-SHA256. It processes the Wi-Fi password (PSK) into variables s and T without exposing the password in the network, preventing offline dictionary attacks.
+
+### Constants & Macros: 
+Defines frame parsing constants (PQC_OUI_0, PQC_OUI_TYPE_PAKE, PQC_PAKE_TYPE_1, etc.) to safely extract data from MAC payloads without relying on hardcoded magic numbers.
 
 # Module lattice cryptographic algorithms
 

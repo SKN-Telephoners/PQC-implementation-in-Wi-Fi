@@ -8,6 +8,8 @@
 
 #ifndef SME_H
 #define SME_H
+void sme_pqc_extend_auth_timeout(struct wpa_supplicant *wpa_s, int sec);
+
 
 #ifdef CONFIG_SME
 

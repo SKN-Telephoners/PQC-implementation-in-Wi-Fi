@@ -1840,11 +1840,12 @@ void handle_probe_req(struct hostapd_data *hapd,
 					sta->pqc_pub_sent = false;
 					sta->pqc_pub_frag_count = 0;
 
-					kem = OQS_KEM_new(OQS_KEM_alg_ml_kem_512);
+					kem = OQS_KEM_new(OQS_KEM_alg_ml_kem_512); //HARDCODED!!!! we should get it from sta_info pqc_choice
 					if (kem) {
 						sta->ml_kem_512_pub_len = kem->length_public_key;
 						sta->ml_kem_512_pub = os_malloc(sta->ml_kem_512_pub_len);
 						kem_secret_key = malloc(kem->length_secret_key);
+						sta->ml_kem_secr_len = kem->length_secret_key;
 
 						if (sta->ml_kem_512_pub && kem_secret_key &&
 						    OQS_KEM_keypair(kem, sta->ml_kem_512_pub,
@@ -1863,9 +1864,11 @@ void handle_probe_req(struct hostapd_data *hapd,
 											   MAC2STR(sta->addr));
 						}
 
-						if (kem_secret_key)
-							OQS_MEM_secure_free(kem_secret_key,
-								    kem->length_secret_key);
+						if (kem_secret_key) {
+							sta->ml_kem_secr = kem_secret_key;
+							wpa_printf(MSG_INFO, "PQC_LOG: Saved secret key to sta_info struct");
+						}
+							
 						OQS_KEM_free(kem);
 					}
 				}
