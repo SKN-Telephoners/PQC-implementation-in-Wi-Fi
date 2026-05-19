@@ -7189,7 +7189,7 @@ void wpa_supplicant_event(void *ctx, enum wpa_event_type event,
                 if (data->rx_mgmt.frame_len >= 31) {
                     const u8 *pos = data->rx_mgmt.frame + 24;
                     
-                    /* cheching whether category is equal to Vendor Specific (127) */
+                    /* cheching whether category/type is correct */
                     if (pos[0] == WLAN_ACTION_PUBLIC && 
                         pos[1] == WLAN_PA_VENDOR_SPECIFIC && 
                         pos[2] == PQC_OUI_0 && 
