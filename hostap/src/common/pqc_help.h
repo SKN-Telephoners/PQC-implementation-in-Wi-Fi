@@ -21,6 +21,13 @@
 #define PQC_PAKE_TYPE_3        0x03  /* already used in PAKE-3 */
 #define PQC_PAKE_TYPE_4        0x04  /* reserved for PAKE-4 */
 
+/* Vendor-specific Action type for PQC/PASN */
+#define PQC_OUI_TYPE_PASN      0x11
+
+/* PASN subtypes */
+#define PQC_PASN_TYPE_1        0x01  /* PASN-1: STA -> AP (ML-DSA pub key) */
+#define PQC_PASN_TYPE_2        0x02  /* PASN-2: AP -> STA (signed response) */
+
 const char* get_oqs_kem_alg(u8 pqc_choice);
 const char* get_oqs_dsa_alg(u8 pqc_choice);
 int pqc_2f_inverse(const u8 *K, size_t K_len, const u8 *s, size_t s_len, const u8 *T, size_t T_len, u8 *r, u8 *M);

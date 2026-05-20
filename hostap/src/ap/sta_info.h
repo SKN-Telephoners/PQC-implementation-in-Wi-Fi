@@ -253,6 +253,9 @@ struct sta_info {
 	u8 *ml_dsa_secret;
 	size_t ml_dsa_secret_len;
 
+	/* PQC PASN state machine */
+	struct hostapd_pqc_sm *pqc_sm;
+
 
 #if defined(CONFIG_INTERWORKING) || defined(CONFIG_DPP)
 #define GAS_DIALOG_MAX 8 /* Max concurrent dialog number */

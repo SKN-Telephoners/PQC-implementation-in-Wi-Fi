@@ -46,6 +46,7 @@
 #include "neighbor_db.h"
 #include "nan_usd_ap.h"
 #include "interference.h"
+#include "pqc_pasn.h"
 
 
 #ifdef CONFIG_FILS
@@ -1830,6 +1831,45 @@ static void hostapd_action_rx(struct hostapd_data *hapd,
 		return;
 	}
 #endif /* CONFIG_DPP */
+	/* PQC PASN handler */
+	if (plen >= 6 &&
+	    mgmt->u.action.category == WLAN_ACTION_PUBLIC &&
+	    mgmt->u.action.u.vs_public_action.action ==
+	    WLAN_PA_VENDOR_SPECIFIC &&
+	    WPA_GET_BE24(mgmt->u.action.u.vs_public_action.oui) == 0x00904C) {
+		u8 pqc_type = mgmt->u.action.u.vs_public_action.variable[0];
+		u8 pqc_subtype = mgmt->u.action.u.vs_public_action.variable[1];
+		const u8 *pos, *end;
+
+		pos = mgmt->u.action.u.vs_public_action.variable + 2;
+		end = drv_mgmt->frame + drv_mgmt->frame_len;
+
+		wpa_printf(MSG_DEBUG, "PQC_LOG: AP - Received PQC action frame (type=0x%02x, subtype=0x%02x) from " MACSTR,
+		           pqc_type, pqc_subtype, MAC2STR(mgmt->sa));
+
+		/* Handle PASN-1 frame (type=0x11, subtype=0x01) */
+		if (pqc_type == 0x11 && pqc_subtype == 0x01) {
+			struct hostapd_pqc_sm *pqc_sm;
+
+			wpa_printf(MSG_DEBUG, "PQC_LOG: AP - Processing PASN-1 frame from " MACSTR, MAC2STR(mgmt->sa));
+
+			/* Get or create PQC state machine for this STA */
+			if (!sta->pqc_sm) {
+				sta->pqc_sm = pqc_ap_sm_init(hapd, sta);
+				if (!sta->pqc_sm) {
+					wpa_printf(MSG_ERROR, "PQC_LOG: AP - Failed to initialize PQC state machine");
+					return;
+				}
+			}
+			pqc_sm = sta->pqc_sm;
+
+			/* Call PASN-1 handler */
+			if (pqc_ap_sm_rx_pasn1(pqc_sm, sta, hapd, pos, end - pos) < 0) {
+				wpa_printf(MSG_ERROR, "PQC_LOG: AP - PASN-1 processing failed");
+			}
+			return;
+		}
+	}
 #ifdef CONFIG_NAN_USD
 	if (mgmt->u.action.category == WLAN_ACTION_PUBLIC && plen >= 5 &&
 	    mgmt->u.action.u.vs_public_action.action ==

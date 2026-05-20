@@ -49,7 +49,28 @@ struct wpa_pqc_sm {
     // ML-DSA
     u8 *dsa_public_key;     
     size_t dsa_keys_len;
-}; 
+
+    // PASN
+    u8 *sta_mldsa_secret_key;  /* ML-DSA secret key (STA) generated after association */
+    size_t sta_mldsa_secret_len;
+    u8 *sta_mldsa_public_key;  /* ML-DSA public key (STA) generated after association */
+    size_t sta_mldsa_public_len;
+
+    /* PASN-2 received materials */
+    u8 *pasn_ciphertext;       /* ML-KEM ciphertext received from AP */
+    size_t pasn_ciphertext_len;
+    u8 *pasn_dsa_signature;    /* ML-DSA signature received from AP */
+    size_t pasn_dsa_signature_len;
+    u8 pasn_mic1[32];          /* MIC1 received from AP */
+
+    /* PASN derived materials */
+    u8 *pasn_shared_secret;    /* PQC shared secret from ML-KEM decapsulation */
+    size_t pasn_shared_secret_len;
+    u8 pasn_ptk[32];           /* PTK - Pairwise Transient Key */
+    u8 pasn_kek[16];           /* Key Encryption Key */
+    u8 pasn_kck[16];           /* Key Confirmation Key */
+    u8 pasn_tk[16];            /* Temporal Key */
+};
 struct wpa_pqc_sm * pqc_sm_init(struct wpa_supplicant *wpa_s, struct wpa_ssid *ssid);
 void pqc_sm_deinit(struct wpa_pqc_sm *sm);
 int pqc_sm_rx_auth_req(struct wpa_pqc_sm *sm);
