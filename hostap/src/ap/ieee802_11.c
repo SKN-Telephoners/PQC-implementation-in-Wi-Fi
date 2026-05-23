@@ -64,6 +64,7 @@
 #include "pasn/pasn_common.h"
 #include "pqc_ap_sm.h"
 #include "pqc_pake.h"
+#include "pqc_pasn.h"
 
 
 #ifdef CONFIG_FILS
@@ -587,8 +588,9 @@ static void sae_set_state(struct sta_info *sta, enum sae_state state,
 		   MAC2STR(sta->addr), reason);
 	sta->sae->state = state;
 }
+#endif /* CONFIG_SAE */
 
-
+#if defined(CONFIG_SAE) || defined(CONFIG_PASN)
 static bool in_mac_addr_list(const u8 *list, unsigned int num, const u8 *addr)
 {
 	unsigned int i;
@@ -600,8 +602,9 @@ static bool in_mac_addr_list(const u8 *list, unsigned int num, const u8 *addr)
 
 	return false;
 }
+#endif /* CONFIG_SAE || CONFIG_PASN */
 
-
+#ifdef CONFIG_SAE
 static struct sae_password_entry *
 sae_password_find_pw(struct hostapd_data *hapd, struct sta_info *sta)
 {
@@ -756,6 +759,9 @@ int sae_password_bind(struct hostapd_data *hapd, const u8 *addr,
 
 	return -1;
 }
+#endif /* CONFIG_SAE */
+
+#if defined(CONFIG_SAE) || defined(CONFIG_PASN)
 
 
 const char * sae_get_password(struct hostapd_data *hapd,
@@ -888,6 +894,7 @@ const char * sae_get_password(struct hostapd_data *hapd,
 			password = pw->password;
 			if (!(hapd->conf->mesh & MESH_ENABLED))
 				pk = pw->pk;
+#ifdef CONFIG_SAE
 			if (sta && sta->sae && sta->sae->tmp) {
 				os_free(sta->sae->tmp->dec_pw_id);
 				sta->sae->tmp->dec_pw_id =
@@ -902,6 +909,7 @@ const char * sae_get_password(struct hostapd_data *hapd,
 						   "SAE: Bound decrypted password identifier to STA");
 				}
 			}
+#endif /* CONFIG_SAE */
 			break;
 		}
 	fail:
@@ -918,8 +926,10 @@ found:
 
 	return password;
 }
+#endif /* CONFIG_SAE || CONFIG_PASN */
 
 
+#ifdef CONFIG_SAE
 static struct wpabuf * auth_build_sae_commit(struct hostapd_data *hapd,
 					     struct sta_info *sta, int update,
 					     int status_code)
@@ -7840,55 +7850,81 @@ static int handle_action(struct hostapd_data *hapd,
 #endif /* CONFIG_FST */
 	case WLAN_ACTION_PUBLIC:
 		const u8 *pos = ((const u8 *) mgmt) + IEEE80211_HDRLEN + 1;
-        size_t left = len - (IEEE80211_HDRLEN + 1);
+		size_t left = len - (IEEE80211_HDRLEN + 1);
 
-        /* PQC PAKE INTERCEPTION */
-			if (left >= 6 && 
-            pos[0] == WLAN_PA_VENDOR_SPECIFIC && 
-            pos[1] == PQC_OUI_0 && pos[2] == PQC_OUI_1 && pos[3] == PQC_OUI_2 && 
-            pos[4] == PQC_OUI_TYPE_PAKE) {
-            
-            u8 subtype = pos[5];
-            const u8 *payload = pos + 6; /* payload offset */
-            size_t payload_len = left - 6;
+		if (left >= 6 && 
+		    pos[0] == WLAN_PA_VENDOR_SPECIFIC && 
+		    pos[1] == PQC_OUI_0 && pos[2] == PQC_OUI_1 && pos[3] == PQC_OUI_2) {
+			u8 type = pos[4];
+			u8 subtype = pos[5];
+			const u8 *payload = pos + 6;
+			size_t payload_len = left - 6;
 
-            /* --- PAKE-1 INTERCEPTION --- */
-            if (subtype == PQC_PAKE_TYPE_1) {
-                wpa_printf(MSG_DEBUG, "PQC_LOG: Received PAKE-1 (Public Action) from: " MACSTR, MAC2STR(mgmt->sa));
-                if (sta) {
-                    if (!sta->pqc) {
-                        sta->pqc = pqc_ap_sm_init(hapd, sta);
-                    }
-                    if (sta->pqc) {
-                        pqc_ap_sm_rx_pake1(sta->pqc, hapd, sta, payload, payload_len);
-                    } else {
-                        wpa_printf(MSG_ERROR, "PQC_LOG: Failed to init SM for PAKE-1");
-                    }
-                }
-                return 1; 
-            }
-			if (subtype == PQC_PAKE_TYPE_3) {
-                wpa_printf(MSG_DEBUG, "PQC_LOG: Received PAKE-3 (Public Action) from: " MACSTR, MAC2STR(mgmt->sa));
-                if (sta && sta->pqc) {
-                    if (payload_len >= 32) {
-                        const u8 *s = payload;
-                        const u8 *T = payload + 32;
-                        size_t T_len = payload_len - 32;
-                        
-						if (pqc_ap_sm_rx_pake3(sta->pqc, s, 32, T, T_len) == 0) {
-                            wpa_printf(MSG_DEBUG, "PQC_LOG: PAKE-3 processed successfully, PAKE-4 sent.");
-                        } else {
-                            wpa_printf(MSG_ERROR, "PQC_LOG: Failed to process PAKE-3!");
-                        }
+			/* PQC PAKE INTERCEPTION */
+			if (type == PQC_OUI_TYPE_PAKE) {
+				if (subtype == PQC_PAKE_TYPE_1) {
+					wpa_printf(MSG_DEBUG, "PQC_LOG: Received PAKE-1 (Public Action) from: " MACSTR, MAC2STR(mgmt->sa));
+					if (sta) {
+						if (!sta->pqc) {
+							sta->pqc = pqc_ap_sm_init(hapd, sta);
+							sta->pqc_sm = sta->pqc;
+						}
+						if (sta->pqc) {
+							pqc_ap_sm_rx_pake1(sta->pqc, hapd, sta, payload, payload_len);
+						} else {
+							wpa_printf(MSG_ERROR, "PQC_LOG: Failed to init SM for PAKE-1");
+						}
+					}
+					return 1; 
+				}
+				if (subtype == PQC_PAKE_TYPE_3) {
+					wpa_printf(MSG_DEBUG, "PQC_LOG: Received PAKE-3 (Public Action) from: " MACSTR, MAC2STR(mgmt->sa));
+					if (sta && sta->pqc) {
+						if (payload_len >= 32) {
+							const u8 *s = payload;
+							const u8 *T = payload + 32;
+							size_t T_len = payload_len - 32;
 
-                    } else {
-                        wpa_printf(MSG_ERROR, "PQC_LOG: too shaor PAKE-3 payload");
-                    }
-                } else {
-                    wpa_printf(MSG_DEBUG, "PQC_LOG: Ignored PAKE-3 (no initialized session for STA)");
-                }
-                return 1; 
-            }
+							if (pqc_ap_sm_rx_pake3(sta->pqc, s, 32, T, T_len) == 0) {
+								wpa_printf(MSG_DEBUG, "PQC_LOG: PAKE-3 processed successfully, PAKE-4 sent.");
+							} else {
+								wpa_printf(MSG_ERROR, "PQC_LOG: Failed to process PAKE-3!");
+							}
+						} else {
+							wpa_printf(MSG_ERROR, "PQC_LOG: too shaor PAKE-3 payload");
+						}
+					} else {
+						wpa_printf(MSG_DEBUG, "PQC_LOG: Ignored PAKE-3 (no initialized session for STA)");
+					}
+					return 1; 
+				}
+			}
+
+			/* PQC PASN INTERCEPTION */
+			if (type == PQC_OUI_TYPE_PASN) {
+				if (subtype == PQC_PASN_TYPE_1) {
+					wpa_printf(MSG_INFO, "PQC_LOG: Received PASN-1 (Public Action) from: " MACSTR, MAC2STR(mgmt->sa));
+					if (!sta) {
+						sta = ap_sta_add(hapd, mgmt->sa);
+					}
+					if (sta) {
+						if (!sta->pqc) {
+							sta->pqc = pqc_ap_sm_init(hapd, sta);
+							sta->pqc_sm = sta->pqc;
+						}
+						if (sta->pqc) {
+							if (pqc_ap_sm_rx_pasn1(sta->pqc, sta, hapd, payload, payload_len) < 0) {
+								wpa_printf(MSG_ERROR, "PQC_LOG: AP - PASN-1 processing failed");
+							}
+						} else {
+							wpa_printf(MSG_ERROR, "PQC_LOG: AP - Failed to initialize PQC state machine for PASN-1");
+						}
+					} else {
+						wpa_printf(MSG_ERROR, "PQC_LOG: AP - No STA info found for received PASN-1");
+					}
+					return 1;
+				}
+			}
 		}
 	case WLAN_ACTION_PROTECTED_DUAL:
 		if (len >= IEEE80211_HDRLEN + 2 &&

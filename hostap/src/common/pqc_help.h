@@ -30,7 +30,16 @@
 
 const char* get_oqs_kem_alg(u8 pqc_choice);
 const char* get_oqs_dsa_alg(u8 pqc_choice);
+
+int pqc_pbkdf2_sha256(const char *passphrase, const u8 *salt, size_t salt_len,
+                     int iterations, u8 *buf, size_t buflen);
+
+int pqc_derive_pasn_ptk(const u8 *pmk, const u8 *sta_mac, const u8 *ap_mac,
+                       const u8 *shared_secret, size_t shared_secret_len,
+                       u8 *out_ptk);
+
 int pqc_2f_inverse(const u8 *K, size_t K_len, const u8 *s, size_t s_len, const u8 *T, size_t T_len, u8 *r, u8 *M);
 int pqc_2f_network(const u8 *K, size_t K_len, const u8 *r, size_t r_len, const u8 *M, size_t M_len, u8 *s, u8 *T);
+
 
 #endif // PQC_HELP_H

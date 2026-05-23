@@ -1786,6 +1786,72 @@ static void hostapd_action_rx(struct hostapd_data *hapd,
 		   mgmt->u.action.category, *action,
 		   MAC2STR(mgmt->sa), MAC2STR(mgmt->da), (int) plen);
 
+	/* PQC Public Action Frame Interceptor (Pre-Association) */
+	if (plen >= 8 && mgmt->u.action.category == WLAN_ACTION_PUBLIC) {
+		const u8 *pqc_pos = ((const u8 *) mgmt) + IEEE80211_HDRLEN + 1;
+		size_t pqc_left = drv_mgmt->frame_len - (IEEE80211_HDRLEN + 1);
+
+		if (pqc_left >= 6 &&
+		    pqc_pos[0] == WLAN_PA_VENDOR_SPECIFIC &&
+		    pqc_pos[1] == PQC_OUI_0 && pqc_pos[2] == PQC_OUI_1 && pqc_pos[3] == PQC_OUI_2) {
+			u8 type = pqc_pos[4];
+			u8 subtype = pqc_pos[5];
+			const u8 *payload = pqc_pos + 6;
+			size_t payload_len = pqc_left - 6;
+
+			/* Handle PAKE-3 frame (type=0x10, subtype=0x03) */
+			if (type == PQC_OUI_TYPE_PAKE && subtype == PQC_PAKE_TYPE_3) {
+				wpa_printf(MSG_INFO, "PQC_LOG: AP - Received PAKE-3 (Public Action) from: " MACSTR, MAC2STR(mgmt->sa));
+				sta = ap_get_sta(hapd, mgmt->sa);
+				if (!sta) {
+					sta = ap_sta_add(hapd, mgmt->sa);
+				}
+				if (sta && sta->pqc_sm) {
+					if (payload_len >= 32) {
+						const u8 *s = payload;
+						const u8 *T = payload + 32;
+						size_t T_len = payload_len - 32;
+
+						if (pqc_ap_sm_rx_pake3(sta->pqc_sm, s, 32, T, T_len) == 0) {
+							wpa_printf(MSG_INFO, "PQC_LOG: AP - PAKE-3 processed successfully, PAKE-4 sent.");
+						} else {
+							wpa_printf(MSG_ERROR, "PQC_LOG: AP - Failed to process PAKE-3!");
+						}
+					} else {
+						wpa_printf(MSG_ERROR, "PQC_LOG: AP - too short PAKE-3 payload");
+					}
+				} else {
+					wpa_printf(MSG_DEBUG, "PQC_LOG: AP - Ignored PAKE-3 (no initialized session for STA)");
+				}
+				return;
+			}
+
+			/* Handle PASN-1 frame (type=0x11, subtype=0x01) */
+			if (type == PQC_OUI_TYPE_PASN && subtype == PQC_PASN_TYPE_1) {
+				wpa_printf(MSG_INFO, "PQC_LOG: AP - Received PASN-1 (Public Action) from: " MACSTR, MAC2STR(mgmt->sa));
+				sta = ap_get_sta(hapd, mgmt->sa);
+				if (!sta) {
+					sta = ap_sta_add(hapd, mgmt->sa);
+				}
+				if (sta) {
+					if (!sta->pqc_sm) {
+						sta->pqc_sm = pqc_ap_sm_init(hapd, sta);
+					}
+					if (sta->pqc_sm) {
+						if (pqc_ap_sm_rx_pasn1(sta->pqc_sm, sta, hapd, payload, payload_len) < 0) {
+							wpa_printf(MSG_ERROR, "PQC_LOG: AP - PASN-1 processing failed");
+						}
+					} else {
+						wpa_printf(MSG_ERROR, "PQC_LOG: AP - Failed to initialize PQC state machine for PASN-1");
+					}
+				} else {
+					wpa_printf(MSG_ERROR, "PQC_LOG: AP - No STA info found for received PASN-1");
+				}
+				return;
+			}
+		}
+	}
+
 	sta = ap_get_sta(hapd, mgmt->sa);
 	if (sta == NULL) {
 		wpa_printf(MSG_DEBUG, "%s: station not found", __func__);
@@ -1831,45 +1897,6 @@ static void hostapd_action_rx(struct hostapd_data *hapd,
 		return;
 	}
 #endif /* CONFIG_DPP */
-	/* PQC PASN handler */
-	if (plen >= 6 &&
-	    mgmt->u.action.category == WLAN_ACTION_PUBLIC &&
-	    mgmt->u.action.u.vs_public_action.action ==
-	    WLAN_PA_VENDOR_SPECIFIC &&
-	    WPA_GET_BE24(mgmt->u.action.u.vs_public_action.oui) == 0x00904C) {
-		u8 pqc_type = mgmt->u.action.u.vs_public_action.variable[0];
-		u8 pqc_subtype = mgmt->u.action.u.vs_public_action.variable[1];
-		const u8 *pos, *end;
-
-		pos = mgmt->u.action.u.vs_public_action.variable + 2;
-		end = drv_mgmt->frame + drv_mgmt->frame_len;
-
-		wpa_printf(MSG_DEBUG, "PQC_LOG: AP - Received PQC action frame (type=0x%02x, subtype=0x%02x) from " MACSTR,
-		           pqc_type, pqc_subtype, MAC2STR(mgmt->sa));
-
-		/* Handle PASN-1 frame (type=0x11, subtype=0x01) */
-		if (pqc_type == 0x11 && pqc_subtype == 0x01) {
-			struct hostapd_pqc_sm *pqc_sm;
-
-			wpa_printf(MSG_DEBUG, "PQC_LOG: AP - Processing PASN-1 frame from " MACSTR, MAC2STR(mgmt->sa));
-
-			/* Get or create PQC state machine for this STA */
-			if (!sta->pqc_sm) {
-				sta->pqc_sm = pqc_ap_sm_init(hapd, sta);
-				if (!sta->pqc_sm) {
-					wpa_printf(MSG_ERROR, "PQC_LOG: AP - Failed to initialize PQC state machine");
-					return;
-				}
-			}
-			pqc_sm = sta->pqc_sm;
-
-			/* Call PASN-1 handler */
-			if (pqc_ap_sm_rx_pasn1(pqc_sm, sta, hapd, pos, end - pos) < 0) {
-				wpa_printf(MSG_ERROR, "PQC_LOG: AP - PASN-1 processing failed");
-			}
-			return;
-		}
-	}
 #ifdef CONFIG_NAN_USD
 	if (mgmt->u.action.category == WLAN_ACTION_PUBLIC && plen >= 5 &&
 	    mgmt->u.action.u.vs_public_action.action ==

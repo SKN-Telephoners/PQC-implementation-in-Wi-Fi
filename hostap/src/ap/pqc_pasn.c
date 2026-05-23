@@ -43,181 +43,135 @@ int pqc_ap_sm_rx_pasn1(struct hostapd_pqc_sm *sm, struct sta_info *sta, struct h
     OQS_SIG *sig = NULL;
     OQS_KEM *kem = NULL;
     int ret = -1;
+    u8 pmk[32];
 
-    wpa_printf(MSG_DEBUG, "PQC_LOG: AP - Processing PASN-1 frame from STA");
+    wpa_printf(MSG_DEBUG, "PQC_LOG: AP - Processing PASN-1 frame (ML-KEM focus)");
 
     if (!sm || !sta || !hapd || !payload || len < 8) {
-        wpa_printf(MSG_ERROR, "PQC_LOG: AP - Invalid PASN-1 frame parameters");
+        wpa_printf(MSG_ERROR, "PQC_LOG: AP - Invalid PASN-1 parameters");
         return -1;
     }
 
-    /* --- Parsing PASN-1 --- */
+    /* --- 1. Parsing PASN-1 (Extract ML-KEM Key) --- */
     const u8 *pos = payload;
     size_t remaining = len;
 
-    /* Read STA's ML-DSA public key length */
-    if (remaining < 2) {
-        wpa_printf(MSG_ERROR, "PQC_LOG: AP - PASN-1 payload too short for key length");
-        return -1;
-    }
-
-    u16 sta_mldsa_pub_len = WPA_GET_BE16(pos);
+    if (remaining < 2) return -1;
+    u16 sta_kem_pub_len = WPA_GET_BE16(pos);
     pos += 2;
     remaining -= 2;
 
-    if (remaining < sta_mldsa_pub_len + ETH_ALEN) {
-        wpa_printf(MSG_ERROR, "PQC_LOG: AP - PASN-1 payload too short for key and MAC");
+    if (remaining < (size_t)sta_kem_pub_len + ETH_ALEN) {
+        wpa_printf(MSG_ERROR, "PQC_LOG: AP - PASN-1 too short for KEM key and MAC");
         return -1;
     }
 
-    const u8 *sta_mldsa_pub = pos;
-    pos += sta_mldsa_pub_len;
-    remaining -= sta_mldsa_pub_len;
-
+    const u8 *sta_kem_pub = pos;
+    pos += sta_kem_pub_len;
+    remaining -= sta_kem_pub_len;
     const u8 *sta_mac = pos;
 
     /* Verify MAC address matches STA */
     if (os_memcmp(sta_mac, sta->addr, ETH_ALEN) != 0) {
-        wpa_printf(MSG_ERROR, "PQC_LOG: AP - PASN-1 STA MAC mismatch. Expected " MACSTR ", got " MACSTR,
-                   MAC2STR(sta->addr), MAC2STR(sta_mac));
+        wpa_printf(MSG_ERROR, "PQC_LOG: AP - MAC mismatch in PASN-1");
         return -1;
     }
 
-    wpa_printf(MSG_DEBUG, "PQC_LOG: AP - PASN-1 parsed successfully (ML-DSA pub key len: %u)", sta_mldsa_pub_len);
+    /* Save the STA's ML-KEM public key into the state machine */
+    os_free(sm->kem_pub_key);
+    sm->kem_pub_key = os_malloc(sta_kem_pub_len);
+    if (!sm->kem_pub_key) return -1;
+    os_memcpy(sm->kem_pub_key, sta_kem_pub, sta_kem_pub_len);
+    sm->kem_pub_key_len = sta_kem_pub_len;
 
-    /* Save STA's ML-DSA public key */
-    if (sm->sta_mldsa_public_key) {
-        os_free(sm->sta_mldsa_public_key);
-    }
-    sm->sta_mldsa_public_key = os_malloc(sta_mldsa_pub_len);
-    if (!sm->sta_mldsa_public_key) {
-        wpa_printf(MSG_ERROR, "PQC_LOG: AP - Memory allocation error for STA ML-DSA key");
-        return -1;
-    }
+    wpa_printf(MSG_DEBUG, "PQC_LOG: AP - Parsed ML-KEM public key (len: %u)", sta_kem_pub_len);
 
-    os_memcpy(sm->sta_mldsa_public_key, sta_mldsa_pub, sta_mldsa_pub_len);
-    sm->sta_mldsa_public_len = sta_mldsa_pub_len;
+    /* --- 2. ML-KEM Encapsulation --- */
+    kem = OQS_KEM_new(get_oqs_kem_alg(sm->pqc_choice));
+    if (!kem) goto cleanup;
 
-    /* --- ML-KEM Encapsulation --- */
-    const char *kem_alg = get_oqs_kem_alg(sm->pqc_choice);
-    if (!kem_alg) {
-        wpa_printf(MSG_ERROR, "PQC_LOG: AP - Error in mapping KEM algorithm");
-        return -1;
-    }
-
-    kem = OQS_KEM_new(kem_alg);
-    if (!kem) {
-        wpa_printf(MSG_ERROR, "PQC_LOG: AP - Error in initializing OQS KEM");
-        return -1;
-    }
-
-    /* Allocate memory for ciphertext and shared secret */
     sm->pasn_ciphertext_len = kem->length_ciphertext;
     sm->pasn_ciphertext = os_malloc(sm->pasn_ciphertext_len);
-
     sm->pasn_shared_secret_len = kem->length_shared_secret;
     sm->pasn_shared_secret = os_malloc(sm->pasn_shared_secret_len);
 
-    if (!sm->pasn_ciphertext || !sm->pasn_shared_secret) {
-        wpa_printf(MSG_ERROR, "PQC_LOG: AP - Memory allocation error for KEM encapsulation");
-        goto cleanup;
-    }
+    if (!sm->pasn_ciphertext || !sm->pasn_shared_secret) goto cleanup;
 
-    /* ML-KEM encapsulation using STA's ML-KEM public key */
+    /* Encapsulate using the key we just parsed from the STA */
     if (OQS_KEM_encaps(kem, sm->pasn_ciphertext, sm->pasn_shared_secret, sm->kem_pub_key) != OQS_SUCCESS) {
-        wpa_printf(MSG_ERROR, "PQC_LOG: AP - Error in KEM encapsulation");
+        wpa_printf(MSG_ERROR, "PQC_LOG: AP - ML-KEM Encapsulation failed");
         goto cleanup;
     }
 
-    wpa_printf(MSG_DEBUG, "PQC_LOG: AP - ML-KEM encapsulation successful (ciphertext len: %zu, shared secret len: %zu)",
-               sm->pasn_ciphertext_len, sm->pasn_shared_secret_len);
-
-    /* --- ML-DSA Sign over ciphertext --- */
-    const char *dsa_alg = get_oqs_dsa_alg(sm->pqc_choice);
-    if (!dsa_alg) {
-        wpa_printf(MSG_ERROR, "PQC_LOG: AP - Error in mapping DSA algorithm");
-        goto cleanup;
-    }
-
-    sig = OQS_SIG_new(dsa_alg);
-    if (!sig) {
-        wpa_printf(MSG_ERROR, "PQC_LOG: AP - Error in initializing OQS SIG");
-        goto cleanup;
-    }
+    /* --- 3. ML-DSA Signature Generation --- */
+    sig = OQS_SIG_new(get_oqs_dsa_alg(sm->pqc_choice));
+    if (!sig) goto cleanup;
 
     sm->pasn_dsa_signature_len = sig->length_signature;
     sm->pasn_dsa_signature = os_malloc(sm->pasn_dsa_signature_len);
-    if (!sm->pasn_dsa_signature) {
-        wpa_printf(MSG_ERROR, "PQC_LOG: AP - Memory allocation error for DSA signature");
-        goto cleanup;
-    }
+    if (!sm->pasn_dsa_signature) goto cleanup;
 
     size_t actual_sig_len = sm->pasn_dsa_signature_len;
     if (OQS_SIG_sign(sig, sm->pasn_dsa_signature, &actual_sig_len,
                      sm->pasn_ciphertext, sm->pasn_ciphertext_len,
-                     sm->ap_mldsa_secret_key) != OQS_SUCCESS) {
-        wpa_printf(MSG_ERROR, "PQC_LOG: AP - Error in ML-DSA signature generation");
+                     sm->dsa_secret_key) != OQS_SUCCESS) {
+        wpa_printf(MSG_ERROR, "PQC_LOG: AP - ML-DSA Signing failed");
         goto cleanup;
     }
-
     sm->pasn_dsa_signature_len = actual_sig_len;
-    wpa_printf(MSG_DEBUG, "PQC_LOG: AP - ML-DSA signature generated successfully (sig len: %zu)", sm->pasn_dsa_signature_len);
 
-    /* --- PTK Derivation via KDF-SHA256 --- */
-    /* PTK input: PMK || "PASN key deriviation" || MAC_STA || MAC_AP || PQC_shared_secret */
-    struct wpabuf *ptk_input = wpabuf_alloc(32 + 19 + ETH_ALEN + ETH_ALEN + sm->pasn_shared_secret_len);
-    if (!ptk_input) {
-        wpa_printf(MSG_ERROR, "PQC_LOG: AP - Memory allocation error for PTK derivation");
-        goto cleanup;
-    }
-
-    /* Get PMK from WPA state machine */
-    u8 pmk[32];
+    /* --- 4. PTK Derivation (PBKDF2-SHA256) --- */
+    /* Get the PMK (from earlier PAKE phase) */
     if (pqc_ap_sm_derive_pmk(sm, pmk) != 0) {
-        wpa_printf(MSG_ERROR, "PQC_LOG: AP - Failed to derive PMK");
-        wpabuf_free(ptk_input);
+        wpa_printf(MSG_ERROR, "PQC_LOG: AP - PMK derivation failed");
         goto cleanup;
     }
 
-    wpabuf_put_data(ptk_input, pmk, 32);
-    wpabuf_put_data(ptk_input, (const u8 *)"PASN key deriviation", 19);
-    wpabuf_put_data(ptk_input, sta->addr, ETH_ALEN);
-    wpabuf_put_data(ptk_input, hapd->own_addr, ETH_ALEN);
-    wpabuf_put_data(ptk_input, sm->pasn_shared_secret, sm->pasn_shared_secret_len);
+    /* Construct PBKDF2 Salt: label || MAC sta || MAC ap || shared_secret */
+    const char *label = "PASN key deriviation";
+    size_t label_len = os_strlen(label);
+    size_t salt_len = label_len + ETH_ALEN + ETH_ALEN + sm->pasn_shared_secret_len;
+    u8 *salt = os_malloc(salt_len);
+    if (!salt) goto cleanup;
 
-    /* Derive PTK using KDF-SHA256 */
-    hmac_sha256_kdf(pmk, 32, "PASN PTK", wpabuf_head(ptk_input), wpabuf_len(ptk_input),
-                    sm->pasn_ptk, 32);
-    wpabuf_free(ptk_input);
+    os_memcpy(salt, label, label_len);
+    os_memcpy(salt + label_len, sta->addr, ETH_ALEN);
+    os_memcpy(salt + label_len + ETH_ALEN, hapd->own_addr, ETH_ALEN);
+    os_memcpy(salt + label_len + (2 * ETH_ALEN), sm->pasn_shared_secret, sm->pasn_shared_secret_len);
 
-    wpa_printf(MSG_DEBUG, "PQC_LOG: AP - PTK derived successfully");
+    /* PBKDF2-SHA256: Password is PMK, Salt is the concatenated buffer */
+    /* We use 4096 iterations to match WPA standard password hashing */
+    if (pqc_pbkdf2_sha256((const char *)pmk, salt, salt_len, 4096, sm->pasn_ptk, 32) != 0) {
+        wpa_printf(MSG_ERROR, "PQC_LOG: AP - PBKDF2-SHA256 failed");
+        os_free(salt);
+        goto cleanup;
+    }
+    os_free(salt);
 
-    /* Split PTK into KEK, KCK, TK */
+    /* Split PTK into KEK and KCK */
     os_memcpy(sm->pasn_kek, sm->pasn_ptk, 16);
     os_memcpy(sm->pasn_kck, sm->pasn_ptk + 16, 16);
-    /* TK would be for additional encryption if needed */
-    os_memcpy(sm->pasn_tk, sm->pasn_ptk, 16);
 
-    /* --- Generate MIC1 --- */
-    /* MIC1 = HMAC-SHA256(ciphertext || signature || KCK) */
-    struct wpabuf *mic1_input = wpabuf_alloc(sm->pasn_ciphertext_len + sm->pasn_dsa_signature_len);
-    if (!mic1_input) {
-        wpa_printf(MSG_ERROR, "PQC_LOG: AP - Memory allocation error for MIC1");
-        goto cleanup;
-    }
+    /* --- 5. MIC1 Generation with 64-byte dummy signature --- */
+    u8 dummy_signature[64];
+    os_memset(dummy_signature, 0x88, 64);
 
-    wpabuf_put_data(mic1_input, sm->pasn_ciphertext, sm->pasn_ciphertext_len);
-    wpabuf_put_data(mic1_input, sm->pasn_dsa_signature, sm->pasn_dsa_signature_len);
+    size_t mic_input_len = sm->pasn_ciphertext_len + 64;
+    u8 *mic_input = os_malloc(mic_input_len);
+    if (!mic_input) goto cleanup;
 
-    hmac_sha256(sm->pasn_kck, 16, wpabuf_head(mic1_input), wpabuf_len(mic1_input), sm->pasn_mic1);
-    wpabuf_free(mic1_input);
+    os_memcpy(mic_input, sm->pasn_ciphertext, sm->pasn_ciphertext_len);
+    os_memcpy(mic_input + sm->pasn_ciphertext_len, dummy_signature, 64);
 
-    wpa_printf(MSG_INFO, "PQC_LOG: AP - MIC1 generated successfully");
+    hmac_sha256(sm->pasn_kck, 16, mic_input, mic_input_len, sm->pasn_mic1);
+    os_free(mic_input);
 
-    /* Send PASN-2 response */
-    ret = hostapd_pqc_send_pasn2(hapd, sta, sm->ap_mldsa_public_key, sm->ap_mldsa_public_len,
+    wpa_printf(MSG_INFO, "PQC_LOG: AP - PASN-2 prepared (PTK derived via PBKDF2 with dummy signature)");
+
+    /* --- 6. Send Response --- */
+    ret = hostapd_pqc_send_pasn2(hapd, sta, sm->dsa_pub_key, sm->dsa_pub_key_len,
                                  sm->pasn_ciphertext, sm->pasn_ciphertext_len,
-                                 sm->pasn_dsa_signature, sm->pasn_dsa_signature_len,
+                                 dummy_signature, 64,
                                  sm->pasn_mic1);
 
 cleanup:
@@ -225,7 +179,6 @@ cleanup:
     if (sig) OQS_SIG_free(sig);
     return ret;
 }
-
 /**
  * hostapd_pqc_send_pasn2 - Build and send PASN-2 frame with ML-KEM ciphertext, ML-DSA signature, and MIC1
  *
