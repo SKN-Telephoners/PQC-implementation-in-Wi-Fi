@@ -21,7 +21,8 @@
  */
 int pqc_ap_sm_rx_pasn1(struct hostapd_pqc_sm *sm, struct sta_info *sta, struct hostapd_data *hapd,
                        const u8 *payload, size_t len);
-
+int pqc_ap_sm_rx_pasn3(struct hostapd_pqc_sm *sm, struct sta_info *sta, struct hostapd_data *hapd,
+                       const u8 *payload, size_t len);
 
 #endif // PQC_AP_PASN_H
 

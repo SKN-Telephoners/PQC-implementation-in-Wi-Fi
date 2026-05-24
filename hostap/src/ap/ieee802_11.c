@@ -7924,6 +7924,28 @@ static int handle_action(struct hostapd_data *hapd,
 					}
 					return 1;
 				}
+				if (subtype == PQC_PASN_TYPE_3) {
+					wpa_printf(MSG_INFO, "PQC_LOG: Received PASN-3 (Public Action) from: " MACSTR, MAC2STR(mgmt->sa));
+					if (!sta) {
+						sta = ap_sta_add(hapd, mgmt->sa);
+					}
+					if (sta) {
+						if (!sta->pqc) {
+							sta->pqc = pqc_ap_sm_init(hapd, sta);
+							sta->pqc_sm = sta->pqc;
+						}
+						if (sta->pqc) {
+							if (pqc_ap_sm_rx_pasn3(sta->pqc, sta, hapd, payload, payload_len) < 0) {
+								wpa_printf(MSG_ERROR, "PQC_LOG: AP - PASN-3 processing failed");
+							}
+						} else {
+							wpa_printf(MSG_ERROR, "PQC_LOG: AP - Failed to initialize PQC state machine for PASN-3");
+						}
+					} else {
+						wpa_printf(MSG_ERROR, "PQC_LOG: AP - No STA info found for received PASN-3");
+					}
+					return 1;
+				}
 			}
 		}
 	case WLAN_ACTION_PROTECTED_DUAL:

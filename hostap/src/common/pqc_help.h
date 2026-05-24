@@ -28,6 +28,15 @@
 #define PQC_PASN_TYPE_1        0x01  /* PASN-1: STA -> AP (ML-KEM pub key) */
 #define PQC_PASN_TYPE_2        0x02  /* PASN-2: AP -> STA (ciphertext + MIC1) */
 #define PQC_PASN_TYPE_2_SIG    0x03  /* PASN-2-SIG: AP -> STA (ML-DSA signature fragments) */
+#define PQC_PASN_TYPE_3        0x04
+#define PQC_PASN_TYPE_4        0x05
+
+/* other useful */
+#define MIC_LEN                32
+#define PTK_LEN                48
+#define KEK_LEN                16
+#define KCK_LEN                16
+#define TK_LEN                 16
 
 const char* get_oqs_kem_alg(u8 pqc_choice);
 const char* get_oqs_dsa_alg(u8 pqc_choice);

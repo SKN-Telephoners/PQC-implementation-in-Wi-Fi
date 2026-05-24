@@ -61,7 +61,8 @@ struct wpa_pqc_sm {
     size_t pasn_ciphertext_len;
     u8 *pasn_dsa_signature;    /* ML-DSA signature received from AP */
     size_t pasn_dsa_signature_len;
-    u8 pasn_mic1[32];          /* MIC1 received from AP */
+    u8 pasn_mic1[MIC_LEN];          /* MIC1 received from AP */
+    u8 pasn_mic2[MIC_LEN];           /* MIC 2 generated during PARSING OF PASN2*/
 
     /* PASN-2-SIG reassembly */
     u8 *pasn_sig_buf;
@@ -71,10 +72,10 @@ struct wpa_pqc_sm {
     /* PASN derived materials */
     u8 *pasn_shared_secret;    /* PQC shared secret from ML-KEM decapsulation */
     size_t pasn_shared_secret_len;
-    u8 pasn_ptk[32];           /* PTK - Pairwise Transient Key */
-    u8 pasn_kek[16];           /* Key Encryption Key */
-    u8 pasn_kck[16];           /* Key Confirmation Key */
-    u8 pasn_tk[16];            /* Temporal Key */
+    u8 pasn_ptk[PTK_LEN];           /* PTK - Pairwise Transient Key */
+    u8 pasn_kek[KEK_LEN];           /* Key Encryption Key */
+    u8 pasn_kck[KCK_LEN];           /* Key Confirmation Key */
+    u8 pasn_tk[TK_LEN];            /* Temporal Key */
 
     u8 pmk[32];                /* PMK derived from PAKE, used for PASN PTK derivation */
     u8 ap_mac[ETH_ALEN];       /* AP MAC resolved at PAKE-1 time, used for fsid */

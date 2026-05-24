@@ -149,7 +149,7 @@ int pqc_derive_pasn_ptk(const u8 *pmk, const u8 *sta_mac, const u8 *ap_mac,
     os_memcpy(salt + label_len + (2 * ETH_ALEN), shared_secret, shared_secret_len);
 
     /* Use our local standalone PBKDF2 */
-    ret = pqc_pbkdf2_sha256((const char *)pmk, salt, salt_len, 4096, out_ptk, 32);
+    ret = pqc_pbkdf2_sha256((const char *)pmk, salt, salt_len, 4096, out_ptk, 48);
 
     os_free(salt);
     return ret;

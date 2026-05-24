@@ -11,12 +11,17 @@
 #include "../common/pqc_help.h"
 #include <oqs/oqs.h>
 #include "pqc_pasn.h"
+#include "wpa_auth.h"
+#include "wpa_auth_i.h"
+#include "../crypto/aes_wrap.h"
 
 #include <string.h>
 
 static int hostapd_pqc_send_pasn2(struct hostapd_data *hapd, struct sta_info *sta,
                                    const u8 *ciphertext, size_t ciphertext_len,
                                    const u8 *mic1);
+static int hostapd_pqc_send_pasn4(struct hostapd_data *hapd, struct sta_info *sta,
+                                  const u8 *enc_keys, size_t enc_keys_len, const u8 *mic3);
 static int hostapd_pqc_send_pasn2_sig(struct hostapd_data *hapd, struct sta_info *sta,
                                        const u8 *signature, size_t sig_len);
 
@@ -127,30 +132,18 @@ int pqc_ap_sm_rx_pasn1(struct hostapd_pqc_sm *sm, struct sta_info *sta, struct h
         goto cleanup;
     }
 
-    /* Construct PBKDF2 Salt: label || MAC sta || MAC ap || shared_secret */
-    const char *label = "PASN key deriviation";
-    size_t label_len = os_strlen(label);
-    size_t salt_len = label_len + ETH_ALEN + ETH_ALEN + sm->pasn_shared_secret_len;
-    u8 *salt = os_malloc(salt_len);
-    if (!salt) goto cleanup;
-
-    os_memcpy(salt, label, label_len);
-    os_memcpy(salt + label_len, sta->addr, ETH_ALEN);
-    os_memcpy(salt + label_len + ETH_ALEN, hapd->own_addr, ETH_ALEN);
-    os_memcpy(salt + label_len + (2 * ETH_ALEN), sm->pasn_shared_secret, sm->pasn_shared_secret_len);
-
     /* PBKDF2-SHA256: Password is PMK, Salt is the concatenated buffer */
-    /* We use 4096 iterations to match WPA standard password hashing */
-    if (pqc_pbkdf2_sha256((const char *)pmk, salt, salt_len, 4096, sm->pasn_ptk, 32) != 0) {
+    if (pqc_derive_pasn_ptk(pmk, sta->addr, hapd->own_addr,
+                            sm->pasn_shared_secret, sm->pasn_shared_secret_len,
+                            sm->pasn_ptk) != 0) {
         wpa_printf(MSG_ERROR, "PQC_LOG: AP - PBKDF2-SHA256 failed");
-        os_free(salt);
         goto cleanup;
     }
-    os_free(salt);
 
     /* Split PTK into KEK and KCK */
     os_memcpy(sm->pasn_kek, sm->pasn_ptk, 16);
     os_memcpy(sm->pasn_kck, sm->pasn_ptk + 16, 16);
+    os_memcpy(sm->pasn_tk, sm->pasn_ptk + 32, 16);
 
     /* --- 5. MIC1 Generation --- */
     size_t mic_input_len = sm->pasn_ciphertext_len + sm->pasn_dsa_signature_len;
@@ -192,7 +185,7 @@ static int hostapd_pqc_send_pasn2(struct hostapd_data *hapd, struct sta_info *st
     wpa_printf(MSG_DEBUG, "PQC_LOG: AP - Constructing PASN-2 frame");
 
     /* header(7) + ct_len(2) + ct + mic1(32) */
-    size_t frame_len = 1 + 1 + 3 + 1 + 1 + 2 + ciphertext_len + 32;
+    size_t frame_len = 1 + 1 + 3 + 1 + 1 + 2 + ciphertext_len + MIC_LEN;
     buf = wpabuf_alloc(frame_len);
     if (!buf)
         return -1;
@@ -207,7 +200,7 @@ static int hostapd_pqc_send_pasn2(struct hostapd_data *hapd, struct sta_info *st
 
     wpabuf_put_be16(buf, ciphertext_len);
     wpabuf_put_data(buf, ciphertext, ciphertext_len);
-    wpabuf_put_data(buf, mic1, 32);
+    wpabuf_put_data(buf, mic1, MIC_LEN);
 
     wpa_printf(MSG_INFO, "PQC_LOG: AP - Sending PASN-2 frame to " MACSTR
                " (ciphertext len: %zu)", MAC2STR(sta->addr), ciphertext_len);
@@ -278,4 +271,106 @@ static int hostapd_pqc_send_pasn2_sig(struct hostapd_data *hapd, struct sta_info
 }
 
 
+/* parsing PASN-3 */
+int pqc_ap_sm_rx_pasn3(struct hostapd_pqc_sm *sm, struct sta_info *sta, struct hostapd_data *hapd,
+                       const u8 *payload, size_t len) {
+
+    if (!sm || !sta || !payload || len < MIC_LEN) {
+        wpa_printf(MSG_ERROR, "PQC_LOG: AP - Invalid PASN-3 frame parameters");
+        return -1;
+    }
+
+    wpa_printf(MSG_DEBUG, "PQC_LOG: AP - Processing PASN-3 frame. Verifying MIC2...");
+
+    /* MIC2 Verification */
+    u8 mic2_calculated[MIC_LEN];
+    /* MIC2 = HMAC-SHA256(KCK, PTK) zgodnie z generowaniem na STA */
+    hmac_sha256(sm->pasn_kck, KCK_LEN, sm->pasn_ptk, PTK_LEN, mic2_calculated);
+
+    if (os_memcmp_const(mic2_calculated, payload, MIC_LEN) != 0) {
+        wpa_printf(MSG_ERROR, "PQC_LOG: AP - MIC2 verification failed. Dropping connection.");
+        return -1;
+    }
+    wpa_printf(MSG_INFO, "PQC_LOG: AP - MIC2 verified successfully.");
+
+    /* GTK and IGTK generation */
+    u8 group_keys[32]; 
+    u8 *gtk = group_keys;
+    u8 *igtk = group_keys + 16;
+    
+    /* we hope taht hapd->wpa_auth is initialized by hostapd */
+    if (hapd->wpa_auth && hapd->wpa_auth->group) {
+        /* copy current GTK */
+        os_memcpy(gtk, hapd->wpa_auth->group->GTK[hapd->wpa_auth->group->GN - 1], 16);
+        /* copy current IGTK */
+        os_memcpy(igtk, hapd->wpa_auth->group->IGTK[hapd->wpa_auth->group->GN_igtk - 4], 16);
+        wpa_printf(MSG_DEBUG, "PQC_LOG: AP - Fetched real GTK and IGTK from authenticator");
+    } else {
+        wpa_printf(MSG_WARNING, "PQC_LOG: AP - wpa_auth group not ready, using random keys (fallback)");
+        os_get_random(gtk, 16);
+        os_get_random(igtk, 16);
+    }
+
+    /* Encrypting GTK and IGTK with AES-WRAP*/
+    u8 enc_group_keys[40]; 
+    if (aes_wrap(sm->pasn_kek, KEK_LEN, 4, group_keys, enc_group_keys) < 0) {
+        wpa_printf(MSG_ERROR, "PQC_LOG: AP - Failed to encrypt group keys");
+        return -1;
+    }
+
+    /* MIC3 generation */
+    u8 mic3[MIC_LEN];
+    hmac_sha256(sm->pasn_kck, KCK_LEN, enc_group_keys, sizeof(enc_group_keys), mic3);
+
+    /* send PASN-4 */
+    if (hostapd_pqc_send_pasn4(hapd, sta, enc_group_keys, sizeof(enc_group_keys), mic3) < 0) {
+        wpa_printf(MSG_ERROR, "PQC_LOG: AP - Failed to send PASN-4");
+        return -1;
+    }
+
+    /* Instalation of TK (temporal key) in NIC driver*/
+    if (hostapd_drv_set_key(hapd->conf->iface, hapd, WPA_ALG_CCMP, sta->addr, 
+                            0, 0, 1, NULL, 0, sm->pasn_tk, TK_LEN, 0) < 0) {
+        wpa_printf(MSG_ERROR, "PQC_LOG: AP - Failed to install TK to hardware");
+    } else {
+        wpa_printf(MSG_INFO, "PQC_LOG: AP - TK installed successfully to hardware");
+    }
+    
+    /* Port authorization (Opening 802.1X traffic for this station) */
+    sta->flags |= WLAN_STA_AUTHORIZED;
+    ap_sta_set_authorized(hapd, sta, 1);
+
+    wpa_printf(MSG_INFO, "PQC_LOG: AP - PASN phase complete. Station fully authorized.");
+    return 0;
+}
+
+/* Function that sends PASN-4 to STA */
+static int hostapd_pqc_send_pasn4(struct hostapd_data *hapd, struct sta_info *sta,
+                                  const u8 *enc_keys, size_t enc_keys_len, const u8 *mic3) {
+    struct wpabuf *buf;
+    int ret;
+
+    /* Length: Category(1) + Action(1) + OUI(3) + Type(1) + Subtype(1) + Keys(40) + MIC3(32) */
+    size_t frame_len = 1 + 1 + 3 + 1 + 1 + enc_keys_len + MIC_LEN;
+    buf = wpabuf_alloc(frame_len);
+    if (!buf) return -1;
+
+    wpabuf_put_u8(buf, WLAN_ACTION_PUBLIC);
+    wpabuf_put_u8(buf, WLAN_PA_VENDOR_SPECIFIC);
+    wpabuf_put_u8(buf, PQC_OUI_0);
+    wpabuf_put_u8(buf, PQC_OUI_1);
+    wpabuf_put_u8(buf, PQC_OUI_2);
+    wpabuf_put_u8(buf, PQC_OUI_TYPE_PASN);
+    wpabuf_put_u8(buf, PQC_PAKE_TYPE_4); 
+
+    wpabuf_put_data(buf, enc_keys, enc_keys_len);
+    wpabuf_put_data(buf, mic3, MIC_LEN);
+
+    wpa_printf(MSG_INFO, "PQC_LOG: AP - Sending PASN-4 frame to " MACSTR, MAC2STR(sta->addr));
+
+    ret = hostapd_drv_send_action(hapd, hapd->iface->freq, 0, sta->addr,
+                                  wpabuf_head(buf), wpabuf_len(buf));
+    wpabuf_free(buf);
+    return ret;
+}
 

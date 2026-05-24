@@ -62,11 +62,12 @@ struct hostapd_pqc_sm {
     u8 *pasn_dsa_signature;    /* ML-DSA signature over ciphertext */
     size_t pasn_dsa_signature_len;
 
-    u8 pasn_ptk[32];           /* PTK - Pairwise Transient Key */
-    u8 pasn_kek[16];           /* Key Encryption Key */
-    u8 pasn_kck[16];           /* Key Confirmation Key */
-    u8 pasn_tk[16];            /* Temporal Key */
-    u8 pasn_mic1[32];          /* MIC1 for PASN-2 */
+    u8 pasn_ptk[PTK_LEN];           /* PTK - Pairwise Transient Key */
+    u8 pasn_kek[KEK_LEN];           /* Key Encryption Key */
+    u8 pasn_kck[KCK_LEN];           /* Key Confirmation Key */
+    u8 pasn_tk[TK_LEN];            /* Temporal Key */
+    u8 pasn_mic1[MIC_LEN];          /* MIC1 for PASN-2 */
+    u8 pasn_mic2[MIC_LEN];          /* MIC2 from PASN-3 */
 };
 
 struct hostapd_pqc_sm * pqc_ap_sm_init(struct hostapd_data *hapd, struct sta_info *sta);

@@ -7253,6 +7253,18 @@ void wpa_supplicant_event(void *ctx, enum wpa_event_type event,
                                     wpa_printf(MSG_ERROR, "PQC_LOG: Error - no PQC session found");
                                 }
                             }
+							if (subtype == PQC_PASN_TYPE_4) {
+                                wpa_printf(MSG_DEBUG, "PQC_LOG: Received PASN-4 frame (Vendor Action), len=%zu", payload_len);
+                                if (wpa_s->pqc) {
+                                    if (pqc_sm_rx_pasn4(wpa_s->pqc, payload, payload_len) == 0) {
+                                        wpa_printf(MSG_INFO, "PQC_LOG: PASN-4 processed successfully.");
+                                    } else {
+                                        wpa_printf(MSG_ERROR, "PQC_LOG: Error processing PASN-4");
+                                    }
+                                } else {
+                                    wpa_printf(MSG_ERROR, "PQC_LOG: Error - no PQC session found");
+                                }
+                            }
                         }
                     }
                 }

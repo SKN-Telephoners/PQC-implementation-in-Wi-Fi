@@ -13,6 +13,7 @@
 #include "../src/common/pqc_help.h"
 #include "pqc_sm.h"
 #include "pqc_pasn.h"
+#include "../src/crypto/aes_wrap.h"
 
 /**
  * pqc_pasn_generate_mldsa_keys - Generate ML-DSA key pair for PASN
@@ -321,7 +322,10 @@ int pqc_sm_rx_pasn2_sig(struct wpa_pqc_sm *sm, const u8 *payload, size_t payload
         wpa_printf(MSG_ERROR, "PQC_LOG: PASN - PTK derivation failed");
         goto cleanup;
     }
+    os_memcpy(sm->pasn_kek, sm->pasn_ptk, 16);
     os_memcpy(sm->pasn_kck, sm->pasn_ptk + 16, 16);
+    os_memcpy(sm->pasn_tk, sm->pasn_ptk + 32, 16);
+    
     wpa_printf(MSG_DEBUG, "PQC_LOG: PASN - PTK derived successfully");
 
     /* MIC1 verification: HMAC-SHA256(KCK, ciphertext || signature) */
@@ -331,7 +335,7 @@ int pqc_sm_rx_pasn2_sig(struct wpa_pqc_sm *sm, const u8 *payload, size_t payload
     wpabuf_put_data(mic1_input, sm->pasn_ciphertext, sm->pasn_ciphertext_len);
     wpabuf_put_data(mic1_input, signature, sig_len);
 
-    u8 mic1_calculated[32];
+    u8 mic1_calculated[MIC_LEN];
     hmac_sha256(sm->pasn_kck, 16, wpabuf_head(mic1_input), wpabuf_len(mic1_input), mic1_calculated);
     wpabuf_free(mic1_input);
 
@@ -340,8 +344,28 @@ int pqc_sm_rx_pasn2_sig(struct wpa_pqc_sm *sm, const u8 *payload, size_t payload
         goto cleanup;
     }
 
-    wpa_printf(MSG_INFO, "PQC_LOG: PASN - PASN-2 verification successful (signature + MIC1 verified)");
-    ret = 0;
+    /* MIC2 generation */
+    size_t mic2_input_len = PTK_LEN;
+    u8 *mic2_input = os_malloc(mic2_input_len);
+    if (!mic2_input) goto cleanup;
+
+    os_memcpy(mic2_input, sm->pasn_ptk, PTK_LEN);
+
+    hmac_sha256(sm->pasn_kck, KCK_LEN, mic2_input, mic2_input_len, sm->pasn_mic2);
+    os_free(mic2_input);
+    wpa_printf(MSG_INFO, "PQC_LOG: PASN - generated MIC2 and saved in state machine");
+
+    /* Send PASN-3*/
+    wpa_printf(MSG_DEBUG, "PQC_LOG: Sending PASN-3 frame with MIC2");
+
+    if (wpas_pqc_send_pasn3(sm) != 0) {
+        wpa_printf(MSG_ERROR, "PQC_LOG: Failed to send PASN-3 frame");
+        return -1;
+    }
+
+    wpa_printf(MSG_INFO, "PQC_LOG: PASN-3 frame sent successfully. Waiting for group keys...");
+
+
 
 cleanup:
     if (kem) OQS_KEM_free(kem);
@@ -350,4 +374,142 @@ cleanup:
 }
 
 
+/**
+ * wpas_pqc_send_pasn3 - Build and send PASN-3 frame with MIC2
+ *
+ * Frame structure:
+ * - Category (1B): WLAN_ACTION_PUBLIC
+ * - Action (1B): WLAN_PA_VENDOR_SPECIFIC
+ * - OUI (3B): PQC_OUI
+ * - Type (1B): PQC_OUI_TYPE_PASN
+ * - Subtype (1B): PQC_PASN_TYPE_1
+ * - Payload:
+ *   - MIC2 - 32 bytes 
+ *
+ * @sm: PQC state machine
+ * Returns: 0 on success, -1 on failure
+ */
 
+int wpas_pqc_send_pasn3(struct wpa_pqc_sm *sm) {
+    int ret;
+    struct wpabuf *buf = NULL;
+    // Use the MIC2 derived earlier (during PASN-2 parsing)
+    if (!sm) {
+        wpa_printf(MSG_ERROR, "PQC_LOG: PASN - Missing MIC2");
+        return -1;
+    }
+
+    // Payload: Type (1) + Subtype (1) + MIC_len (32)
+    size_t frame_len = 1 + 1 + 3 + 1 + 1 + MIC_LEN;
+    buf = wpabuf_alloc(frame_len);
+    if (!buf) return -1;
+
+    wpabuf_put_u8(buf, WLAN_ACTION_PUBLIC);
+    wpabuf_put_u8(buf, WLAN_PA_VENDOR_SPECIFIC);
+    wpabuf_put_u8(buf, PQC_OUI_0);
+    wpabuf_put_u8(buf, PQC_OUI_1);
+    wpabuf_put_u8(buf, PQC_OUI_2);
+    wpabuf_put_u8(buf, PQC_OUI_TYPE_PASN);
+    wpabuf_put_u8(buf, PQC_PASN_TYPE_3);
+
+    /* Payload: MIC2 */
+    wpabuf_put_data(buf, sm->pasn_mic2, MIC_LEN);
+
+    /* Get frequency and target BSSID */
+    unsigned int freq = sm->wpa_s->current_bss ? sm->wpa_s->current_bss->freq : 2412;
+    const u8 *target_bssid = sm->wpa_s->pending_bssid;
+
+    static const u8 zero_mac[ETH_ALEN] = {0, 0, 0, 0, 0, 0};
+    if (os_memcmp(target_bssid, zero_mac, ETH_ALEN) == 0 && sm->wpa_s->current_bss) {
+        target_bssid = sm->wpa_s->current_bss->bssid;
+    }
+
+    wpa_printf(MSG_INFO, "PQC_LOG: PASN - Sending PASN-3 frame to: " MACSTR, MAC2STR(target_bssid));
+
+    /* Send action frame */
+    ret = wpa_drv_send_action(sm->wpa_s, freq, 0,
+                              target_bssid,
+                              sm->wpa_s->own_addr,
+                              target_bssid,
+                              wpabuf_head(buf), wpabuf_len(buf), 0);
+
+    if (ret == 0) {
+        wpa_printf(MSG_DEBUG, "PQC_LOG: PASN - PASN-3 frame sent successfully");
+    } else {
+        wpa_printf(MSG_ERROR, "PQC_LOG: PASN - Failed to send PASN-3 frame");
+    }
+
+    wpabuf_free(buf);
+    return ret;
+}
+
+/* Parsing of PASN-4 */
+int pqc_sm_rx_pasn4(struct wpa_pqc_sm *sm, const u8 *payload, size_t payload_len) {
+    if (!sm || !payload || payload_len < 40 + MIC_LEN) {
+        wpa_printf(MSG_ERROR, "PQC_LOG: PASN - Invalid PASN-4 frame");
+        return -1;
+    }
+
+    wpa_printf(MSG_DEBUG, "PQC_LOG: PASN - Processing PASN-4 frame from AP");
+
+    /* Parsing of payload: Encrypted keys(40B) + MIC3(32B) */
+    size_t enc_keys_len = payload_len - MIC_LEN;
+    const u8 *enc_keys = payload;
+    const u8 *mic3 = payload + enc_keys_len;
+
+    /* MIC 3 verify */
+    u8 mic3_calculated[MIC_LEN];
+    hmac_sha256(sm->pasn_kck, KCK_LEN, enc_keys, enc_keys_len, mic3_calculated);
+
+    if (os_memcmp_const(mic3_calculated, mic3, MIC_LEN) != 0) {
+        wpa_printf(MSG_ERROR, "PQC_LOG: PASN - MIC3 verification failed. Disconnecting.");
+        return -1;
+    }
+    wpa_printf(MSG_DEBUG, "PQC_LOG: PASN - MIC3 verified successfully");
+
+    /* Unwrapping of GTK and IGTK */
+    u8 group_keys[32]; // 16B GTK + 16B IGTK
+    if (aes_unwrap(sm->pasn_kek, KEK_LEN, 4, enc_keys, group_keys) < 0) {
+        wpa_printf(MSG_ERROR, "PQC_LOG: PASN - Failed to decrypt group keys (AES Unwrap error)");
+        return -1;
+    }
+
+    const u8 *gtk = group_keys;
+    const u8 *igtk = group_keys + 16;
+    wpa_printf(MSG_DEBUG, "PQC_LOG: PASN - Group keys decrypted successfully");
+
+    /* instalation of keys in hardware */
+    
+    /* TK */
+    if (wpa_drv_set_key(sm->wpa_s, 0, WPA_ALG_CCMP, sm->wpa_s->bssid, 
+                        0, 1, NULL, 0, sm->pasn_tk, TK_LEN, 0) < 0) {
+        wpa_printf(MSG_ERROR, "PQC_LOG: PASN - Failed to install TK to hardware");
+    } else {
+        wpa_printf(MSG_DEBUG, "PQC_LOG: PASN - TK installed successfully");
+    }
+
+    /* GTK */
+    u8 broadcast_mac[ETH_ALEN] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
+    if (wpa_drv_set_key(sm->wpa_s, 0, WPA_ALG_CCMP, broadcast_mac, 
+                        1, 0, NULL, 0, gtk, 16, 0) < 0) {
+        wpa_printf(MSG_ERROR, "PQC_LOG: PASN - Failed to install GTK to hardware");
+    } else {
+        wpa_printf(MSG_DEBUG, "PQC_LOG: PASN - GTK installed successfully");
+    }
+
+    /* IGTK */
+    if (wpa_drv_set_key(sm->wpa_s, 0, WPA_ALG_BIP_CMAC_128, broadcast_mac, 
+                        4, 0, NULL, 0, igtk, 16, 0) < 0) {
+        wpa_printf(MSG_ERROR, "PQC_LOG: PASN - Failed to install IGTK to hardware");
+    } else {
+        wpa_printf(MSG_DEBUG, "PQC_LOG: PASN - IGTK installed successfully");
+    }
+
+    /* END (finally) */
+    wpa_supplicant_set_state(sm->wpa_s, WPA_COMPLETED);
+    // wpa_supplicant_port_cb(sm->wpa_s, sm->wpa_s->bssid, 1);
+    
+    wpa_printf(MSG_INFO, "PQC_LOG: *** PASN PHASE COMPLETE! Fully connected and secure. ***");
+
+    return 0;
+}
