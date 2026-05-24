@@ -481,7 +481,7 @@ int pqc_sm_rx_pasn4(struct wpa_pqc_sm *sm, const u8 *payload, size_t payload_len
     /* instalation of keys in hardware */
     
     /* TK */
-    if (wpa_drv_set_key(sm->wpa_s, 0, WPA_ALG_CCMP, sm->wpa_s->bssid, 
+    if (wpa_drv_set_key(sm->wpa_s, -1, WPA_ALG_CCMP, sm->wpa_s->bssid, 
                         0, 1, NULL, 0, sm->pasn_tk, TK_LEN, KEY_FLAG_PAIRWISE) < 0) {
         wpa_printf(MSG_ERROR, "PQC_LOG: PASN - Failed to install TK to hardware");
     } else {
@@ -490,16 +490,16 @@ int pqc_sm_rx_pasn4(struct wpa_pqc_sm *sm, const u8 *payload, size_t payload_len
 
     /* GTK */
     u8 broadcast_mac[ETH_ALEN] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
-    if (wpa_drv_set_key(sm->wpa_s, 0, WPA_ALG_CCMP, broadcast_mac, 
-                        1, 0, NULL, 0, gtk, 16, 0) < 0) {
+    if (wpa_drv_set_key(sm->wpa_s, -1, WPA_ALG_CCMP, broadcast_mac, 
+                        1, 0, NULL, 0, gtk, 16, KEY_FLAG_DEFAULT) < 0) {
         wpa_printf(MSG_ERROR, "PQC_LOG: PASN - Failed to install GTK to hardware");
     } else {
         wpa_printf(MSG_DEBUG, "PQC_LOG: PASN - GTK installed successfully");
     }
 
     /* IGTK */
-    if (wpa_drv_set_key(sm->wpa_s, 0, WPA_ALG_BIP_CMAC_128, broadcast_mac, 
-                        4, 0, NULL, 0, igtk, 16, 0) < 0) {
+    if (wpa_drv_set_key(sm->wpa_s, -1, WPA_ALG_BIP_CMAC_128, broadcast_mac, 
+                        4, 0, NULL, 0, igtk, 16, KEY_FLAG_DEFAULT) < 0) {
         wpa_printf(MSG_ERROR, "PQC_LOG: PASN - Failed to install IGTK to hardware");
     } else {
         wpa_printf(MSG_DEBUG, "PQC_LOG: PASN - IGTK installed successfully");
