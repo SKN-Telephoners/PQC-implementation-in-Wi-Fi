@@ -510,7 +510,9 @@ int pqc_sm_rx_pasn4(struct wpa_pqc_sm *sm, const u8 *payload, size_t payload_len
     }
 
     /* END (finally) */
+    wpa_drv_set_authorized(sm->wpa_s, 1);
     wpa_supplicant_set_state(sm->wpa_s, WPA_COMPLETED);
+    
     // wpa_supplicant_port_cb(sm->wpa_s, sm->wpa_s->bssid, 1);
     
     wpa_printf(MSG_INFO, "PQC_LOG: *** PASN PHASE COMPLETE! Fully connected and secure. ***");
