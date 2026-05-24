@@ -7238,7 +7238,19 @@ void wpa_supplicant_event(void *ctx, enum wpa_event_type event,
                                         wpa_printf(MSG_ERROR, "PQC_LOG: Error processing PASN-2!");
                                     }
                                 } else {
-                                    wpa_printf(MSG_ERROR, "PQC_LOG: Error - no initialize PQC session found");
+                                    wpa_printf(MSG_ERROR, "PQC_LOG: Error - no PQC session found");
+                                }
+                            }
+                            if (subtype == PQC_PASN_TYPE_2_SIG) {
+                                wpa_printf(MSG_DEBUG, "PQC_LOG: Received PASN-2-SIG frame (Vendor Action), len=%zu", payload_len);
+                                if (wpa_s->pqc) {
+                                    if (pqc_sm_rx_pasn2_sig(wpa_s->pqc, payload, payload_len) == 0) {
+                                        wpa_printf(MSG_INFO, "PQC_LOG: PASN-2-SIG processed successfully.");
+                                    } else {
+                                        wpa_printf(MSG_ERROR, "PQC_LOG: Error processing PASN-2-SIG!");
+                                    }
+                                } else {
+                                    wpa_printf(MSG_ERROR, "PQC_LOG: Error - no PQC session found");
                                 }
                             }
                         }

@@ -25,8 +25,9 @@
 #define PQC_OUI_TYPE_PASN      0x11
 
 /* PASN subtypes */
-#define PQC_PASN_TYPE_1        0x01  /* PASN-1: STA -> AP (ML-DSA pub key) */
-#define PQC_PASN_TYPE_2        0x02  /* PASN-2: AP -> STA (signed response) */
+#define PQC_PASN_TYPE_1        0x01  /* PASN-1: STA -> AP (ML-KEM pub key) */
+#define PQC_PASN_TYPE_2        0x02  /* PASN-2: AP -> STA (ciphertext + MIC1) */
+#define PQC_PASN_TYPE_2_SIG    0x03  /* PASN-2-SIG: AP -> STA (ML-DSA signature fragments) */
 
 const char* get_oqs_kem_alg(u8 pqc_choice);
 const char* get_oqs_dsa_alg(u8 pqc_choice);

@@ -14,11 +14,11 @@
 
 #include <string.h>
 
-int hostapd_pqc_send_pasn2(struct hostapd_data *hapd, struct sta_info *sta,
-                           const u8 *ap_mldsa_pub, size_t ap_mldsa_pub_len,
-                           const u8 *ciphertext, size_t ciphertext_len,
-                           const u8 *signature, size_t sig_len,
-                           const u8 *mic1);
+static int hostapd_pqc_send_pasn2(struct hostapd_data *hapd, struct sta_info *sta,
+                                   const u8 *ciphertext, size_t ciphertext_len,
+                                   const u8 *mic1);
+static int hostapd_pqc_send_pasn2_sig(struct hostapd_data *hapd, struct sta_info *sta,
+                                       const u8 *signature, size_t sig_len);
 
 /**
  * pqc_ap_sm_rx_pasn1 - Process received PASN-1 frame from STA
@@ -152,128 +152,129 @@ int pqc_ap_sm_rx_pasn1(struct hostapd_pqc_sm *sm, struct sta_info *sta, struct h
     os_memcpy(sm->pasn_kek, sm->pasn_ptk, 16);
     os_memcpy(sm->pasn_kck, sm->pasn_ptk + 16, 16);
 
-    /* --- 5. MIC1 Generation with 64-byte dummy signature --- */
-    u8 dummy_signature[64];
-    os_memset(dummy_signature, 0x88, 64);
-
-    size_t mic_input_len = sm->pasn_ciphertext_len + 64;
+    /* --- 5. MIC1 Generation --- */
+    size_t mic_input_len = sm->pasn_ciphertext_len + sm->pasn_dsa_signature_len;
     u8 *mic_input = os_malloc(mic_input_len);
     if (!mic_input) goto cleanup;
 
     os_memcpy(mic_input, sm->pasn_ciphertext, sm->pasn_ciphertext_len);
-    os_memcpy(mic_input + sm->pasn_ciphertext_len, dummy_signature, 64);
+    os_memcpy(mic_input + sm->pasn_ciphertext_len, sm->pasn_dsa_signature, sm->pasn_dsa_signature_len);
 
     hmac_sha256(sm->pasn_kck, 16, mic_input, mic_input_len, sm->pasn_mic1);
     os_free(mic_input);
 
-    wpa_printf(MSG_INFO, "PQC_LOG: AP - PASN-2 prepared (PTK derived via PBKDF2 with dummy signature)");
+    wpa_printf(MSG_INFO, "PQC_LOG: AP - PASN-2 prepared (PTK derived via PBKDF2)");
 
     /* --- 6. Send Response --- */
-    ret = hostapd_pqc_send_pasn2(hapd, sta, sm->dsa_pub_key, sm->dsa_pub_key_len,
+    ret = hostapd_pqc_send_pasn2(hapd, sta,
                                  sm->pasn_ciphertext, sm->pasn_ciphertext_len,
-                                 dummy_signature, 64,
                                  sm->pasn_mic1);
+    if (ret == 0)
+        ret = hostapd_pqc_send_pasn2_sig(hapd, sta,
+                                         sm->pasn_dsa_signature, sm->pasn_dsa_signature_len);
 
 cleanup:
     if (kem) OQS_KEM_free(kem);
     if (sig) OQS_SIG_free(sig);
     return ret;
 }
-/**
- * hostapd_pqc_send_pasn2 - Build and send PASN-2 frame with ML-KEM ciphertext, ML-DSA signature, and MIC1
- *
- * Frame structure:
- * - Category (1B): WLAN_ACTION_PUBLIC
- * - Action (1B): WLAN_PA_VENDOR_SPECIFIC
- * - OUI (3B): PQC_OUI
- * - Type (1B): PQC_OUI_TYPE_PASN
- * - Subtype (1B): PQC_PASN_TYPE_2
- * - Payload:
- *   - AP ML-DSA public key length (2B)
- *   - AP ML-DSA public key (variable)
- *   - Ciphertext length (2B)
- *   - ML-KEM ciphertext (variable)
- *   - Signature length (2B)
- *   - ML-DSA signature (variable)
- *   - MIC1 (32B)
- */
-int hostapd_pqc_send_pasn2(struct hostapd_data *hapd, struct sta_info *sta,
-                            const u8 *ap_mldsa_pub, size_t ap_mldsa_pub_len,
-                            const u8 *ciphertext, size_t ciphertext_len,
-                            const u8 *signature, size_t sig_len,
-                            const u8 *mic1) {
+/* PASN-2: ciphertext + MIC1 only (AP ML-DSA key is already known to STA from PAKE-2;
+ * signature is sent separately in PASN-2-SIG frames to stay under frame size limits). */
+static int hostapd_pqc_send_pasn2(struct hostapd_data *hapd, struct sta_info *sta,
+                                   const u8 *ciphertext, size_t ciphertext_len,
+                                   const u8 *mic1) {
     struct wpabuf *buf;
     int ret;
 
-    if (!hapd || !sta || !ap_mldsa_pub || !ciphertext || !signature || !mic1) {
-        wpa_printf(MSG_ERROR, "PQC_LOG: AP - Invalid PASN-2 parameters");
+    if (!hapd || !sta || !ciphertext || !mic1)
         return -1;
-    }
 
     wpa_printf(MSG_DEBUG, "PQC_LOG: AP - Constructing PASN-2 frame");
 
-    /* Frame length calculation:
-     * Header: Category (1) + Action (1) + OUI (3) + Type (1) + Subtype (1)
-     * Payload: AP ML-DSA pub key len (2) + AP ML-DSA pub key
-     *        + ciphertext len (2) + ciphertext
-     *        + signature len (2) + signature
-     *        + MIC1 (32)
-     */
-    size_t frame_len = 1 + 1 + 3 + 1 + 1 +
-                      2 + ap_mldsa_pub_len +
-                      2 + ciphertext_len +
-                      2 + sig_len +
-                      32;
+    /* header(7) + ct_len(2) + ct + mic1(32) */
+    size_t frame_len = 1 + 1 + 3 + 1 + 1 + 2 + ciphertext_len + 32;
     buf = wpabuf_alloc(frame_len);
-    if (!buf) {
-        wpa_printf(MSG_ERROR, "PQC_LOG: AP - Buffer allocation failed");
+    if (!buf)
         return -1;
-    }
 
-    /* Action Frame header */
-    wpabuf_put_u8(buf, WLAN_ACTION_PUBLIC);             // Category: Public (4)
-    wpabuf_put_u8(buf, WLAN_PA_VENDOR_SPECIFIC);        // Action: Vendor Specific (9)
-
-    /* OUI */
+    wpabuf_put_u8(buf, WLAN_ACTION_PUBLIC);
+    wpabuf_put_u8(buf, WLAN_PA_VENDOR_SPECIFIC);
     wpabuf_put_u8(buf, PQC_OUI_0);
     wpabuf_put_u8(buf, PQC_OUI_1);
     wpabuf_put_u8(buf, PQC_OUI_2);
+    wpabuf_put_u8(buf, PQC_OUI_TYPE_PASN);
+    wpabuf_put_u8(buf, PQC_PASN_TYPE_2);
 
-    /* PQC Type and Subtype */
-    wpabuf_put_u8(buf, PQC_OUI_TYPE_PASN);              // Type: PASN
-    wpabuf_put_u8(buf, PQC_PASN_TYPE_2);                // Subtype: PASN-2
-
-    /* Payload: AP ML-DSA public key with length prefix */
-    wpabuf_put_be16(buf, ap_mldsa_pub_len);
-    wpabuf_put_data(buf, ap_mldsa_pub, ap_mldsa_pub_len);
-
-    /* Payload: ML-KEM ciphertext with length prefix */
     wpabuf_put_be16(buf, ciphertext_len);
     wpabuf_put_data(buf, ciphertext, ciphertext_len);
-
-    /* Payload: ML-DSA signature with length prefix */
-    wpabuf_put_be16(buf, sig_len);
-    wpabuf_put_data(buf, signature, sig_len);
-
-    /* Payload: MIC1 (fixed 32 bytes) */
     wpabuf_put_data(buf, mic1, 32);
 
     wpa_printf(MSG_INFO, "PQC_LOG: AP - Sending PASN-2 frame to " MACSTR
-               " (AP ML-DSA pub key len: %zu, ciphertext len: %zu, sig len: %zu)",
-               MAC2STR(sta->addr), ap_mldsa_pub_len, ciphertext_len, sig_len);
+               " (ciphertext len: %zu)", MAC2STR(sta->addr), ciphertext_len);
 
-    /* Send action frame */
     ret = hostapd_drv_send_action(hapd, hapd->iface->freq, 0, sta->addr,
                                   wpabuf_head(buf), wpabuf_len(buf));
-
-    if (ret == 0) {
+    if (ret == 0)
         wpa_printf(MSG_DEBUG, "PQC_LOG: AP - PASN-2 frame sent successfully");
-    } else {
+    else
         wpa_printf(MSG_ERROR, "PQC_LOG: AP - Failed to send PASN-2 frame");
-    }
 
     wpabuf_free(buf);
     return ret;
+}
+
+/* PASN-2-SIG: send ML-DSA signature in 1400-byte fragments.
+ * Frame payload: frag_idx(1) + total_sig_len(2) + data_len(2) + data */
+static int hostapd_pqc_send_pasn2_sig(struct hostapd_data *hapd, struct sta_info *sta,
+                                       const u8 *signature, size_t sig_len) {
+    const size_t chunk = 1400;
+    size_t offset = 0;
+    u8 frag_idx = 0;
+    int ret = 0;
+
+    while (offset < sig_len) {
+        size_t data_len = sig_len - offset;
+        if (data_len > chunk)
+            data_len = chunk;
+
+        /* header(7) + frag_idx(1) + total_sig_len(2) + data_len(2) + data */
+        size_t frame_len = 1 + 1 + 3 + 1 + 1 + 1 + 2 + 2 + data_len;
+        struct wpabuf *buf = wpabuf_alloc(frame_len);
+        if (!buf)
+            return -1;
+
+        wpabuf_put_u8(buf, WLAN_ACTION_PUBLIC);
+        wpabuf_put_u8(buf, WLAN_PA_VENDOR_SPECIFIC);
+        wpabuf_put_u8(buf, PQC_OUI_0);
+        wpabuf_put_u8(buf, PQC_OUI_1);
+        wpabuf_put_u8(buf, PQC_OUI_2);
+        wpabuf_put_u8(buf, PQC_OUI_TYPE_PASN);
+        wpabuf_put_u8(buf, PQC_PASN_TYPE_2_SIG);
+
+        wpabuf_put_u8(buf, frag_idx);
+        wpabuf_put_be16(buf, (u16)sig_len);
+        wpabuf_put_be16(buf, (u16)data_len);
+        wpabuf_put_data(buf, signature + offset, data_len);
+
+        wpa_printf(MSG_DEBUG, "PQC_LOG: AP - Sending PASN-2-SIG frag %u (offset=%zu, len=%zu)",
+                   frag_idx, offset, data_len);
+
+        ret = hostapd_drv_send_action(hapd, hapd->iface->freq, 0, sta->addr,
+                                      wpabuf_head(buf), wpabuf_len(buf));
+        wpabuf_free(buf);
+
+        if (ret != 0) {
+            wpa_printf(MSG_ERROR, "PQC_LOG: AP - Failed to send PASN-2-SIG frag %u", frag_idx);
+            return ret;
+        }
+
+        offset += data_len;
+        frag_idx++;
+    }
+
+    wpa_printf(MSG_INFO, "PQC_LOG: AP - PASN-2-SIG sent (%u fragments, %zu bytes total)",
+               frag_idx, sig_len);
+    return 0;
 }
 
 

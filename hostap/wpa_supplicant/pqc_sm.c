@@ -81,9 +81,10 @@ void pqc_sm_deinit(struct wpa_pqc_sm *sm) {
     }
 
     /* PASN cleanup */
-    if (sm->pasn_ciphertext) {
+    if (sm->pasn_ciphertext)
         os_free(sm->pasn_ciphertext);
-    }
+    if (sm->pasn_sig_buf)
+        os_free(sm->pasn_sig_buf);
     if (sm->pasn_dsa_signature) {
         os_free(sm->pasn_dsa_signature);
     }

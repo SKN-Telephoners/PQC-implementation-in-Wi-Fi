@@ -164,234 +164,183 @@ int wpas_pqc_send_pasn1(struct wpa_pqc_sm *sm) {
     return ret;
 }
 
-/**
- * pqc_sm_rx_pasn2 - Process received PASN-2 frame from AP
+/* pqc_sm_rx_pasn2 - Save ciphertext and MIC1 from PASN-2 frame.
+ * Crypto verification is deferred until all PASN-2-SIG fragments arrive.
  *
- * PASN-2 frame contains:
- * - AP's ML-DSA public key (for signature verification)
- * - ML-KEM ciphertext (for KEM decapsulation)
- * - ML-DSA signature over ciphertext
- * - MIC1 (HMAC-SHA256 for integrity verification)
- *
- * @sm: PQC state machine
- * @payload: PASN-2 payload
- * @payload_len: Payload length
- * Returns: 0 on success, -1 on failure
+ * Frame payload: ct_len(2) + ciphertext + MIC1(32)
  */
 int pqc_sm_rx_pasn2(struct wpa_pqc_sm *sm, const u8 *payload, size_t payload_len) {
-    OQS_SIG *sig = NULL;
-    OQS_KEM *kem = NULL;
-    int ret = -1;
-
     wpa_printf(MSG_DEBUG, "PQC_LOG: PASN - Processing PASN-2 frame from AP");
     wpa_printf(MSG_DEBUG, "PQC_LOG: PASN - PASN-2 payload length: %zu bytes", payload_len);
 
-    if (!sm || !payload || payload_len < 10) {
+    if (!sm || !payload || payload_len < 4 + 32) {
         wpa_printf(MSG_ERROR, "PQC_LOG: PASN - Invalid PASN-2 frame (too short)");
         return -1;
     }
 
-    const char *dsa_alg = get_oqs_dsa_alg(sm->pqc_choice);
-    if (!dsa_alg) {
-        wpa_printf(MSG_ERROR, "PQC_LOG: PASN - Error in mapping DSA algorithm");
-        return -1;
-    }
-
-    sig = OQS_SIG_new(dsa_alg);
-    if (!sig) {
-        wpa_printf(MSG_ERROR, "PQC_LOG: PASN - Error in initializing OQS SIG for verification");
-        return -1;
-    }
-
-    const char *kem_alg = get_oqs_kem_alg(sm->pqc_choice);
-    if (!kem_alg) {
-        wpa_printf(MSG_ERROR, "PQC_LOG: PASN - Error in mapping KEM algorithm");
-        goto cleanup;
-    }
-
-    kem = OQS_KEM_new(kem_alg);
-    if (!kem) {
-        wpa_printf(MSG_ERROR, "PQC_LOG: PASN - Error in initializing OQS KEM");
-        goto cleanup;
-    }
-
-    /* Parse PASN-2 payload:
-     * Offset 0-1: AP ML-DSA public key length (BE16)
-     * Offset 2-(2+key_len): AP ML-DSA public key
-     * Offset (2+key_len) to (2+key_len+1): Ciphertext length (BE16)
-     * Offset (2+key_len+2)-(2+key_len+2+c_len): ML-KEM ciphertext
-     * Offset (2+key_len+2+c_len) to (2+key_len+2+c_len+1): Signature length (BE16)
-     * Offset (2+key_len+2+c_len+2)-(2+key_len+2+c_len+2+s_len): ML-DSA signature
-     * Offset (2+key_len+2+c_len+2+s_len)-(2+key_len+2+c_len+2+s_len+31): MIC1 (32 bytes)
-     */
     const u8 *pos = payload;
-    size_t remaining = payload_len;
-
-    /* Read AP's ML-DSA public key length */
-    if (remaining < 2) {
-        wpa_printf(MSG_ERROR, "PQC_LOG: PASN - PASN-2 payload too short for AP key length");
-        goto cleanup;
-    }
-
-    u16 ap_mldsa_pub_len = WPA_GET_BE16(pos);
-    pos += 2;
-    remaining -= 2;
-
-    if (remaining < ap_mldsa_pub_len + 6) {
-        wpa_printf(MSG_ERROR, "PQC_LOG: PASN - PASN-2 payload too short for AP key");
-        goto cleanup;
-    }
-
-    const u8 *ap_mldsa_pub = pos;
-    pos += ap_mldsa_pub_len;
-    remaining -= ap_mldsa_pub_len;
-
-    wpa_printf(MSG_DEBUG, "PQC_LOG: PASN - Parsed AP ML-DSA public key (len: %u)", ap_mldsa_pub_len);
-
-    /* Read ciphertext length */
     u16 ciphertext_len = WPA_GET_BE16(pos);
     pos += 2;
-    remaining -= 2;
 
-    if (remaining < ciphertext_len + 4) {
-        wpa_printf(MSG_ERROR, "PQC_LOG: PASN - PASN-2 payload too short for ciphertext");
-        goto cleanup;
+    if (payload_len < (size_t)(2 + ciphertext_len + 32)) {
+        wpa_printf(MSG_ERROR, "PQC_LOG: PASN - PASN-2 truncated");
+        return -1;
     }
 
     const u8 *ciphertext = pos;
-    pos += ciphertext_len;
-    remaining -= ciphertext_len;
+    const u8 *mic1 = pos + ciphertext_len;
 
-    wpa_printf(MSG_DEBUG, "PQC_LOG: PASN - Parsed ML-KEM ciphertext (len: %u)", ciphertext_len);
-
-    /* Read signature length */
-    u16 sig_len = WPA_GET_BE16(pos);
-    pos += 2;
-    remaining -= 2;
-
-    if (remaining < sig_len + 32) {
-        wpa_printf(MSG_ERROR, "PQC_LOG: PASN - PASN-2 payload too short for signature and MIC1");
-        goto cleanup;
-    }
-
-    const u8 *signature = pos;
-    pos += sig_len;
-    remaining -= sig_len;
-
-    wpa_printf(MSG_DEBUG, "PQC_LOG: PASN - Parsed ML-DSA signature (len: %u)", sig_len);
-
-    /* Read MIC1 (32 bytes) */
-    if (remaining < 32) {
-        wpa_printf(MSG_ERROR, "PQC_LOG: PASN - PASN-2 payload too short for MIC1");
-        goto cleanup;
-    }
-
-    const u8 *mic1_received = pos;
-
-    wpa_printf(MSG_DEBUG, "PQC_LOG: PASN - Parsed MIC1");
-
-    /* Save AP's ML-DSA public key */
-    if (sm->dsa_public_key) {
-        os_free(sm->dsa_public_key);
-    }
-    sm->dsa_public_key = os_malloc(ap_mldsa_pub_len);
-    if (!sm->dsa_public_key) {
-        wpa_printf(MSG_ERROR, "PQC_LOG: PASN - Memory allocation error for AP ML-DSA key");
-        goto cleanup;
-    }
-
-    os_memcpy(sm->dsa_public_key, ap_mldsa_pub, ap_mldsa_pub_len);
-    sm->dsa_keys_len = ap_mldsa_pub_len;
-
-    /* Verify ML-DSA signature over ciphertext */
-    if (sig_len == 64) {
-        wpa_printf(MSG_INFO, "PQC_LOG: PASN - Dummy signature of 64 bytes received. Bypassing ML-DSA verification.");
-    } else {
-        if (OQS_SIG_verify(sig, ciphertext, ciphertext_len,
-                           signature, sig_len, ap_mldsa_pub) != OQS_SUCCESS) {
-            wpa_printf(MSG_ERROR, "PQC_LOG: PASN - ML-DSA signature verification failed");
-            goto cleanup;
-        }
-        wpa_printf(MSG_DEBUG, "PQC_LOG: PASN - ML-DSA signature verification successful");
-    }
-
-    /* ML-KEM Decapsulation */
-    sm->pasn_shared_secret_len = kem->length_shared_secret;
-    sm->pasn_shared_secret = os_malloc(sm->pasn_shared_secret_len);
-    if (!sm->pasn_shared_secret) {
-        wpa_printf(MSG_ERROR, "PQC_LOG: PASN - Memory allocation error for shared secret");
-        goto cleanup;
-    }
-
-    if (OQS_KEM_decaps(kem, sm->pasn_shared_secret, ciphertext, sm->sta_second_secret_key) != OQS_SUCCESS) {
-        wpa_printf(MSG_ERROR, "PQC_LOG: PASN - ML-KEM decapsulation failed");
-        goto cleanup;
-    }
-
-    wpa_printf(MSG_DEBUG, "PQC_LOG: PASN - ML-KEM decapsulation successful (shared secret len: %zu)",
-               sm->pasn_shared_secret_len);
-
-    /* Save ciphertext and signature for MIC1 verification */
-    if (sm->pasn_ciphertext) os_free(sm->pasn_ciphertext);
+    /* Save ciphertext */
+    if (sm->pasn_ciphertext)
+        os_free(sm->pasn_ciphertext);
     sm->pasn_ciphertext = os_malloc(ciphertext_len);
-    if (!sm->pasn_ciphertext) {
-        wpa_printf(MSG_ERROR, "PQC_LOG: PASN - Memory allocation error for ciphertext");
-        goto cleanup;
-    }
+    if (!sm->pasn_ciphertext)
+        return -1;
     os_memcpy(sm->pasn_ciphertext, ciphertext, ciphertext_len);
     sm->pasn_ciphertext_len = ciphertext_len;
 
-    if (sm->pasn_dsa_signature) os_free(sm->pasn_dsa_signature);
-    sm->pasn_dsa_signature = os_malloc(sig_len);
-    if (!sm->pasn_dsa_signature) {
-        wpa_printf(MSG_ERROR, "PQC_LOG: PASN - Memory allocation error for signature");
+    /* Save MIC1 for later verification */
+    os_memcpy(sm->pasn_mic1, mic1, 32);
+
+    /* Reset signature reassembly state */
+    if (sm->pasn_sig_buf) {
+        os_free(sm->pasn_sig_buf);
+        sm->pasn_sig_buf = NULL;
+    }
+    sm->pasn_sig_buf_len = 0;
+    sm->pasn_sig_total_len = 0;
+
+    wpa_printf(MSG_DEBUG, "PQC_LOG: PASN - PASN-2 saved (ct=%u bytes, MIC1 saved). Waiting for PASN-2-SIG...",
+               ciphertext_len);
+    return 0;
+}
+
+/* pqc_sm_rx_pasn2_sig - Accumulate ML-DSA signature fragments from PASN-2-SIG frames.
+ * When all fragments are received, perform full crypto verification.
+ *
+ * Frame payload: frag_idx(1) + total_sig_len(2) + data_len(2) + data
+ */
+int pqc_sm_rx_pasn2_sig(struct wpa_pqc_sm *sm, const u8 *payload, size_t payload_len) {
+    OQS_SIG *sig = NULL;
+    OQS_KEM *kem = NULL;
+    int ret = -1;
+
+    if (!sm || !payload || payload_len < 5) {
+        wpa_printf(MSG_ERROR, "PQC_LOG: PASN - Invalid PASN-2-SIG frame");
+        return -1;
+    }
+
+    const u8 *pos = payload;
+    u8 frag_idx = *pos++;
+    u16 total_sig_len = WPA_GET_BE16(pos); pos += 2;
+    u16 data_len = WPA_GET_BE16(pos); pos += 2;
+
+    if ((size_t)(pos - payload) + data_len > payload_len) {
+        wpa_printf(MSG_ERROR, "PQC_LOG: PASN - PASN-2-SIG data overruns frame");
+        return -1;
+    }
+
+    /* Allocate reassembly buffer on first fragment */
+    if (frag_idx == 0) {
+        if (sm->pasn_sig_buf)
+            os_free(sm->pasn_sig_buf);
+        sm->pasn_sig_buf = os_malloc(total_sig_len);
+        if (!sm->pasn_sig_buf)
+            return -1;
+        sm->pasn_sig_total_len = total_sig_len;
+        sm->pasn_sig_buf_len = 0;
+    }
+
+    if (!sm->pasn_sig_buf || sm->pasn_sig_buf_len + data_len > sm->pasn_sig_total_len) {
+        wpa_printf(MSG_ERROR, "PQC_LOG: PASN - PASN-2-SIG buffer error (frag %u)", frag_idx);
+        return -1;
+    }
+
+    os_memcpy(sm->pasn_sig_buf + sm->pasn_sig_buf_len, pos, data_len);
+    sm->pasn_sig_buf_len += data_len;
+
+    wpa_printf(MSG_DEBUG, "PQC_LOG: PASN - PASN-2-SIG frag %u received (%u bytes, total %zu/%zu)",
+               frag_idx, data_len, sm->pasn_sig_buf_len, sm->pasn_sig_total_len);
+
+    /* Wait for more fragments */
+    if (sm->pasn_sig_buf_len < sm->pasn_sig_total_len)
+        return 0;
+
+    /* All fragments received — run crypto */
+    const u8 *signature = sm->pasn_sig_buf;
+    size_t sig_len = sm->pasn_sig_total_len;
+
+    wpa_printf(MSG_DEBUG, "PQC_LOG: PASN - All PASN-2-SIG fragments received (%zu bytes). Verifying...", sig_len);
+
+    if (!sm->dsa_public_key) {
+        wpa_printf(MSG_ERROR, "PQC_LOG: PASN - AP ML-DSA public key missing (should have been saved from PAKE-2)");
+        return -1;
+    }
+    if (!sm->pasn_ciphertext) {
+        wpa_printf(MSG_ERROR, "PQC_LOG: PASN - Ciphertext missing (PASN-2 not received first?)");
+        return -1;
+    }
+
+    const char *dsa_alg = get_oqs_dsa_alg(sm->pqc_choice);
+    const char *kem_alg = get_oqs_kem_alg(sm->pqc_choice);
+    if (!dsa_alg || !kem_alg)
+        return -1;
+
+    sig = OQS_SIG_new(dsa_alg);
+    kem = OQS_KEM_new(kem_alg);
+    if (!sig || !kem)
+        goto cleanup;
+
+    /* ML-DSA: verify signature over ciphertext using AP's key from PAKE-2 */
+    if (OQS_SIG_verify(sig, sm->pasn_ciphertext, sm->pasn_ciphertext_len,
+                       signature, sig_len, sm->dsa_public_key) != OQS_SUCCESS) {
+        wpa_printf(MSG_ERROR, "PQC_LOG: PASN - ML-DSA signature verification failed");
         goto cleanup;
     }
-    os_memcpy(sm->pasn_dsa_signature, signature, sig_len);
-    sm->pasn_dsa_signature_len = sig_len;
+    wpa_printf(MSG_DEBUG, "PQC_LOG: PASN - ML-DSA signature verification successful");
 
-    /* Derive PTK using PMK from completed PAKE phase */
-    if (!sm->wpa_s) {
-        wpa_printf(MSG_ERROR, "PQC_LOG: PASN - WPA supplicant not available");
+    /* ML-KEM decapsulation */
+    sm->pasn_shared_secret_len = kem->length_shared_secret;
+    if (sm->pasn_shared_secret)
+        OQS_MEM_secure_free(sm->pasn_shared_secret, sm->pasn_shared_secret_len);
+    sm->pasn_shared_secret = os_malloc(sm->pasn_shared_secret_len);
+    if (!sm->pasn_shared_secret)
+        goto cleanup;
+
+    if (OQS_KEM_decaps(kem, sm->pasn_shared_secret, sm->pasn_ciphertext, sm->sta_second_secret_key) != OQS_SUCCESS) {
+        wpa_printf(MSG_ERROR, "PQC_LOG: PASN - ML-KEM decapsulation failed");
         goto cleanup;
     }
+    wpa_printf(MSG_DEBUG, "PQC_LOG: PASN - ML-KEM decapsulation successful (shared secret len: %zu)",
+               sm->pasn_shared_secret_len);
 
+    /* PTK derivation */
     if (pqc_derive_pasn_ptk(sm->pmk, sm->wpa_s->own_addr, sm->wpa_s->bssid,
                             sm->pasn_shared_secret, sm->pasn_shared_secret_len,
                             sm->pasn_ptk) != 0) {
         wpa_printf(MSG_ERROR, "PQC_LOG: PASN - PTK derivation failed");
         goto cleanup;
     }
-
-    /* Extract KCK for MIC verification */
     os_memcpy(sm->pasn_kck, sm->pasn_ptk + 16, 16);
-
     wpa_printf(MSG_DEBUG, "PQC_LOG: PASN - PTK derived successfully");
 
-    /* Calculate expected MIC1 */
-    struct wpabuf *mic1_input = wpabuf_alloc(ciphertext_len + sig_len);
-    if (!mic1_input) {
-        wpa_printf(MSG_ERROR, "PQC_LOG: PASN - Memory allocation error for MIC1 calculation");
+    /* MIC1 verification: HMAC-SHA256(KCK, ciphertext || signature) */
+    struct wpabuf *mic1_input = wpabuf_alloc(sm->pasn_ciphertext_len + sig_len);
+    if (!mic1_input)
         goto cleanup;
-    }
-
-    wpabuf_put_data(mic1_input, ciphertext, ciphertext_len);
+    wpabuf_put_data(mic1_input, sm->pasn_ciphertext, sm->pasn_ciphertext_len);
     wpabuf_put_data(mic1_input, signature, sig_len);
 
     u8 mic1_calculated[32];
     hmac_sha256(sm->pasn_kck, 16, wpabuf_head(mic1_input), wpabuf_len(mic1_input), mic1_calculated);
     wpabuf_free(mic1_input);
 
-    /* Compare MIC1 */
-    if (os_memcmp_const(mic1_calculated, mic1_received, 32) != 0) {
+    if (os_memcmp_const(mic1_calculated, sm->pasn_mic1, 32) != 0) {
         wpa_printf(MSG_ERROR, "PQC_LOG: PASN - MIC1 verification failed");
         goto cleanup;
     }
 
-    os_memcpy(sm->pasn_mic1, mic1_received, 32);
-
     wpa_printf(MSG_INFO, "PQC_LOG: PASN - PASN-2 verification successful (signature + MIC1 verified)");
-
     ret = 0;
 
 cleanup:

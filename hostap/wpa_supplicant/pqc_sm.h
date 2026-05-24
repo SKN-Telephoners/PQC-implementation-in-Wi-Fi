@@ -63,6 +63,11 @@ struct wpa_pqc_sm {
     size_t pasn_dsa_signature_len;
     u8 pasn_mic1[32];          /* MIC1 received from AP */
 
+    /* PASN-2-SIG reassembly */
+    u8 *pasn_sig_buf;
+    size_t pasn_sig_buf_len;
+    size_t pasn_sig_total_len;
+
     /* PASN derived materials */
     u8 *pasn_shared_secret;    /* PQC shared secret from ML-KEM decapsulation */
     size_t pasn_shared_secret_len;
