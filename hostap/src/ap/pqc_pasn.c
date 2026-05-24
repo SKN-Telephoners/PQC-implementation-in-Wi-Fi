@@ -330,7 +330,7 @@ int pqc_ap_sm_rx_pasn3(struct hostapd_pqc_sm *sm, struct sta_info *sta, struct h
 
     /* Instalation of TK (temporal key) in NIC driver*/
     if (hostapd_drv_set_key(hapd->conf->iface, hapd, WPA_ALG_CCMP, sta->addr, 
-                            0, 0, 1, NULL, 0, sm->pasn_tk, TK_LEN, KEY_FLAG_DEFAULT) < 0) {
+                            0, 0, 1, NULL, 0, sm->pasn_tk, TK_LEN, KEY_FLAG_PAIRWISE) < 0) {
         wpa_printf(MSG_ERROR, "PQC_LOG: AP - Failed to install TK to hardware");
     } else {
         wpa_printf(MSG_INFO, "PQC_LOG: AP - TK installed successfully to hardware");
