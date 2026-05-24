@@ -51,6 +51,9 @@ int wpas_pqc_send_pake1(struct wpa_pqc_sm *sm, const u8 *c, size_t c_len, const 
         target_bssid = sm->wpa_s->current_bss->bssid;
     }
 
+    /* Save AP MAC now — bssid/pending_bssid are zero during PAKE-2 processing */
+    os_memcpy(sm->ap_mac, target_bssid, ETH_ALEN);
+
     wpa_printf(MSG_INFO, "PQC_LOG: Sending Public Action frame (PAKE-1) to: " MACSTR, MAC2STR(target_bssid));
 
     ret = wpa_drv_send_action(sm->wpa_s, freq, 0, target_bssid, 
@@ -73,14 +76,26 @@ int pqc_sm_rx_pake2(struct wpa_pqc_sm *sm,
 
     wpa_printf(MSG_DEBUG, "PQC_LOG: State Machine processing PAKE-2");
     
-    if (payload_len <= PQC_SID_LEN) {
+    /* Parse length-prefixed fields: enc_sid_len(2) + enc_sid + dpk_len(2) + dpk */
+    if (payload_len < 4) {
         wpa_printf(MSG_ERROR, "PQC_LOG: PAKE-2 payload too short");
         return -1;
     }
 
-    const u8 *enc_sid = payload;
-    const u8 *dpk = payload + PQC_SID_LEN;
-    size_t dpk_len = payload_len - PQC_SID_LEN;
+    const u8 *pos_p2 = payload;
+    u16 enc_sid_len_val = WPA_GET_BE16(pos_p2); pos_p2 += 2;
+    if (enc_sid_len_val != PQC_SID_LEN || payload_len < (size_t)(2 + enc_sid_len_val + 2)) {
+        wpa_printf(MSG_ERROR, "PQC_LOG: PAKE-2 malformed enc_sid field");
+        return -1;
+    }
+    const u8 *enc_sid = pos_p2; pos_p2 += enc_sid_len_val;
+    u16 dpk_len_val = WPA_GET_BE16(pos_p2); pos_p2 += 2;
+    if (payload_len < (size_t)(2 + enc_sid_len_val + 2 + dpk_len_val)) {
+        wpa_printf(MSG_ERROR, "PQC_LOG: PAKE-2 payload too short for dpk");
+        return -1;
+    }
+    const u8 *dpk = pos_p2;
+    size_t dpk_len = dpk_len_val;
 
     /* save ML-DSA key from AP (dpk) for later verification in PASN */
     if (sm->dsa_public_key) {
@@ -95,11 +110,13 @@ int pqc_sm_rx_pake2(struct wpa_pqc_sm *sm,
     wpa_printf(MSG_DEBUG, "PQC_LOG: Saved AP ML-DSA public key (len=%zu)", dpk_len);
     
     /* Decrypt {sid} using AES-256 with K_aes */
-    /* PLACEHOLDER: K_aes derived earlier */
+    wpa_hexdump(MSG_DEBUG, "PQC_DBG STA: K_aes in rx_pake2[0:8]", sm->K_aes, 8);
+    wpa_hexdump(MSG_DEBUG, "PQC_DBG STA: enc_sid received", enc_sid, enc_sid_len_val);
     void *aes_ctx = aes_decrypt_init(sm->K_aes, 32);
     if (!aes_ctx) return -1;
     aes_decrypt(aes_ctx, enc_sid, sid);
     aes_decrypt_deinit(aes_ctx);
+    wpa_hexdump(MSG_DEBUG, "PQC_DBG STA: sid decrypted", sid, PQC_SID_LEN);
 
     /* fsid = sid || id || MAC_AP || MAC_STA */
     sm->fsid_len = PQC_SID_LEN + sizeof(sm->id) + (2 * ETH_ALEN);
@@ -107,12 +124,12 @@ int pqc_sm_rx_pake2(struct wpa_pqc_sm *sm,
     if (!sm->fsid) return -1;
 
     u8 *pos = sm->fsid;
-    os_memcpy(pos, sid, PQC_SID_LEN);                
+    os_memcpy(pos, sid, PQC_SID_LEN);
     pos += PQC_SID_LEN;
-    os_memcpy(pos, sm->id, sizeof(sm->id));          
+    os_memcpy(pos, sm->id, sizeof(sm->id));
     pos += sizeof(sm->id);
-    os_memcpy(pos, sm->wpa_s->bssid, ETH_ALEN);      
-    pos += ETH_ALEN; /* MAC AP */
+    os_memcpy(pos, sm->ap_mac, ETH_ALEN);  /* saved during PAKE-1 send */
+    pos += ETH_ALEN;
     os_memcpy(pos, sm->wpa_s->own_addr, ETH_ALEN);   /* MAC STA */
 
     /* ML-KEM.KeyGen() = (ps_e, ss_e) */
@@ -137,31 +154,32 @@ int pqc_sm_rx_pake2(struct wpa_pqc_sm *sm,
 
     /* 4. r <- random */
     if (os_get_random(r, PQC_R_LEN) < 0) {
-        os_free(ps_e);
+        os_free(ps_e);  /* ps_e not yet owned by sm */
         goto cleanup;
     }
 
     /* 5. (s, T) = 2F(pwd, r, Z) */
     T = os_malloc(kem->length_public_key);
-    if (!T) { 
-        os_free(ps_e); 
-        goto cleanup; 
+    if (!T) {
+        os_free(ps_e);  /* ps_e not yet owned by sm */
+        goto cleanup;
     }
 
+    /* Save ps_e (public key hidden in Feistel) and T to SM — SM owns them from here */
+    sm->sta_kem_public_key = ps_e;
+    sm->sta_kem_pub_len = kem->length_public_key;
     sm->T = T;
     sm->T_len = kem->length_public_key;
 
     if (pqc_2f_network(sm->pwd, sm->pwd_len, r, PQC_R_LEN, ps_e, kem->length_public_key, s, T) < 0) {
-        os_free(ps_e); 
-        os_free(T); 
-        goto cleanup;
+        goto cleanup;  /* sm owns ps_e and T; deinit will free them */
     }
 
     os_memcpy(sm->s, s, PQC_R_LEN);
 
     /* 6. Send PAKE-3(s, T) */
     wpa_printf(MSG_INFO, "PQC_LOG: PAKE-3 data ready (s_len=%d, T_len=%zu)", PQC_R_LEN, kem->length_public_key);
-    
+
     if (wpas_pqc_send_pake3(sm, s, PQC_R_LEN, T, kem->length_public_key) < 0) {
         wpa_printf(MSG_ERROR, "PQC_LOG: Failed to send PAKE-3 frame");
         ret = -1;
@@ -169,8 +187,7 @@ int pqc_sm_rx_pake2(struct wpa_pqc_sm *sm,
         ret = 0;
     }
 
-    os_free(ps_e);
-    os_free(T);
+    /* ps_e and T are owned by sm->sta_kem_public_key and sm->T — do NOT free here */
 
 cleanup:
     if (kem) OQS_KEM_free(kem);
@@ -298,6 +315,10 @@ int pqc_sm_rx_pake4(struct wpa_pqc_sm *sm,
         goto cleanup;
     }
 
+    wpa_hexdump(MSG_DEBUG, "PQC_DBG STA: fsid[0:16]", sm->fsid, sm->fsid ? (sm->fsid_len < 16 ? sm->fsid_len : 16) : 0);
+    wpa_hexdump(MSG_DEBUG, "PQC_DBG STA: psk[0:8]", sm->sta_kem_public_key, 8);
+    wpa_hexdump(MSG_DEBUG, "PQC_DBG STA: K[0:8]", sm->shared_secret_K, sm->shared_secret_K_len < 8 ? sm->shared_secret_K_len : 8);
+
     /* tag verification */
     size_t Htag_len = os_strlen(tag_prefix) + sm->fsid_len + sm->pwd_len + sm->sta_kem_pub_len + PQC_R_LEN + sm->T_len + c2_len + sm->shared_secret_K_len;
     struct wpabuf *Htag_data = wpabuf_alloc(Htag_len);
@@ -336,6 +357,9 @@ int pqc_sm_rx_pake4(struct wpa_pqc_sm *sm,
 
     // PMK 
     
+    wpa_hexdump(MSG_DEBUG, "PQC_DBG STA: computed tag", Htag, 32);
+    wpa_hexdump(MSG_DEBUG, "PQC_DBG STA: received tag", tag, 32);
+
     if (os_memcmp_const(Htag, tag, 32) != 0){
         wpa_printf(MSG_WARNING, "PQC_LOG: Tag verification failed. Setting random PMK.");
         os_get_random(PMK, sizeof(PMK));
@@ -344,6 +368,9 @@ int pqc_sm_rx_pake4(struct wpa_pqc_sm *sm,
         hmac_sha256_kdf(sm->shared_secret_K, sm->shared_secret_K_len, key_prefix, wpabuf_head(Hkey_data), wpabuf_len(Hkey_data), PMK, sizeof(PMK));
     }
     wpabuf_free(Hkey_data);
+
+    /* Save PMK for PASN PTK derivation */
+    os_memcpy(sm->pmk, PMK, sizeof(PMK));
 
     wpa_sm_set_pmk(sm->wpa_s->wpa, PMK, sizeof(PMK), NULL, sm->wpa_s->bssid);
 

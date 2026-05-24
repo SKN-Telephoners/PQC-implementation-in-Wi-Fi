@@ -70,6 +70,9 @@ struct wpa_pqc_sm {
     u8 pasn_kek[16];           /* Key Encryption Key */
     u8 pasn_kck[16];           /* Key Confirmation Key */
     u8 pasn_tk[16];            /* Temporal Key */
+
+    u8 pmk[32];                /* PMK derived from PAKE, used for PASN PTK derivation */
+    u8 ap_mac[ETH_ALEN];       /* AP MAC resolved at PAKE-1 time, used for fsid */
 };
 struct wpa_pqc_sm * pqc_sm_init(struct wpa_supplicant *wpa_s, struct wpa_ssid *ssid);
 void pqc_sm_deinit(struct wpa_pqc_sm *sm);

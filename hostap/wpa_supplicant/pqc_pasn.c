@@ -350,42 +350,18 @@ int pqc_sm_rx_pasn2(struct wpa_pqc_sm *sm, const u8 *payload, size_t payload_len
     os_memcpy(sm->pasn_dsa_signature, signature, sig_len);
     sm->pasn_dsa_signature_len = sig_len;
 
-    /* Verify MIC1 = HMAC-SHA256(ciphertext || signature || KCK) */
-    /* First, derive PTK from shared secret */
-    struct wpabuf *ptk_input = wpabuf_alloc(32 + 19 + ETH_ALEN + ETH_ALEN + sm->pasn_shared_secret_len);
-    if (!ptk_input) {
-        wpa_printf(MSG_ERROR, "PQC_LOG: PASN - Memory allocation error for PTK derivation");
-        goto cleanup;
-    }
-
-    /* Get PMK from WPA state machine */
-    u8 pmk[32];
-    /* Try to get PMK from wpas_glue if available, otherwise use a derived value */
+    /* Derive PTK using PMK from completed PAKE phase */
     if (!sm->wpa_s) {
         wpa_printf(MSG_ERROR, "PQC_LOG: PASN - WPA supplicant not available");
-        wpabuf_free(ptk_input);
         goto cleanup;
     }
 
-    /* PMK is set during WPA initialization - if not available, derive from K_aes */
-    /* As fallback, use shared K_aes from PAKE phase as part of PTK input */
-    os_memcpy(pmk, sm->K_aes, 32);
-
-    wpa_printf(MSG_DEBUG, "PQC_LOG: PASN - Using K_aes as PMK source for PTK derivation");
-
-    wpabuf_put_data(ptk_input, pmk, 32);
-    wpabuf_put_data(ptk_input, (const u8 *)"PASN key deriviation", 19);
-    wpabuf_put_data(ptk_input, sm->wpa_s->own_addr, ETH_ALEN);
-    wpabuf_put_data(ptk_input, sm->wpa_s->bssid, ETH_ALEN);
-    wpabuf_put_data(ptk_input, sm->pasn_shared_secret, sm->pasn_shared_secret_len);
-
-    /* Derive PTK */
-    if (pqc_derive_pasn_ptk(sm->K_aes, sm->wpa_s->own_addr, sm->wpa_s->bssid,
+    if (pqc_derive_pasn_ptk(sm->pmk, sm->wpa_s->own_addr, sm->wpa_s->bssid,
                             sm->pasn_shared_secret, sm->pasn_shared_secret_len,
                             sm->pasn_ptk) != 0) {
         wpa_printf(MSG_ERROR, "PQC_LOG: PASN - PTK derivation failed");
         goto cleanup;
-                            }
+    }
 
     /* Extract KCK for MIC verification */
     os_memcpy(sm->pasn_kck, sm->pasn_ptk + 16, 16);

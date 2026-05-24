@@ -57,6 +57,7 @@ void pqc_sm_deinit(struct wpa_pqc_sm *sm) {
     wpa_printf(MSG_DEBUG, "PQC_LOG: Deinitializing State Machine");
 
     if (sm->fsid) os_free(sm->fsid);
+    if (sm->T) os_free(sm->T);
     
     if (sm->ap_kem_public_key) os_free(sm->ap_kem_public_key);
     if (sm->sta_kem_public_key) os_free(sm->sta_kem_public_key);
@@ -98,6 +99,7 @@ void pqc_sm_deinit(struct wpa_pqc_sm *sm) {
 
     forced_memzero(sm->pwd, sizeof(sm->pwd));
     forced_memzero(sm->K_aes, sizeof(sm->K_aes));
+    forced_memzero(sm->pmk, sizeof(sm->pmk));
 
     os_free(sm);
 
@@ -132,6 +134,7 @@ int pqc_sm_rx_auth_req(struct wpa_pqc_sm *sm) {
     }
 
     wpa_printf(MSG_DEBUG, "PQC_LOG: KEM Encapsulation successful, K_aes derived");
+    wpa_hexdump(MSG_DEBUG, "PQC_DBG STA: K_aes[0:8]", sm->K_aes, 8);
 
     /* Generating random STA id */
     if (os_get_random(sm->id, PQC_SID_LEN) < 0) {

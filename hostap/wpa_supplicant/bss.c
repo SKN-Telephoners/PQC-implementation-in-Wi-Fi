@@ -639,6 +639,36 @@ static struct wpa_bss * wpa_bss_add(struct wpa_supplicant *wpa_s,
 		bss->id, MAC2STR(bss->bssid), wpa_ssid_txt(ssid, ssid_len),
 		bss->freq, extra);
 	wpas_notify_bss_added(wpa_s, bss->bssid, bss->id);
+
+	/* PQC: process key fragment IEs from probe response */
+	if (bss->ie_len > 0) {
+		const u8 *pqc_pos = bss->ies;
+		size_t pqc_left = bss->ie_len;
+
+		while (pqc_left >= 2) {
+			u8 id = pqc_pos[0];
+			u8 elen = pqc_pos[1];
+
+			if (2 + elen > pqc_left)
+				break;
+
+			if (id == WLAN_EID_VENDOR_SPECIFIC && elen >= 5 &&
+			    os_memcmp(&pqc_pos[2], "\x00\x90\x4c", 3) == 0) {
+				u8 pqc_type = pqc_pos[5];
+
+				if (pqc_type == 0x02) {
+					wpa_printf(MSG_DEBUG,
+						   "PQC: Found PQC Key Fragment IE in wpa_bss_add (type=0x02), length=%u",
+						   elen);
+					pqc_process_vendor_ie(wpa_s, &pqc_pos[2], elen);
+				}
+			}
+
+			pqc_pos += 2 + elen;
+			pqc_left -= 2 + elen;
+		}
+	}
+
 	return bss;
 }
 
