@@ -488,6 +488,10 @@ int pqc_sm_rx_pasn4(struct wpa_pqc_sm *sm, const u8 *payload, size_t payload_len
         wpa_printf(MSG_DEBUG, "PQC_LOG: PASN - TK installed successfully");
     }
 
+    sm->wpa_s->pairwise_cipher = WPA_CIPHER_CCMP;
+    sm->wpa_s->group_cipher = WPA_CIPHER_CCMP;
+    sm->wpa_s->key_mgmt = WPA_KEY_MGMT_IEEE8021X;
+
     /* GTK */
     u8 broadcast_mac[ETH_ALEN] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
     if (wpa_drv_set_key(sm->wpa_s, -1, WPA_ALG_CCMP, broadcast_mac, 
