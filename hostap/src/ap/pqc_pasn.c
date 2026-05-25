@@ -131,7 +131,7 @@ int pqc_ap_sm_rx_pasn1(struct hostapd_pqc_sm *sm, struct sta_info *sta, struct h
         wpa_printf(MSG_ERROR, "PQC_LOG: AP - PMK derivation failed");
         goto cleanup;
     }
-
+    wpa_hexdump(MSG_ERROR, "PQC_DEBUG_STA: PMK", pmk, 16);
     /* PBKDF2-SHA256: Password is PMK, Salt is the concatenated buffer */
     if (pqc_derive_pasn_ptk(pmk, sta->addr, hapd->own_addr,
                             sm->pasn_shared_secret, sm->pasn_shared_secret_len,
@@ -312,6 +312,8 @@ int pqc_ap_sm_rx_pasn3(struct hostapd_pqc_sm *sm, struct sta_info *sta, struct h
     }
 
     /* Encrypting GTK and IGTK with AES-WRAP*/
+    wpa_hexdump(MSG_ERROR, "PQC_DEBUG_STA: GTK", gtk, 16);
+    wpa_hexdump(MSG_ERROR, "PQC_DEBUG_STA: IGTK", igtk, 16);
     u8 enc_group_keys[40]; 
     if (aes_wrap(sm->pasn_kek, KEK_LEN, 4, group_keys, enc_group_keys) < 0) {
         wpa_printf(MSG_ERROR, "PQC_LOG: AP - Failed to encrypt group keys");
@@ -329,6 +331,10 @@ int pqc_ap_sm_rx_pasn3(struct hostapd_pqc_sm *sm, struct sta_info *sta, struct h
     }
 
     /* Instalation of TK (temporal key) in NIC driver*/
+    wpa_hexdump(MSG_ERROR, "PQC_DEBUG_STA: TK", sm->pasn_tk, 16);
+    wpa_hexdump(MSG_ERROR, "PQC_DEBUG_STA: KEK", sm->pasn_kek, 16);
+    wpa_hexdump(MSG_ERROR, "PQC_DEBUG_STA: KCK", sm->pasn_kck, 16);
+    wpa_hexdump(MSG_ERROR, "PQC_DEBUG_STA: PTK", sm->pasn_ptk, 48);
     if (hostapd_drv_set_key(hapd->conf->iface, hapd, WPA_ALG_CCMP, sta->addr, 
                             0, 0, 1, NULL, 0, sm->pasn_tk, TK_LEN, KEY_FLAG_PAIRWISE) < 0) {
         wpa_printf(MSG_ERROR, "PQC_LOG: AP - Failed to install TK to hardware");

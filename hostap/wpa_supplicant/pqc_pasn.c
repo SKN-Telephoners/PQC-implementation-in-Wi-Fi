@@ -317,6 +317,7 @@ int pqc_sm_rx_pasn2_sig(struct wpa_pqc_sm *sm, const u8 *payload, size_t payload
                sm->pasn_shared_secret_len);
 
     /* PTK derivation */
+    wpa_hexdump(MSG_ERROR, "PQC_DEBUG_STA: PMK", sm->pmk, 16);
     if (pqc_derive_pasn_ptk(sm->pmk, sm->wpa_s->own_addr, sm->wpa_s->bssid,
                             sm->pasn_shared_secret, sm->pasn_shared_secret_len,
                             sm->pasn_ptk) != 0) {
@@ -482,6 +483,11 @@ int pqc_sm_rx_pasn4(struct wpa_pqc_sm *sm, const u8 *payload, size_t payload_len
     /* instalation of keys in hardware */
     
     /* TK */
+    wpa_hexdump(MSG_ERROR, "PQC_DEBUG_STA: TK", sm->pasn_tk, 16);
+    wpa_hexdump(MSG_ERROR, "PQC_DEBUG_STA: KEK", sm->pasn_kek, 16);
+    wpa_hexdump(MSG_ERROR, "PQC_DEBUG_STA: KCK", sm->pasn_kck, 16);
+    wpa_hexdump(MSG_ERROR, "PQC_DEBUG_STA: PTK", sm->pasn_ptk, 48);
+
     if (wpa_drv_set_key(sm->wpa_s, -1, WPA_ALG_CCMP, sm->wpa_s->bssid, 
                         0, 1, NULL, 0, sm->pasn_tk, TK_LEN, KEY_FLAG_PAIRWISE) < 0) {
         wpa_printf(MSG_ERROR, "PQC_LOG: PASN - Failed to install TK to hardware");
@@ -494,6 +500,7 @@ int pqc_sm_rx_pasn4(struct wpa_pqc_sm *sm, const u8 *payload, size_t payload_len
     sm->wpa_s->key_mgmt = WPA_KEY_MGMT_IEEE8021X;
 
     /* GTK */
+    wpa_hexdump(MSG_ERROR, "PQC_DEBUG_STA: GTK", gtk, 16);
     u8 broadcast_mac[ETH_ALEN] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
     if (wpa_drv_set_key(sm->wpa_s, -1, WPA_ALG_CCMP, broadcast_mac, 
                         1, 0, NULL, 0, gtk, 16, KEY_FLAG_GROUP) < 0) {
@@ -503,6 +510,7 @@ int pqc_sm_rx_pasn4(struct wpa_pqc_sm *sm, const u8 *payload, size_t payload_len
     }
 
     /* IGTK */
+    wpa_hexdump(MSG_ERROR, "PQC_DEBUG_STA: IGTK", igtk, 16);
     if (wpa_drv_set_key(sm->wpa_s, -1, WPA_ALG_BIP_CMAC_128, broadcast_mac, 
                         4, 0, NULL, 0, igtk, 16, KEY_FLAG_GROUP) < 0) {
         wpa_printf(MSG_ERROR, "PQC_LOG: PASN - Failed to install IGTK to hardware");
