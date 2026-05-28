@@ -1978,8 +1978,10 @@ OBJS += wpa_supplicant.o events.o bssid_ignore.o wpas_glue.o scan.o
 OBJS += pqc_sm.o
 OBJS += ../src/common/pqc_help.o
 OBJS += pqc_pake.o
+OBJS += pqc_pasn.o
 OBJS += ../src/ap/pqc_ap_sm.o
 OBJS += ../src/ap/pqc_pake.o
+OBJS += ../src/ap/pqc_pasn.o
 
 OBJS_t := $(OBJS) $(OBJS_l2) eapol_test.o
 OBJS_t += ../src/radius/radius_client.o

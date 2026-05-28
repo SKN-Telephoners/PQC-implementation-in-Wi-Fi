@@ -2,7 +2,14 @@
 Practical implementation of PQC algorithms based on modifying hostapd and wpa_supplicant written in C
 # SETUP (tests)
 ### virtual wlan cards
+#### NetworkManager
+Stop the service as it may be problematic during virtual wlan cards creation (Ubuntu):
+```bash
+sudo systemctl stop NetworkManager
 ```
+create virtual wlan cards:
+```bash
+sudo modprobe -r mac80211_hwsim
 sudo modprobe mac80211_hwsim radios=2
 ```
 ### dependancies
@@ -20,11 +27,12 @@ make -j4
 ```
 interface=wlan0
 driver=nl80211
-ssid=PQC
+ssid=SiecPQC
 channel=1
 hw_mode=g
 pqc_enabled=1
 pqc_choice=136
+wpa_passphrase=password
 ```
 **/hostap/wpa_supplicant** - create new file *test-sta.config:
 ```
@@ -32,10 +40,14 @@ ctrl_interface=/var/run/wpa_supplicant
 update_config=0
 
 network={
-	ssid="PQC"
+	ssid="SiecPQC"
 	key_mgmt=NONE
+    proto=RSN
+    group=CCMP
+    pairwise=CCMP
 	pqc_enabled=1
 	pqc_choice=136
+    psk="password"
 }
 ```
 ### running virtual AP & STA
@@ -256,6 +268,37 @@ Instead of the standard 4-Way Handshake deriving the PMK from a PSK, the PQC aut
 **src/ap/pqc_ap_sm.c**: ```pqc_ap_sm_derive_pmk``` derives the PMK locally using session parameters (fsid, Feistel outputs, ciphertext) saved in state machine.
 
 **src/ap/ieee802_11.c** (handle association): Modified to check the ```pqc_enabled``` flag. If enabled, it calls ```pqc_ap_sm_derive_pmk()``` to finalize the PAKE phase.
+
+## PASN
+
+**PQC PASN frame format**
+
+| Field          | Length    | Description                                   |
+|----------------|-----------|-----------------------------------------------|
+| Category       | 1 byte    | 4 (Vendor Specific Action Frame)              |
+| Action         | 1 byte    | 9                                             |
+| OUI            | 3 bytes   | 00 90 4C (test OUI)                           |
+| Type           | 1 byte    | 0x11                                          |
+| Subtype        | 1 byte    | 0x01 / 0x02 / 0x03 / 0x04                     |
+| Payload        | 32 bytes  | Variable (based on which PASN frame it is)    |
+
+### PASN-3
+#### STA: 
+**wpa_supplicant/pqc_pasn.c**: `wpas_pqc_send_pasn3` builds the frame (subtype 0x03) containing the cryptographic parameters (such as the STA's signature or encapsulation data) and sends it to the AP to prove its identity and finalize key derivation parameters.
+
+#### AP: 
+**src/ap/ieee802_11.c**: Intercepted at the top of `handle_action` (subtype 0x03).
+
+**src/ap/pqc_pasn_ap.c**: `pqc_ap_sm_rx_pasn3` parses the frame and verifies the STA's payload. Upon successful verification of MIC, it derives the PTK (Pairwise Transient Key) from the PMK. It then installs the TK (Unicast) using `KEY_FLAG_PAIRWISE` and GTK/IGTK (Broadcast/Multicast) using `KEY_FLAG_GROUP` into the hardware driver via `hostapd_drv_set_key()`. Finally, it marks the station as authorized (`ap_sta_set_authorized()`) and triggers the PASN-4 response.
+
+### PASN-4
+#### AP: 
+**src/ap/pqc_pasn_ap.c**: `hostapd_pqc_send_pasn4` generates the necessary verification tags and encrypts (AES-wrap) the GTK/IGTK keys. It then builds and sends the final PASN-4 Public Action frame (subtype 0x04) to the STA.
+
+#### STA: 
+**wpa_supplicant/events.c**: Intercepted in the RX_MGMT event handler by validating the Public Action headers and subtype 0x04.
+
+**wpa_supplicant/pqc_pasn.c**: `pqc_sm_rx_pasn4` parses the payload, decrypts the GTK/IGTK provided by the AP, and verifies the final HMAC/signatures. It then installs the TK (`KEY_FLAG_PAIRWISE`) and GTK/IGTK (`KEY_FLAG_GROUP`) into the hardware driver using `wpa_drv_set_key()`. Most importantly, it opens the controlled port for data traffic by calling `wpa_drv_set_supp_port(sm->wpa_s, 1)` and transitions the station's state machine to `WPA_COMPLETED` using `wpa_supplicant_set_state()`, concluding the secure post-quantum connection process (yay!).
 
 # Helpful functions
 All mathematical and configuration helper functions (our own) are grouped in src/common/pqc_help.c and pqc_help.h:

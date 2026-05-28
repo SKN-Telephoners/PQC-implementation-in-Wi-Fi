@@ -45,7 +45,7 @@ int pqc_ap_sm_rx_pake1(struct hostapd_pqc_sm *sm, struct hostapd_data *hapd, str
         wpa_printf(MSG_ERROR, "PQC_LOG: Error in KEM decapsulation");
         goto cleanup;
     }
-    
+    wpa_hexdump(MSG_DEBUG, "PQC_DBG AP: K_aes[0:8]", sm->K_aes, 8);
 
     /* Decryption of STA id */
     void *aes_ctx = aes_decrypt_init(sm->K_aes, 32);
@@ -64,6 +64,9 @@ int pqc_ap_sm_rx_pake1(struct hostapd_pqc_sm *sm, struct hostapd_data *hapd, str
     if (!aes_ctx) goto cleanup;
     aes_encrypt(aes_ctx, sid, enc_sid);
     aes_encrypt_deinit(aes_ctx);
+
+    wpa_hexdump(MSG_DEBUG, "PQC_DBG AP: sid plaintext", sid, sizeof(sid));
+    wpa_hexdump(MSG_DEBUG, "PQC_DBG AP: enc_sid sent", enc_sid, sizeof(enc_sid));
 
     /* fsid = sid || id || MAC_AP || MAC_STA */
     sm->fsid_len = sizeof(sid) + sizeof(id) + (2 * ETH_ALEN);
@@ -189,6 +192,10 @@ int pqc_ap_sm_rx_pake3(struct hostapd_pqc_sm *sm,
         goto cleanup;
     }
 
+    wpa_hexdump(MSG_DEBUG, "PQC_DBG AP: fsid[0:16]", sm->fsid, sm->fsid ? (sm->fsid_len < 16 ? sm->fsid_len : 16) : 0);
+    wpa_hexdump(MSG_DEBUG, "PQC_DBG AP: psk[0:8]", sm->sta_first_kem_public_key, 8);
+    wpa_hexdump(MSG_DEBUG, "PQC_DBG AP: K[0:8]", sm->shared_secret_K, sm->shared_secret_K_len < 8 ? sm->shared_secret_K_len : 8);
+
     /* Tag generation
      * HMAC-SHA256("tag verification" || fsid || pwd || psk || s || T || c || K) 
      */
@@ -210,6 +217,8 @@ int pqc_ap_sm_rx_pake3(struct hostapd_pqc_sm *sm,
     // HMAC
     hmac_sha256(sm->shared_secret_K, sm->shared_secret_K_len, wpabuf_head(tag_data), wpabuf_len(tag_data), tag);
     wpabuf_free(tag_data);
+
+    wpa_hexdump(MSG_DEBUG, "PQC_DBG AP: tag", tag, sizeof(tag));
 
     /* sending PAKE-4(c, tag) */
     if (hostapd_pqc_send_pake4(sm, sm->ciphertext_2, sm->ciphertext_2_len, tag, sizeof(tag)) < 0) {

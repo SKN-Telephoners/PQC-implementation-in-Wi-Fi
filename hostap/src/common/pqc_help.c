@@ -89,3 +89,68 @@ int pqc_2f_inverse(const u8 *K, size_t K_len,
 
     return 0;
 }
+
+int pqc_pbkdf2_sha256(const char *passphrase, const u8 *salt, size_t salt_len,
+                     int iterations, u8 *buf, size_t buflen)
+{
+    u8 counter[4];
+    u8 u[32], t[32];
+    u8 *pos = buf;
+    size_t left = buflen;
+    unsigned int i, j, block = 1;
+
+    while (left > 0) {
+        size_t clen = left > 32 ? 32 : left;
+
+        WPA_PUT_BE32(counter, block);
+        /* T_i = U_1 = hmac_sha256(salt || block_counter) */
+        struct wpabuf *salt_buf = wpabuf_alloc(salt_len + 4);
+        if (!salt_buf) return -1;
+        wpabuf_put_data(salt_buf, salt, salt_len);
+        wpabuf_put_data(salt_buf, counter, 4);
+
+        hmac_sha256((u8 *)passphrase, 32, wpabuf_head(salt_buf), wpabuf_len(salt_buf), u);
+        wpabuf_free(salt_buf);
+
+        os_memcpy(t, u, 32);
+
+        for (i = 1; i < (unsigned int)iterations; i++) {
+            hmac_sha256((u8 *)passphrase, 32, u, 32, u);
+            for (j = 0; j < 32; j++)
+                t[j] ^= u[j];
+        }
+
+        os_memcpy(pos, t, clen);
+        pos += clen;
+        left -= clen;
+        block++;
+    }
+    return 0;
+}
+
+int pqc_derive_pasn_ptk(const u8 *pmk, const u8 *sta_mac, const u8 *ap_mac,
+                       const u8 *shared_secret, size_t shared_secret_len,
+                       u8 *out_ptk)
+{
+    const char *label = "PASN key deriviation";
+    size_t label_len = os_strlen(label);
+    u8 *salt;
+    size_t salt_len;
+    int ret;
+
+    /* Salt structure: label || MAC_STA || MAC_AP || shared_secret */
+    salt_len = label_len + ETH_ALEN + ETH_ALEN + shared_secret_len;
+    salt = os_malloc(salt_len);
+    if (!salt) return -1;
+
+    os_memcpy(salt, label, label_len);
+    os_memcpy(salt + label_len, sta_mac, ETH_ALEN);
+    os_memcpy(salt + label_len + ETH_ALEN, ap_mac, ETH_ALEN);
+    os_memcpy(salt + label_len + (2 * ETH_ALEN), shared_secret, shared_secret_len);
+
+    /* Use our local standalone PBKDF2 */
+    ret = pqc_pbkdf2_sha256((const char *)pmk, salt, salt_len, 4096, out_ptk, 48);
+
+    os_free(salt);
+    return ret;
+}

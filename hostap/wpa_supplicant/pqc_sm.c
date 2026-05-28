@@ -12,6 +12,7 @@
 #include "sme.h"
 #include "../src/common/pqc_help.h"
 #include "pqc_pake.h"
+#include "pqc_pasn.h"
 
 
 /* STATE LIFECYCLE */
@@ -56,6 +57,7 @@ void pqc_sm_deinit(struct wpa_pqc_sm *sm) {
     wpa_printf(MSG_DEBUG, "PQC_LOG: Deinitializing State Machine");
 
     if (sm->fsid) os_free(sm->fsid);
+    if (sm->T) os_free(sm->T);
     
     if (sm->ap_kem_public_key) os_free(sm->ap_kem_public_key);
     if (sm->sta_kem_public_key) os_free(sm->sta_kem_public_key);
@@ -70,8 +72,35 @@ void pqc_sm_deinit(struct wpa_pqc_sm *sm) {
         OQS_MEM_secure_free(sm->sta_second_secret_key, sm->sta_second_secret_len);
     }
 
+    /* ML-DSA cleanup */
+    if (sm->sta_mldsa_public_key) {
+        os_free(sm->sta_mldsa_public_key);
+    }
+    if (sm->sta_mldsa_secret_key) {
+        OQS_MEM_secure_free(sm->sta_mldsa_secret_key, sm->sta_mldsa_secret_len);
+    }
+
+    /* PASN cleanup */
+    if (sm->pasn_ciphertext)
+        os_free(sm->pasn_ciphertext);
+    if (sm->pasn_sig_buf)
+        os_free(sm->pasn_sig_buf);
+    if (sm->pasn_dsa_signature) {
+        os_free(sm->pasn_dsa_signature);
+    }
+    if (sm->pasn_shared_secret) {
+        OQS_MEM_secure_free(sm->pasn_shared_secret, sm->pasn_shared_secret_len);
+    }
+
+    forced_memzero(sm->pasn_ptk, sizeof(sm->pasn_ptk));
+    forced_memzero(sm->pasn_kek, sizeof(sm->pasn_kek));
+    forced_memzero(sm->pasn_kck, sizeof(sm->pasn_kck));
+    forced_memzero(sm->pasn_tk, sizeof(sm->pasn_tk));
+    forced_memzero(sm->pasn_mic1, sizeof(sm->pasn_mic1));
+
     forced_memzero(sm->pwd, sizeof(sm->pwd));
     forced_memzero(sm->K_aes, sizeof(sm->K_aes));
+    forced_memzero(sm->pmk, sizeof(sm->pmk));
 
     os_free(sm);
 
@@ -106,6 +135,7 @@ int pqc_sm_rx_auth_req(struct wpa_pqc_sm *sm) {
     }
 
     wpa_printf(MSG_DEBUG, "PQC_LOG: KEM Encapsulation successful, K_aes derived");
+    wpa_hexdump(MSG_DEBUG, "PQC_DBG STA: K_aes[0:8]", sm->K_aes, 8);
 
     /* Generating random STA id */
     if (os_get_random(sm->id, PQC_SID_LEN) < 0) {
@@ -163,12 +193,31 @@ int pqc_sm_assoc_success(struct wpa_pqc_sm *sm) {
     wpa_printf(MSG_INFO, "PQC_LOG: Generation of the second key pair ended successfully");
 
     OQS_KEM_free(kem);
+
+    /* PASN Phase: Generate ML-DSA keys and send PASN-1 */
+    wpa_printf(MSG_DEBUG, "PQC_LOG: Transitioning to PASN phase. Generating ML-DSA keys...");
+
+    if (pqc_pasn_generate_mldsa_keys(sm) != 0) {
+        wpa_printf(MSG_ERROR, "PQC_LOG: Failed to generate ML-DSA keys for PASN");
+        return -1;
+    }
+
+    /* Send PASN-1 frame with ML-DSA public key */
+    wpa_printf(MSG_DEBUG, "PQC_LOG: Sending PASN-1 frame with ML-DSA public key");
+
+    if (wpas_pqc_send_pasn1(sm) != 0) {
+        wpa_printf(MSG_ERROR, "PQC_LOG: Failed to send PASN-1 frame");
+        return -1;
+    }
+
+    wpa_printf(MSG_INFO, "PQC_LOG: PASN-1 frame sent successfully. Waiting for PASN-2...");
+
     return 0;
 
 cleanup:
     if (sm->sta_second_pub_key) { 
         os_free(sm->sta_second_pub_key); 
-        sm->sta_second_pub_key = NULL; 
+        sm->sta_second_pub_key = NULL;
     }
     if (sm->sta_second_secret_key) { 
         OQS_MEM_secure_free(sm->sta_second_secret_key, sm->sta_second_secret_len); 

@@ -56,6 +56,7 @@
 #include "nan_supplicant.h"
 #include "pqc_sm.h"
 #include "pqc_pake.h"
+#include "pqc_pasn.h"
 
 
 #define MAX_OWE_TRANSITION_BSS_SELECT_COUNT 5
@@ -7189,48 +7190,85 @@ void wpa_supplicant_event(void *ctx, enum wpa_event_type event,
                 if (data->rx_mgmt.frame_len >= 31) {
                     const u8 *pos = data->rx_mgmt.frame + 24;
                     
-                    /* cheching whether category/type is correct */
+                    /* checking whether category/type is correct */
                     if (pos[0] == WLAN_ACTION_PUBLIC && 
                         pos[1] == WLAN_PA_VENDOR_SPECIFIC && 
                         pos[2] == PQC_OUI_0 && 
                         pos[3] == PQC_OUI_1 && 
-                        pos[4] == PQC_OUI_2 && 
-                        pos[5] == PQC_OUI_TYPE_PAKE) {
+                        pos[4] == PQC_OUI_2) {
 
+                        u8 type = pos[5];
                         u8 subtype = pos[6];
-						const u8 *payload = pos + 7;
-						size_t payload_len = data->rx_mgmt.frame_len - 24 - 7;
+                        const u8 *payload = pos + 7;
+                        size_t payload_len = data->rx_mgmt.frame_len - 24 - 7;
 
+                        if (type == PQC_OUI_TYPE_PAKE) {
                             /* checking Subtype. 0x02 means PAKE-2 frame */
                             if (subtype == PQC_PAKE_TYPE_2) {
                                 wpa_printf(MSG_DEBUG, "PQC_LOG: Received PAKE-2 frame (Vendor Action), len=%zu", payload_len);
                                 
-								if (wpa_s->pqc) {
+                                if (wpa_s->pqc) {
                                     pqc_sm_rx_pake2(wpa_s->pqc, payload, payload_len);
                                 } else {
                                     wpa_printf(MSG_ERROR, "PQC_LOG: Error - no initialize PQC session found");
                                 }
                             }
-							/* checking Subtype. 0x04 means PAKE-2 frame */
-							if (subtype == PQC_PAKE_TYPE_4) {
+                            /* checking Subtype. 0x04 means PAKE-4 frame */
+                            if (subtype == PQC_PAKE_TYPE_4) {
                                 wpa_printf(MSG_DEBUG, "PQC_LOG: Received PAKE-4 frame (Vendor Action), len=%zu", payload_len);
                                 
-								if (wpa_s->pqc) {
+                                if (wpa_s->pqc) {
                                     if (pqc_sm_rx_pake4(wpa_s->pqc, payload, payload_len) == 0) {
                                         wpa_printf(MSG_INFO, "PQC_LOG: PAKE-4 processed successfully. Association triggered.");
                                     } else {
-										wpa_printf(MSG_ERROR, "PQC_LOG: Error processing PAKE-4! Aborting.");
+                                        wpa_printf(MSG_ERROR, "PQC_LOG: Error processing PAKE-4! Aborting.");
                                         wpa_supplicant_set_state(wpa_s, WPA_DISCONNECTED);
-									}
+                                    }
                                 } else {
                                     wpa_printf(MSG_ERROR, "PQC_LOG: Error - no initialize PQC session found");
                                 }
-                               
                             }
-                        
+                        } else if (type == PQC_OUI_TYPE_PASN) {
+                            if (subtype == PQC_PASN_TYPE_2) {
+                                wpa_printf(MSG_DEBUG, "PQC_LOG: Received PASN-2 frame (Vendor Action), len=%zu", payload_len);
+                                if (wpa_s->pqc) {
+                                    if (pqc_sm_rx_pasn2(wpa_s->pqc, payload, payload_len) == 0) {
+                                        wpa_printf(MSG_INFO, "PQC_LOG: PASN-2 processed successfully.");
+                                    } else {
+                                        wpa_printf(MSG_ERROR, "PQC_LOG: Error processing PASN-2!");
+                                    }
+                                } else {
+                                    wpa_printf(MSG_ERROR, "PQC_LOG: Error - no PQC session found");
+                                }
+                            }
+                            if (subtype == PQC_PASN_TYPE_2_SIG) {
+                                wpa_printf(MSG_DEBUG, "PQC_LOG: Received PASN-2-SIG frame (Vendor Action), len=%zu", payload_len);
+                                if (wpa_s->pqc) {
+                                    if (pqc_sm_rx_pasn2_sig(wpa_s->pqc, payload, payload_len) == 0) {
+                                        wpa_printf(MSG_INFO, "PQC_LOG: PASN-2-SIG processed successfully.");
+                                    } else {
+                                        wpa_printf(MSG_ERROR, "PQC_LOG: Error processing PASN-2-SIG!");
+                                    }
+                                } else {
+                                    wpa_printf(MSG_ERROR, "PQC_LOG: Error - no PQC session found");
+                                }
+                            }
+							if (subtype == PQC_PASN_TYPE_4) {
+                                wpa_printf(MSG_DEBUG, "PQC_LOG: Received PASN-4 frame (Vendor Action), len=%zu", payload_len);
+                                if (wpa_s->pqc) {
+                                    if (pqc_sm_rx_pasn4(wpa_s->pqc, payload, payload_len) == 0) {
+                                        wpa_printf(MSG_INFO, "PQC_LOG: PASN-4 processed successfully.");
+                                    } else {
+                                        wpa_printf(MSG_ERROR, "PQC_LOG: Error processing PASN-4");
+                                    }
+                                } else {
+                                    wpa_printf(MSG_ERROR, "PQC_LOG: Error - no PQC session found");
+                                }
+                            }
+                        }
                     }
                 }
-                /* PQC PAKE end */
+                /* PQC PAKE/PASN end */
 
                 /* In case it was not PQC frame */
                 wpas_event_rx_mgmt_action(

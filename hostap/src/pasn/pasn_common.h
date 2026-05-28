@@ -53,9 +53,9 @@ struct pasn_data {
 	u8 mld_addr[ETH_ALEN];
 	bool is_ml_peer;
 
-#ifdef CONFIG_SAE
+#if defined(CONFIG_SAE) || defined(CONFIG_PASN)
 	struct sae_pt *pt;
-#endif /* CONFIG_SAE */
+#endif /* CONFIG_SAE || CONFIG_PASN */
 
 	/* Responder */
 	const char *password;

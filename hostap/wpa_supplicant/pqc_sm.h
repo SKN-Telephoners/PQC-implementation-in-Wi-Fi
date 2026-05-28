@@ -49,7 +49,37 @@ struct wpa_pqc_sm {
     // ML-DSA
     u8 *dsa_public_key;     
     size_t dsa_keys_len;
-}; 
+
+    // PASN
+    u8 *sta_mldsa_secret_key;  /* ML-DSA secret key (STA) generated after association */
+    size_t sta_mldsa_secret_len;
+    u8 *sta_mldsa_public_key;  /* ML-DSA public key (STA) generated after association */
+    size_t sta_mldsa_public_len;
+
+    /* PASN-2 received materials */
+    u8 *pasn_ciphertext;       /* ML-KEM ciphertext received from AP */
+    size_t pasn_ciphertext_len;
+    u8 *pasn_dsa_signature;    /* ML-DSA signature received from AP */
+    size_t pasn_dsa_signature_len;
+    u8 pasn_mic1[MIC_LEN];          /* MIC1 received from AP */
+    u8 pasn_mic2[MIC_LEN];           /* MIC 2 generated during PARSING OF PASN2*/
+
+    /* PASN-2-SIG reassembly */
+    u8 *pasn_sig_buf;
+    size_t pasn_sig_buf_len;
+    size_t pasn_sig_total_len;
+
+    /* PASN derived materials */
+    u8 *pasn_shared_secret;    /* PQC shared secret from ML-KEM decapsulation */
+    size_t pasn_shared_secret_len;
+    u8 pasn_ptk[PTK_LEN];           /* PTK - Pairwise Transient Key */
+    u8 pasn_kek[KEK_LEN];           /* Key Encryption Key */
+    u8 pasn_kck[KCK_LEN];           /* Key Confirmation Key */
+    u8 pasn_tk[TK_LEN];            /* Temporal Key */
+
+    u8 pmk[32];                /* PMK derived from PAKE, used for PASN PTK derivation */
+    u8 ap_mac[ETH_ALEN];       /* AP MAC resolved at PAKE-1 time, used for fsid */
+};
 struct wpa_pqc_sm * pqc_sm_init(struct wpa_supplicant *wpa_s, struct wpa_ssid *ssid);
 void pqc_sm_deinit(struct wpa_pqc_sm *sm);
 int pqc_sm_rx_auth_req(struct wpa_pqc_sm *sm);

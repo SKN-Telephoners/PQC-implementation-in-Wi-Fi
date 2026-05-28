@@ -391,7 +391,7 @@ struct hostapd_data {
 	struct hostapd_eap_user tmp_eap_user;
 #endif /* CONFIG_SQLITE */
 
-#ifdef CONFIG_SAE
+#if defined(CONFIG_SAE) || defined(CONFIG_PASN)
 
 #define COMEBACK_KEY_SIZE 8
 #define COMEBACK_PENDING_IDX_SIZE 256
@@ -401,6 +401,8 @@ struct hostapd_data {
 	struct os_reltime last_comeback_key_update;
 	u16 comeback_idx;
 	u16 comeback_pending_idx[COMEBACK_PENDING_IDX_SIZE];
+#endif /* CONFIG_SAE || CONFIG_PASN */
+#ifdef CONFIG_SAE
 	int dot11RSNASAERetransPeriod; /* msec */
 	struct dl_list sae_commit_queue; /* struct hostapd_sae_commit_queue */
 #endif /* CONFIG_SAE */
