@@ -28,8 +28,8 @@
 #define PQC_PASN_TYPE_1        0x01  /* PASN-1: STA -> AP (ML-KEM pub key) */
 #define PQC_PASN_TYPE_2        0x02  /* PASN-2: AP -> STA (ciphertext + MIC1) */
 #define PQC_PASN_TYPE_2_SIG    0x03  /* PASN-2-SIG: AP -> STA (ML-DSA signature fragments) */
-#define PQC_PASN_TYPE_3        0x04
-#define PQC_PASN_TYPE_4        0x05
+#define PQC_PASN_TYPE_3        0x04  /* PASN-3: STA -> AP (MIC2) */
+#define PQC_PASN_TYPE_4        0x05  /* PASN-4: AP -> STA ({GTK} + {IGTK} + MIC3) */
 
 /* other useful */
 #define MIC_LEN                32
@@ -37,9 +37,15 @@
 #define KEK_LEN                16
 #define KCK_LEN                16
 #define TK_LEN                 16
+#define PMK_LEN                32
+#define ID_LEN                 16
+#define TAG_LEN                32
+#define AES_KEY_LEN            32
+#define TIMES_AES_WRAP         4
 
 const char* get_oqs_kem_alg(u8 pqc_choice);
 const char* get_oqs_dsa_alg(u8 pqc_choice);
+const char* get_oqs_kem_pub_len(u8 pqc_choice);
 
 int pqc_pbkdf2_sha256(const char *passphrase, const u8 *salt, size_t salt_len,
                      int iterations, u8 *buf, size_t buflen);

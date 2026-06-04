@@ -25,6 +25,13 @@ const char* get_oqs_dsa_alg(u8 pqc_choice) {
     return NULL;
 }
 
+const char* get_oqs_kem_pub_len(u8 pqc_choice) {
+    if (pqc_choice & 0x80) return OQS_KEM_kyber_512_length_public_key;
+    if (pqc_choice & 0x40) return OQS_KEM_kyber_768_length_public_key;
+    if (pqc_choice & 0x20) return OQS_KEM_kyber_1024_length_public_key;
+    return NULL;
+}
+
 /**
  * pqc_2f_network - Implements the Double Feistel Network (2F)
  * T = M (dot) H1(K, r)
@@ -90,6 +97,8 @@ int pqc_2f_inverse(const u8 *K, size_t K_len,
     return 0;
 }
 
+
+//for delete
 int pqc_pbkdf2_sha256(const char *passphrase, const u8 *salt, size_t salt_len,
                      int iterations, u8 *buf, size_t buflen)
 {
@@ -128,6 +137,7 @@ int pqc_pbkdf2_sha256(const char *passphrase, const u8 *salt, size_t salt_len,
     return 0;
 }
 
+//same as the function higher up
 int pqc_derive_pasn_ptk(const u8 *pmk, const u8 *sta_mac, const u8 *ap_mac,
                        const u8 *shared_secret, size_t shared_secret_len,
                        u8 *out_ptk)
@@ -154,3 +164,4 @@ int pqc_derive_pasn_ptk(const u8 *pmk, const u8 *sta_mac, const u8 *ap_mac,
     os_free(salt);
     return ret;
 }
+

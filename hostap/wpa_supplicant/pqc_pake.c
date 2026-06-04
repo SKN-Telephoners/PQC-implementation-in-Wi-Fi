@@ -263,8 +263,8 @@ int pqc_sm_rx_pake4(struct wpa_pqc_sm *sm,
     OQS_KEM *kem = NULL;
     const char *tag_prefix = "tag verification";
     const char *key_prefix = "key derivation";
-    u8 Htag[32]; 
-    u8 PMK[32];
+    u8 Htag[TAG_LEN]; 
+    u8 PMK[PMK_LEN];
 
     wpa_printf(MSG_DEBUG, "PQC_LOG: State Machine processing PAKE-4");
 
@@ -288,7 +288,7 @@ int pqc_sm_rx_pake4(struct wpa_pqc_sm *sm,
     size_t c2_len = kem->length_ciphertext;
     const u8 *tag = payload + c2_len;
     size_t tag_len = payload_len - c2_len;
-    if (tag_len < 32) {
+    if (tag_len < TAG_LEN) {
         wpa_printf(MSG_ERROR, "PQC_LOG: PAKE-4 tag too short");
         goto cleanup;
     }
@@ -360,7 +360,7 @@ int pqc_sm_rx_pake4(struct wpa_pqc_sm *sm,
     wpa_hexdump(MSG_DEBUG, "PQC_DBG STA: computed tag", Htag, 32);
     wpa_hexdump(MSG_DEBUG, "PQC_DBG STA: received tag", tag, 32);
 
-    if (os_memcmp_const(Htag, tag, 32) != 0){
+    if (os_memcmp_const(Htag, tag, TAG_LEN) != 0){
         wpa_printf(MSG_WARNING, "PQC_LOG: Tag verification failed. Setting random PMK.");
         os_get_random(PMK, sizeof(PMK));
     } else {

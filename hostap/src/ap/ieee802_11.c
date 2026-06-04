@@ -7123,7 +7123,7 @@ static void handle_assoc(struct hostapd_data *hapd,
      * PQC: CAPTURING ASSOC REQ AND GENERATING PMK
      * ========================================================= */
     if (sta && sta->pqc && hapd->conf->pqc_enabled) {
-        u8 PMK[32];
+        u8 PMK[PMK_LEN];
         
         if (pqc_ap_sm_derive_pmk(sta->pqc, PMK) == 0) {
             wpa_printf(MSG_INFO, "PQC_LOG: PMK for STA " MACSTR " generated.", MAC2STR(mgmt->sa));
@@ -7891,7 +7891,7 @@ static int handle_action(struct hostapd_data *hapd,
 								wpa_printf(MSG_ERROR, "PQC_LOG: Failed to process PAKE-3!");
 							}
 						} else {
-							wpa_printf(MSG_ERROR, "PQC_LOG: too shaor PAKE-3 payload");
+							wpa_printf(MSG_ERROR, "PQC_LOG: too short PAKE-3 payload");
 						}
 					} else {
 						wpa_printf(MSG_DEBUG, "PQC_LOG: Ignored PAKE-3 (no initialized session for STA)");

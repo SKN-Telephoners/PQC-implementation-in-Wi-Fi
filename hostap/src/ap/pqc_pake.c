@@ -20,7 +20,7 @@ int pqc_ap_sm_rx_pake1(struct hostapd_pqc_sm *sm, struct hostapd_data *hapd, str
     
     OQS_KEM *kem = NULL;
     OQS_SIG *sig = NULL;
-    u8 id[16];
+    u8 id[ID_LEN];
     int ret = -1;
 
     if (!sm || len < 4) return -1;
@@ -151,7 +151,7 @@ int pqc_ap_sm_rx_pake3(struct hostapd_pqc_sm *sm,
                        const u8 *s, size_t s_len, 
                        const u8 *T, size_t T_len) {
     u8 r[PQC_R_LEN];
-    u8 tag[32]; 
+    u8 tag[TAG_LEN]; 
     const char *tag_prefix = "tag verification";
     int ret = -1;
     OQS_KEM *kem = NULL;

@@ -48,7 +48,7 @@ int pqc_ap_sm_rx_pasn1(struct hostapd_pqc_sm *sm, struct sta_info *sta, struct h
     OQS_SIG *sig = NULL;
     OQS_KEM *kem = NULL;
     int ret = -1;
-    u8 pmk[32];
+    u8 pmk[PMK_LEN];
 
     wpa_printf(MSG_DEBUG, "PQC_LOG: AP - Processing PASN-1 frame (ML-KEM focus)");
 
@@ -141,9 +141,9 @@ int pqc_ap_sm_rx_pasn1(struct hostapd_pqc_sm *sm, struct sta_info *sta, struct h
     }
 
     /* Split PTK into KEK and KCK */
-    os_memcpy(sm->pasn_kek, sm->pasn_ptk, 16);
-    os_memcpy(sm->pasn_kck, sm->pasn_ptk + 16, 16);
-    os_memcpy(sm->pasn_tk, sm->pasn_ptk + 32, 16);
+    os_memcpy(sm->pasn_kek, sm->pasn_ptk, KEK_LEN);
+    os_memcpy(sm->pasn_kck, sm->pasn_ptk + KEK_LEN, KCK_LEN);
+    os_memcpy(sm->pasn_tk, sm->pasn_ptk + KEK_LEN + KCK_LEN, TK_LEN);
 
     /* --- 5. MIC1 Generation --- */
     size_t mic_input_len = sm->pasn_ciphertext_len + sm->pasn_dsa_signature_len;
@@ -153,7 +153,7 @@ int pqc_ap_sm_rx_pasn1(struct hostapd_pqc_sm *sm, struct sta_info *sta, struct h
     os_memcpy(mic_input, sm->pasn_ciphertext, sm->pasn_ciphertext_len);
     os_memcpy(mic_input + sm->pasn_ciphertext_len, sm->pasn_dsa_signature, sm->pasn_dsa_signature_len);
 
-    hmac_sha256(sm->pasn_kck, 16, mic_input, mic_input_len, sm->pasn_mic1);
+    hmac_sha256(sm->pasn_kck, KCK_LEN, mic_input, mic_input_len, sm->pasn_mic1);
     os_free(mic_input);
 
     wpa_printf(MSG_INFO, "PQC_LOG: AP - PASN-2 prepared (PTK derived via PBKDF2)");
@@ -294,7 +294,7 @@ int pqc_ap_sm_rx_pasn3(struct hostapd_pqc_sm *sm, struct sta_info *sta, struct h
     wpa_printf(MSG_INFO, "PQC_LOG: AP - MIC2 verified successfully.");
 
     /* GTK and IGTK generation */
-    u8 group_keys[32]; 
+    u8 group_keys[WPA_GTK_MAX_LEN]; 
     u8 *gtk = group_keys;
     u8 *igtk = group_keys + 16;
     
@@ -315,7 +315,7 @@ int pqc_ap_sm_rx_pasn3(struct hostapd_pqc_sm *sm, struct sta_info *sta, struct h
     wpa_hexdump(MSG_ERROR, "PQC_DEBUG_STA: GTK", gtk, 16);
     wpa_hexdump(MSG_ERROR, "PQC_DEBUG_STA: IGTK", igtk, 16);
     u8 enc_group_keys[40]; 
-    if (aes_wrap(sm->pasn_kek, KEK_LEN, 4, group_keys, enc_group_keys) < 0) {
+    if (aes_wrap(sm->pasn_kek, KEK_LEN, TIMES_AES_WRAP, group_keys, enc_group_keys) < 0) {
         wpa_printf(MSG_ERROR, "PQC_LOG: AP - Failed to encrypt group keys");
         return -1;
     }
@@ -331,10 +331,10 @@ int pqc_ap_sm_rx_pasn3(struct hostapd_pqc_sm *sm, struct sta_info *sta, struct h
     }
 
     /* Instalation of TK (temporal key) in NIC driver*/
-    wpa_hexdump(MSG_ERROR, "PQC_DEBUG_STA: TK", sm->pasn_tk, 16);
-    wpa_hexdump(MSG_ERROR, "PQC_DEBUG_STA: KEK", sm->pasn_kek, 16);
-    wpa_hexdump(MSG_ERROR, "PQC_DEBUG_STA: KCK", sm->pasn_kck, 16);
-    wpa_hexdump(MSG_ERROR, "PQC_DEBUG_STA: PTK", sm->pasn_ptk, 48);
+    wpa_hexdump(MSG_ERROR, "PQC_DEBUG_STA: TK", sm->pasn_tk, TK_LEN);
+    wpa_hexdump(MSG_ERROR, "PQC_DEBUG_STA: KEK", sm->pasn_kek, KEK_LEN);
+    wpa_hexdump(MSG_ERROR, "PQC_DEBUG_STA: KCK", sm->pasn_kck, KCK_LEN);
+    wpa_hexdump(MSG_ERROR, "PQC_DEBUG_STA: PTK", sm->pasn_ptk, PTK_LEN);
     if (hostapd_drv_set_key(hapd->conf->iface, hapd, WPA_ALG_CCMP, sta->addr, 
                             0, 0, 1, NULL, 0, sm->pasn_tk, TK_LEN, KEY_FLAG_PAIRWISE) < 0) {
         wpa_printf(MSG_ERROR, "PQC_LOG: AP - Failed to install TK to hardware");

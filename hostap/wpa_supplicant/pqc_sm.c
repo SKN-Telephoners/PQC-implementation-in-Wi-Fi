@@ -28,10 +28,10 @@ struct wpa_pqc_sm * pqc_sm_init(struct wpa_supplicant *wpa_s, struct wpa_ssid *s
 
     sm->wpa_s = wpa_s;
     sm->pqc_choice = ssid->pqc_choice;
-    sm->pqc_enabled = 1;
+    sm->pqc_enabled = ssid->pqc_enabled;
 
     // AP's pub KEM key (probe response)
-    sm->ap_kem_pub_len = 800; 
+    sm->ap_kem_pub_len = get_oqs_kem_pub_len(sm->pqc_choice); 
     sm->ap_kem_public_key = os_malloc(sm->ap_kem_pub_len);
 
     if (sm->ap_kem_public_key) {
@@ -144,7 +144,7 @@ int pqc_sm_rx_auth_req(struct wpa_pqc_sm *sm) {
     }
 
     /* Encryption of id */
-    void *aes_ctx = aes_encrypt_init(sm->K_aes, 32);
+    void *aes_ctx = aes_encrypt_init(sm->K_aes, AES_KEY_LEN);
     if (!aes_ctx) goto cleanup;
     aes_encrypt(aes_ctx, sm->id, enc_id);
     aes_encrypt_deinit(aes_ctx);

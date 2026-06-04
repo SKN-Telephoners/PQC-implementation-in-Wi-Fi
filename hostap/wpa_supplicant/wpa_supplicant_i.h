@@ -21,6 +21,7 @@
 #include "config_ssid.h"
 #include "wmm_ac.h"
 #include "pasn/pasn_common.h"
+#include <oqs/oqs.h>
 
 extern const char *const wpa_supplicant_version;
 extern const char *const wpa_supplicant_license;
@@ -1737,7 +1738,7 @@ struct wpa_supplicant {
 	u8 pmkid_anonce[NONCE_LEN];
 	bool pmkid_anonce_set;
 #endif /* CONFIG_PMKSA_PRIVACY */
-	u8 pqc_kem_buffer[800];
+	u8 pqc_kem_buffer[OQS_KEM_kyber_512_length_public_key];
 	/*
 	* PQC: new machine state used mainly for PQC parameters
 	*/

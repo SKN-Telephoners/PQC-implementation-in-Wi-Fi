@@ -471,7 +471,7 @@ int pqc_sm_rx_pasn4(struct wpa_pqc_sm *sm, const u8 *payload, size_t payload_len
 
     /* Unwrapping of GTK and IGTK */
     u8 group_keys[32]; // 16B GTK + 16B IGTK
-    if (aes_unwrap(sm->pasn_kek, KEK_LEN, 4, enc_keys, group_keys) < 0) {
+    if (aes_unwrap(sm->pasn_kek, KEK_LEN, TIMES_AES_WRAP, enc_keys, group_keys) < 0) {
         wpa_printf(MSG_ERROR, "PQC_LOG: PASN - Failed to decrypt group keys (AES Unwrap error)");
         return -1;
     }

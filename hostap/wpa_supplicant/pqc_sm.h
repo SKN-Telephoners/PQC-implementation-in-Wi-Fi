@@ -16,7 +16,7 @@ struct wpa_pqc_sm {
 
     // PAKE
     /* PLACEHOLDER - these values should be populated from previous steps */
-    u8 K_aes[32]; // derived before PAKE-1
+    u8 K_aes[AES_KEY_LEN]; // derived before PAKE-1
     u8 id[16]; // random
     u8 pwd[128]; // Wi-Fi password
     size_t pwd_len; // TODO: it needs to be read from config file 
@@ -77,7 +77,7 @@ struct wpa_pqc_sm {
     u8 pasn_kck[KCK_LEN];           /* Key Confirmation Key */
     u8 pasn_tk[TK_LEN];            /* Temporal Key */
 
-    u8 pmk[32];                /* PMK derived from PAKE, used for PASN PTK derivation */
+    u8 pmk[PMK_LEN];                /* PMK derived from PAKE, used for PASN PTK derivation */
     u8 ap_mac[ETH_ALEN];       /* AP MAC resolved at PAKE-1 time, used for fsid */
 };
 struct wpa_pqc_sm * pqc_sm_init(struct wpa_supplicant *wpa_s, struct wpa_ssid *ssid);
