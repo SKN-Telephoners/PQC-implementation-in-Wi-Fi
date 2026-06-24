@@ -30,6 +30,11 @@ struct wpa_pqc_sm * pqc_sm_init(struct wpa_supplicant *wpa_s, struct wpa_ssid *s
     sm->pqc_choice = ssid->pqc_choice;
     sm->pqc_enabled = ssid->pqc_enabled;
 
+    // PAKE-2 initialization of variables
+    sm->pake2_rx_buf = NULL;
+    sm->pake2_rx_len = 0;
+    sm->pake2_expected_len = 0;
+
     // AP's pub KEM key (probe response)
     sm->ap_kem_pub_len = get_oqs_kem_pub_len(sm->pqc_choice); 
     sm->ap_kem_public_key = os_malloc(sm->ap_kem_pub_len);
@@ -63,6 +68,10 @@ void pqc_sm_deinit(struct wpa_pqc_sm *sm) {
     if (sm->sta_kem_public_key) os_free(sm->sta_kem_public_key);
     if (sm->sta_second_pub_key) os_free(sm->sta_second_pub_key);
     if (sm->dsa_public_key) os_free(sm->dsa_public_key);
+    if (sm->pake2_rx_buf) {
+        os_free(sm->pake2_rx_buf);
+        sm->pake2_rx_buf = NULL;
+    }
 
     /* liboqs safe delete */
     if (sm->kem_secret_key) {

@@ -76,23 +76,65 @@ int pqc_sm_rx_pake2(struct wpa_pqc_sm *sm,
 
     wpa_printf(MSG_DEBUG, "PQC_LOG: State Machine processing PAKE-2");
     
-    /* Parse length-prefixed fields: enc_sid_len(2) + enc_sid + dpk_len(2) + dpk */
-    if (payload_len < 4) {
-        wpa_printf(MSG_ERROR, "PQC_LOG: PAKE-2 payload too short");
+    /* Parse length-prefixed fields: enc_sid_len(2) + enc_sid + dpk_len(2) + dpk with consideration of fragmentation */
+    if (payload_len < 5) {
+        wpa_printf(MSG_ERROR, "PQC_LOG: PAKE-2 payload too short for frag header");
+        return -1;
+    }
+    
+    u8 frag_idx = payload[0];
+    size_t total_len = WPA_GET_BE16(payload + 1);
+    size_t chunk_len = WPA_GET_BE16(payload + 3);
+    const u8 *chunk_data = payload + 5;
+
+    if (payload_len < 5 + chunk_len) {
+        wpa_printf(MSG_ERROR, "PQC_LOG: PAKE-2 chunk length mismatch");
         return -1;
     }
 
-    const u8 *pos_p2 = payload;
+    if (frag_idx == 0) {
+        if (sm->pake2_rx_buf) os_free(sm->pake2_rx_buf);
+        sm->pake2_rx_buf = os_malloc(total_len);
+        if (!sm->pake2_rx_buf) return -1;
+        sm->pake2_expected_len = total_len;
+        sm->pake2_rx_len = 0;
+    }
+
+    if (!sm->pake2_rx_buf || sm->pake2_rx_len + chunk_len > sm->pake2_expected_len) {
+        wpa_printf(MSG_ERROR, "PQC_LOG: PAKE-2 reassembly overflow");
+        goto cleanup;
+    }
+
+    os_memcpy(sm->pake2_rx_buf + sm->pake2_rx_len, chunk_data, chunk_len);
+    sm->pake2_rx_len += chunk_len;
+
+    /* If not fully reassembled, return 0 (success) and wait for the next fragment */
+    if (sm->pake2_rx_len < sm->pake2_expected_len) {
+        return 0; 
+    }
+
+    wpa_printf(MSG_INFO, "PQC_LOG: PAKE-2 fully reassembled. Proceeding with decapsulation.");
+
+    /* Point pos_p2 to our fully reassembled buffer instead of the raw payload */
+    const u8 *pos_p2 = sm->pake2_rx_buf;
+    size_t reassembled_len = sm->pake2_expected_len;
+
+    if (reassembled_len < 4) {
+        wpa_printf(MSG_ERROR, "PQC_LOG: PAKE-2 payload too short");
+        goto cleanup;
+    }
+
     u16 enc_sid_len_val = WPA_GET_BE16(pos_p2); pos_p2 += 2;
     if (enc_sid_len_val != PQC_SID_LEN || payload_len < (size_t)(2 + enc_sid_len_val + 2)) {
         wpa_printf(MSG_ERROR, "PQC_LOG: PAKE-2 malformed enc_sid field");
-        return -1;
+        goto cleanup;
     }
     const u8 *enc_sid = pos_p2; pos_p2 += enc_sid_len_val;
+
     u16 dpk_len_val = WPA_GET_BE16(pos_p2); pos_p2 += 2;
     if (payload_len < (size_t)(2 + enc_sid_len_val + 2 + dpk_len_val)) {
         wpa_printf(MSG_ERROR, "PQC_LOG: PAKE-2 payload too short for dpk");
-        return -1;
+        goto cleanup;
     }
     const u8 *dpk = pos_p2;
     size_t dpk_len = dpk_len_val;
@@ -102,7 +144,7 @@ int pqc_sm_rx_pake2(struct wpa_pqc_sm *sm,
         os_free(sm->dsa_public_key);
     }
     sm->dsa_public_key = os_malloc(dpk_len);
-    if (!sm->dsa_public_key) return -1;
+    if (!sm->dsa_public_key) goto cleanup;
     
     os_memcpy(sm->dsa_public_key, dpk, dpk_len);
     sm->dsa_keys_len = dpk_len; 
@@ -112,8 +154,8 @@ int pqc_sm_rx_pake2(struct wpa_pqc_sm *sm,
     /* Decrypt {sid} using AES-256 with K_aes */
     wpa_hexdump(MSG_DEBUG, "PQC_DBG STA: K_aes in rx_pake2[0:8]", sm->K_aes, 8);
     wpa_hexdump(MSG_DEBUG, "PQC_DBG STA: enc_sid received", enc_sid, enc_sid_len_val);
-    void *aes_ctx = aes_decrypt_init(sm->K_aes, 32);
-    if (!aes_ctx) return -1;
+    void *aes_ctx = aes_decrypt_init(sm->K_aes, AES_KEY_LEN);
+    if (!aes_ctx) goto cleanup;
     aes_decrypt(aes_ctx, enc_sid, sid);
     aes_decrypt_deinit(aes_ctx);
     wpa_hexdump(MSG_DEBUG, "PQC_DBG STA: sid decrypted", sid, PQC_SID_LEN);
@@ -121,7 +163,7 @@ int pqc_sm_rx_pake2(struct wpa_pqc_sm *sm,
     /* fsid = sid || id || MAC_AP || MAC_STA */
     sm->fsid_len = PQC_SID_LEN + sizeof(sm->id) + (2 * ETH_ALEN);
     sm->fsid = os_malloc(sm->fsid_len);
-    if (!sm->fsid) return -1;
+    if (!sm->fsid) goto cleanup;
 
     u8 *pos = sm->fsid;
     os_memcpy(pos, sid, PQC_SID_LEN);
@@ -190,10 +232,17 @@ int pqc_sm_rx_pake2(struct wpa_pqc_sm *sm,
     /* ps_e and T are owned by sm->sta_kem_public_key and sm->T — do NOT free here */
 
 cleanup:
-    if (kem) OQS_KEM_free(kem);
+if (kem) OQS_KEM_free(kem);
     if (ret != 0 && sm->fsid) { 
         os_free(sm->fsid); 
         sm->fsid = NULL; 
+    }
+    /* Free the reassembly buffer once we are entirely done with the payload */
+    if (sm->pake2_rx_buf) {
+        os_free(sm->pake2_rx_buf);
+        sm->pake2_rx_buf = NULL;
+        sm->pake2_expected_len = 0;
+        sm->pake2_rx_len = 0;
     }
     return ret;
 }

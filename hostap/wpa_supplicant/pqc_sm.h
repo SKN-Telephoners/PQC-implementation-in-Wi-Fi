@@ -10,6 +10,11 @@
 struct wpa_pqc_sm {
     struct wpa_supplicant *wpa_s; // main context
 
+    // for PAKE-2 fragmentation
+    u8 *pake2_rx_buf;
+    size_t pake2_rx_len;
+    size_t pake2_expected_len;
+
     // config and negotiation
     u8 pqc_choice; // algorithm
     int pqc_enabled; // if PQC is used

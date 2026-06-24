@@ -7867,7 +7867,7 @@ static int handle_action(struct hostapd_data *hapd,
 					if (sta) {
 						if (!sta->pqc) {
 							sta->pqc = pqc_ap_sm_init(hapd, sta);
-							sta->pqc_sm = sta->pqc;
+							sta->pqc = sta->pqc;
 						}
 						if (sta->pqc) {
 							pqc_ap_sm_rx_pake1(sta->pqc, hapd, sta, payload, payload_len);
@@ -7910,7 +7910,7 @@ static int handle_action(struct hostapd_data *hapd,
 					if (sta) {
 						if (!sta->pqc) {
 							sta->pqc = pqc_ap_sm_init(hapd, sta);
-							sta->pqc_sm = sta->pqc;
+							sta->pqc = sta->pqc;
 						}
 						if (sta->pqc) {
 							if (pqc_ap_sm_rx_pasn1(sta->pqc, sta, hapd, payload, payload_len) < 0) {
@@ -7932,7 +7932,7 @@ static int handle_action(struct hostapd_data *hapd,
 					if (sta) {
 						if (!sta->pqc) {
 							sta->pqc = pqc_ap_sm_init(hapd, sta);
-							sta->pqc_sm = sta->pqc;
+							sta->pqc = sta->pqc;
 						}
 						if (sta->pqc) {
 							if (pqc_ap_sm_rx_pasn3(sta->pqc, sta, hapd, payload, payload_len) < 0) {
