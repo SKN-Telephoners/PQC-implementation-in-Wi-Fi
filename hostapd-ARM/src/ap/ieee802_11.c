@@ -5881,9 +5881,9 @@ static void handle_assoc(struct hostapd_data *hapd,
 	}
 #endif /* CONFIG_IEEE80211BE */
 
-	/* =========================================================
+	/*
      * PQC: CAPTURING ASSOC REQ AND GENERATING PMK
-     * ========================================================= */
+     */
     if (sta && sta->pqc && hapd->conf->pqc_enabled) {
         u8 PMK[PMK_LEN];
         
@@ -6622,106 +6622,102 @@ static int handle_action(struct hostapd_data *hapd,
 				   "FST: Ignore FST Action frame - no FST attached");
 		return 1;
 #endif /* CONFIG_FST */
-	case WLAN_ACTION_PUBLIC:
-	const u8 *pos = ((const u8 *) mgmt) + IEEE80211_HDRLEN + 1;
-		size_t left = len - (IEEE80211_HDRLEN + 1);
+case WLAN_ACTION_PUBLIC:
+{	
+	/* --------- PQC -------*/
+    const u8 *pos = ((const u8 *) mgmt) + IEEE80211_HDRLEN + 1; // +1 skips WLAN_ACTION_PUBLIC
+    size_t left = len - (IEEE80211_HDRLEN + 1);
 
-		if (left >= 6 && 
-		    pos[0] == WLAN_PA_VENDOR_SPECIFIC && 
-		    pos[1] == PQC_OUI_0 && pos[2] == PQC_OUI_1 && pos[3] == PQC_OUI_2) {
-			u8 type = pos[4];
-			u8 subtype = pos[5];
-			const u8 *payload = pos + 6;
-			size_t payload_len = left - 6;
+    /* Need at least 14 bytes: 1(Action) + 3(OUI) + 1(Type) + 1(Subtype) + 8(FragHdr) */
+    if (left >= 14 && 
+        pos[0] == WLAN_PA_VENDOR_SPECIFIC && 
+        pos[1] == PQC_OUI_0 && pos[2] == PQC_OUI_1 && pos[3] == PQC_OUI_2) {
+        
+        u8 type = pos[4];
+        u8 subtype = pos[5];
+        
+        /* Extract Fragmentation Header (Big Endian -> Host Order) */
+        u32 frag_total_len = WPA_GET_BE32(&pos[6]);
+        u32 frag_offset = WPA_GET_BE32(&pos[10]);
+        
+        const u8 *chunk_payload = pos + 14;
+        size_t chunk_len = left - 14;
 
-			/* PQC PAKE INTERCEPTION */
-			if (type == PQC_OUI_TYPE_PAKE) {
-				if (subtype == PQC_PAKE_TYPE_1) {
-					wpa_printf(MSG_DEBUG, "PQC_LOG: Received PAKE-1 (Public Action) from: " MACSTR, MAC2STR(mgmt->sa));
-					if (sta) {
-						if (!sta->pqc) {
-							sta->pqc = pqc_ap_sm_init(hapd, sta);
-							sta->pqc_sm = sta->pqc;
-						}
-						if (sta->pqc) {
-							pqc_ap_sm_rx_pake1(sta->pqc, hapd, sta, payload, payload_len);
-						} else {
-							wpa_printf(MSG_ERROR, "PQC_LOG: Failed to init SM for PAKE-1");
-						}
-					}
-					return 1; 
-				}
-				if (subtype == PQC_PAKE_TYPE_3) {
-					wpa_printf(MSG_DEBUG, "PQC_LOG: Received PAKE-3 (Public Action) from: " MACSTR, MAC2STR(mgmt->sa));
-					if (sta && sta->pqc) {
-						if (payload_len >= 32) {
-							const u8 *s = payload;
-							const u8 *T = payload + 32;
-							size_t T_len = payload_len - 32;
+        /* Ensure STA and State Machine are initialized early so we have a place to reassemble */
+        if (!sta) {
+            sta = ap_sta_add(hapd, mgmt->sa);
+        }
+        if (sta && !sta->pqc) {
+            sta->pqc = pqc_ap_sm_init(hapd, sta);
+            sta->pqc_sm = sta->pqc;
+        }
+        if (!sta || !sta->pqc) {
+            wpa_printf(MSG_ERROR, "PQC_LOG: Failed to init STA/SM for incoming PQC frame");
+            return 1; 
+        }
 
-							if (pqc_ap_sm_rx_pake3(sta->pqc, s, 32, T, T_len) == 0) {
-								wpa_printf(MSG_DEBUG, "PQC_LOG: PAKE-3 processed successfully, PAKE-4 sent.");
-							} else {
-								wpa_printf(MSG_ERROR, "PQC_LOG: Failed to process PAKE-3!");
-							}
-						} else {
-							wpa_printf(MSG_ERROR, "PQC_LOG: too short PAKE-3 payload");
-						}
-					} else {
-						wpa_printf(MSG_DEBUG, "PQC_LOG: Ignored PAKE-3 (no initialized session for STA)");
-					}
-					return 1; 
-				}
-			}
+        /* Attempt Reassembly */
+        struct wpabuf *complete_payload = pqc_reassemble_fragment(&sta->pqc->rx_reassembly_buf,
+                                                                  frag_total_len, frag_offset,
+                                                                  chunk_payload, chunk_len);
+        
+        if (!complete_payload) {
+            /* Still waiting for more chunks. Silently consume the frame. */
+            wpa_printf(MSG_DEBUG, "PQC_LOG: Reassembling fragment offset %u / %u", frag_offset, frag_total_len);
+            return 1; 
+        }
 
-			/* PQC PASN INTERCEPTION */
-			if (type == PQC_OUI_TYPE_PASN) {
-				if (subtype == PQC_PASN_TYPE_1) {
-					wpa_printf(MSG_INFO, "PQC_LOG: Received PASN-1 (Public Action) from: " MACSTR, MAC2STR(mgmt->sa));
-					if (!sta) {
-						sta = ap_sta_add(hapd, mgmt->sa);
-					}
-					if (sta) {
-						if (!sta->pqc) {
-							sta->pqc = pqc_ap_sm_init(hapd, sta);
-							sta->pqc_sm = sta->pqc;
-						}
-						if (sta->pqc) {
-							if (pqc_ap_sm_rx_pasn1(sta->pqc, sta, hapd, payload, payload_len) < 0) {
-								wpa_printf(MSG_ERROR, "PQC_LOG: AP - PASN-1 processing failed");
-							}
-						} else {
-							wpa_printf(MSG_ERROR, "PQC_LOG: AP - Failed to initialize PQC state machine for PASN-1");
-						}
-					} else {
-						wpa_printf(MSG_ERROR, "PQC_LOG: AP - No STA info found for received PASN-1");
-					}
-					return 1;
-				}
-				if (subtype == PQC_PASN_TYPE_3) {
-					wpa_printf(MSG_INFO, "PQC_LOG: Received PASN-3 (Public Action) from: " MACSTR, MAC2STR(mgmt->sa));
-					if (!sta) {
-						sta = ap_sta_add(hapd, mgmt->sa);
-					}
-					if (sta) {
-						if (!sta->pqc) {
-							sta->pqc = pqc_ap_sm_init(hapd, sta);
-							sta->pqc_sm = sta->pqc;
-						}
-						if (sta->pqc) {
-							if (pqc_ap_sm_rx_pasn3(sta->pqc, sta, hapd, payload, payload_len) < 0) {
-								wpa_printf(MSG_ERROR, "PQC_LOG: AP - PASN-3 processing failed");
-							}
-						} else {
-							wpa_printf(MSG_ERROR, "PQC_LOG: AP - Failed to initialize PQC state machine for PASN-3");
-						}
-					} else {
-						wpa_printf(MSG_ERROR, "PQC_LOG: AP - No STA info found for received PASN-3");
-					}
-					return 1;
-				}
-			}
-		}
+        /* REASSEMBLY COMPLETE! Extract the full continuous payload */
+        const u8 *payload = wpabuf_head(complete_payload);
+        size_t payload_len = wpabuf_len(complete_payload);
+        wpa_printf(MSG_DEBUG, "PQC_LOG: Reassembly complete! Total size: %zu", payload_len);
+
+        /* --- PQC PAKE INTERCEPTION --- */
+        if (type == PQC_OUI_TYPE_PAKE) {
+            if (subtype == PQC_PAKE_TYPE_1) {
+                wpa_printf(MSG_DEBUG, "PQC_LOG: Received PAKE-1 from: " MACSTR, MAC2STR(mgmt->sa));
+                pqc_ap_sm_rx_pake1(sta->pqc, hapd, sta, payload, payload_len);
+            }
+            else if (subtype == PQC_PAKE_TYPE_3) {
+                wpa_printf(MSG_DEBUG, "PQC_LOG: Received PAKE-3 from: " MACSTR, MAC2STR(mgmt->sa));
+                if (payload_len >= 32) {
+                    const u8 *s = payload;
+                    const u8 *T = payload + 32;
+                    size_t T_len = payload_len - 32;
+
+                    if (pqc_ap_sm_rx_pake3(sta->pqc, s, 32, T, T_len) == 0) {
+                        wpa_printf(MSG_DEBUG, "PQC_LOG: PAKE-3 processed successfully, PAKE-4 sent.");
+                    } else {
+                        wpa_printf(MSG_ERROR, "PQC_LOG: Failed to process PAKE-3!");
+                    }
+                } else {
+                    wpa_printf(MSG_ERROR, "PQC_LOG: too short PAKE-3 payload");
+                }
+            }
+        }
+
+        /* --- PQC PASN INTERCEPTION --- */
+        else if (type == PQC_OUI_TYPE_PASN) {
+            if (subtype == PQC_PASN_TYPE_1) {
+                wpa_printf(MSG_INFO, "PQC_LOG: Received PASN-1 from: " MACSTR, MAC2STR(mgmt->sa));
+                if (pqc_ap_sm_rx_pasn1(sta->pqc, sta, hapd, payload, payload_len) < 0) {
+                    wpa_printf(MSG_ERROR, "PQC_LOG: AP - PASN-1 processing failed");
+                }
+            }
+            else if (subtype == PQC_PASN_TYPE_3) {
+                wpa_printf(MSG_INFO, "PQC_LOG: Received PASN-3 from: " MACSTR, MAC2STR(mgmt->sa));
+                if (pqc_ap_sm_rx_pasn3(sta->pqc, sta, hapd, payload, payload_len) < 0) {
+                    wpa_printf(MSG_ERROR, "PQC_LOG: AP - PASN-3 processing failed");
+                }
+            }
+        }
+
+        /* Free the reassembled buffer once the state machine is done with it */
+        wpabuf_free(complete_payload);
+        return 1;
+    }
+    break;
+}
 	case WLAN_ACTION_PROTECTED_DUAL:
 		if (len >= IEEE80211_HDRLEN + 2 &&
 		    mgmt->u.action.u.public_action.action ==

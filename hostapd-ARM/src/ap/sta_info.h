@@ -209,20 +209,24 @@ struct sta_info {
 				* transaction identifiers */
 	struct os_reltime sa_query_start;
 
-	//PQC
-	u8 pqc_choice; // chosen parameters by specific STA
-	bool pqc_negotiated; // Flag: whether the IE in probe request sent by STA was correct
-	u8 *ml_kem_512_pub;
-	size_t ml_kem_512_pub_len;
-	u8 *ml_kem_secr;
-	size_t ml_kem_secr_len;
-	bool pqc_pub_ready;
-	bool pqc_pub_sent;
-	size_t pqc_pub_frag_count;
-	u8 *ml_dsa_65_pub;
-	size_t ml_dsa_65_pub_len;
-	u8 *ml_dsa_secret;
-	size_t ml_dsa_secret_len;
+	// PQC
+    u8 pqc_choice;           // chosen parameters by specific STA (bitmask)
+    bool pqc_negotiated;     // Flag: whether the IE in probe request sent by STA was correct
+    
+    /* Dynamic KEM buffers */
+    u8 *kem_pub;
+    size_t kem_pub_len;
+    u8 *kem_secr;
+    size_t kem_secr_len;
+    
+    /* Dynamic DSA buffers */
+    u8 *dsa_pub;
+    size_t dsa_pub_len;
+    u8 *dsa_secr;
+    size_t dsa_secr_len;
+
+    bool pqc_pub_ready;
+    bool pqc_pub_sent;
 
 
 #if defined(CONFIG_INTERWORKING) || defined(CONFIG_DPP)

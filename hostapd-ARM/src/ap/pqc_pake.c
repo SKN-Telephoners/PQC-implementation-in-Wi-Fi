@@ -13,8 +13,13 @@
 #include "pqc_ap_sm.h"
 #include "crypto/aes.h"
 
-static int hostapd_pqc_send_pake2(struct hostapd_data *hapd, struct sta_info *sta, const u8 *enc_sid, size_t enc_sid_len, const u8 *dpk, size_t dpk_len);
+static int hostapd_pqc_send_pake2(struct hostapd_pqc_sm *sm, const u8 *broadcast_mac);
 static int hostapd_pqc_send_pake4(struct hostapd_pqc_sm *sm, const u8 *c, size_t c_len, const u8 *tag, size_t tag_len);
+static int ap_tx_action_wrapper(void *ctx, const u8 *dst_mac, const u8 *data, size_t data_len) {
+    struct hostapd_pqc_sm *sm = ctx;
+    /* Send via AP driver interface on the current frequency */
+    return hostapd_drv_send_action(sm->hapd, sm->hapd->iface->freq, 0, dst_mac, data, data_len);
+}
 
 /* called after receiving PAKE-1 . */
 int pqc_ap_sm_rx_pake1(struct hostapd_pqc_sm *sm, struct hostapd_data *hapd, struct sta_info *sta, const u8 *payload, size_t len) {
@@ -38,10 +43,11 @@ int pqc_ap_sm_rx_pake1(struct hostapd_pqc_sm *sm, struct hostapd_data *hapd, str
 
     wpa_printf(MSG_DEBUG, "PQC_LOG: Parsing of PAKE-1 ended (c_len: %d, id_len: %d)", c_len, id_len);
 
-    /* KEM Decapsulation: (Kses) = ML-KEM-decaps(c, sk) */
+    /* KEM Decapsulation: dynamically loaded based on negotiated choice */
     kem = OQS_KEM_new(get_oqs_kem_alg(sm->pqc_choice)); 
     if (!kem) return -1;
     
+    /* Assuming sm->kem_secret_key was populated from sta->kem_secr during initialization */
     if (OQS_KEM_decaps(kem, sm->K_aes, c, sm->kem_secret_key) != OQS_SUCCESS) {
         wpa_printf(MSG_ERROR, "PQC_LOG: Error in KEM decapsulation");
         goto cleanup;
@@ -69,6 +75,10 @@ int pqc_ap_sm_rx_pake1(struct hostapd_pqc_sm *sm, struct hostapd_data *hapd, str
     wpa_hexdump(MSG_DEBUG, "PQC_DBG AP: sid plaintext", sid, sizeof(sid));
     wpa_hexdump(MSG_DEBUG, "PQC_DBG AP: enc_sid sent", enc_sid, sizeof(enc_sid));
 
+    /* Store enc_sid in state machine for the sender function */
+    os_memcpy(sm->enc_sid, enc_sid, sizeof(enc_sid));
+    sm->enc_sid_len = sizeof(enc_sid);
+
     /* fsid = sid || id || MAC_AP || MAC_STA */
     sm->fsid_len = sizeof(sid) + sizeof(id) + (2 * ETH_ALEN);
     sm->fsid = os_malloc(sm->fsid_len);
@@ -80,14 +90,14 @@ int pqc_ap_sm_rx_pake1(struct hostapd_pqc_sm *sm, struct hostapd_data *hapd, str
     os_memcpy(fsid_pos, hapd->own_addr, ETH_ALEN); fsid_pos += ETH_ALEN;
     os_memcpy(fsid_pos, sta->addr, ETH_ALEN);
 
-    /* Generation of ML-DSA key pair */
+    /* Generation of ML-DSA key pair (Dynamically sized) */
     sig = OQS_SIG_new(get_oqs_dsa_alg(sm->pqc_choice)); 
     if (!sig) goto cleanup;
     
     sm->dsa_pub_key_len = sig->length_public_key;
     sm->dsa_secret_key_len = sig->length_secret_key;
-    sm->dsa_pub_key = os_malloc(sig->length_public_key);
-    sm->dsa_secret_key = os_malloc(sig->length_secret_key); 
+    sm->dsa_pub_key = os_malloc(sm->dsa_pub_key_len);
+    sm->dsa_secret_key = os_malloc(sm->dsa_secret_key_len); 
     
     if (!sm->dsa_pub_key || !sm->dsa_secret_key) goto cleanup;
 
@@ -96,8 +106,11 @@ int pqc_ap_sm_rx_pake1(struct hostapd_pqc_sm *sm, struct hostapd_data *hapd, str
         goto cleanup;
     }
 
-    /* sending PAKE-2 function call */
-    ret = hostapd_pqc_send_pake2(hapd, sta, enc_sid, sizeof(enc_sid), sm->dsa_pub_key, sm->dsa_pub_key_len);
+    /* Broadcast MAC used for the Hardware Filter workaround */
+    u8 broadcast_mac[ETH_ALEN];
+    os_memset(broadcast_mac, 0xff, ETH_ALEN);
+
+    ret = hostapd_pqc_send_pake2(sm, broadcast_mac);
 
 cleanup:
     if (kem) OQS_KEM_free(kem);
@@ -106,90 +119,34 @@ cleanup:
 }
 
 /* building and sending PAKE-2 */
-static int hostapd_pqc_send_pake2(struct hostapd_data *hapd, struct sta_info *sta, 
-                                  const u8 *enc_sid, size_t enc_sid_len, 
-                                  const u8 *dpk, size_t dpk_len) {
-    size_t chunk_size = 350; 
-    int ret = 0;
-    u8 frag_idx = 0;
-    const u8 bcast_mac[ETH_ALEN] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
+int hostapd_pqc_send_pake2(struct hostapd_pqc_sm *sm, const u8 *broadcast_mac) 
+{
+    /*
+     * Length of enc_sid (2 bytes) + enc_sid + length of dsa_pub_key (2B) + dsa_pub_key
+    */
+     
+    size_t payload_len = 2 + sm->enc_sid_len + 2 + sm->dsa_pub_key_len;
 
-    size_t total_payload_len = 2 +enc_sid_len + 2 + dpk_len; // length(2B) + enc_sid + length(2B) + dpk
-    u8 *full_payload = os_malloc(total_payload_len);
-    if (!full_payload) {
-        wpa_printf(MSG_ERROR, "PQC_LOG: PAKE-2 Memory allocation failed for full_payload");
+    struct wpabuf *payload = wpabuf_alloc(payload_len);
+    if (!payload) {
+        wpa_printf(MSG_ERROR, "PQC_LOG: Failed to allocate PAKE-2 payload");
         return -1;
     }
-    wpa_printf(MSG_DEBUG, "PQC_LOG: Started building fragmented PAKE-2 frame");
 
-    u8 *pos = full_payload;
-    WPA_PUT_BE16(pos, (u16)enc_sid_len); pos += 2;
-    os_memcpy(pos, enc_sid, enc_sid_len); pos += enc_sid_len;
-    WPA_PUT_BE16(pos, (u16)dpk_len); pos += 2;
-    os_memcpy(pos, dpk, dpk_len);
+    /* Pack the payload */
+    wpabuf_put_be16(payload, (u16)sm->enc_sid_len);
+    wpabuf_put_data(payload, sm->enc_sid, sm->enc_sid_len);
+    wpabuf_put_be16(payload, (u16)sm->dsa_pub_key_len);
+    wpabuf_put_data(payload, sm->dsa_pub_key, sm->dsa_pub_key_len);
 
-    /* Fragmentation loop */
-    size_t offset = 0;
-
-    if (chunk_size == 0) {
-        chunk_size = 200; // Fallback safe value
-    }
-
-    // FIX 2: Change '<=' to '<' to prevent the 0-byte final loop
-    while (offset < total_payload_len) {
-        size_t current_chunk_len = total_payload_len - offset;
-        if (current_chunk_len > chunk_size) {
-            current_chunk_len = chunk_size;
-        }
-
-        if (current_chunk_len == 0) {
-            wpa_printf(MSG_ERROR, "PQC_LOG: FATAL ERROR - current_chunk_len is 0, breaking loop!");
-            break;
-        }
-
-        /* Length: Cat(1) + Action(1) + OUI(3) + Type(1) + Subtype(1) + frag_idx(1) + total_payload_len(2) + chunk_len(2) + chunk_data*/
-        size_t frame_len = 1 + 1 + 3 + 1 + 1 + 1 + 2 + 2 + current_chunk_len;
-        struct wpabuf *buf = wpabuf_alloc(frame_len);
-        if (!buf) {
-            wpa_printf(MSG_ERROR, "PQC_LOG: PAKE-2 Memory allocation failed for wpabuf");
-            os_free(full_payload);
-            return -1;
-        }
+    wpa_printf(MSG_DEBUG, "PQC_LOG: Sending PAKE-2 (Total Payload: %zu bytes)", payload_len);
     
-        wpabuf_put_u8(buf, WLAN_ACTION_PUBLIC);          // Cat: 4
-        wpabuf_put_u8(buf, WLAN_PA_VENDOR_SPECIFIC);     // Action: 9
-        
-        wpabuf_put_u8(buf, PQC_OUI_0);
-        wpabuf_put_u8(buf, PQC_OUI_1);
-        wpabuf_put_u8(buf, PQC_OUI_2);
-        
-        wpabuf_put_u8(buf, PQC_OUI_TYPE_PAKE);
-        wpabuf_put_u8(buf, PQC_PAKE_TYPE_2);
-
-        wpabuf_put_u8(buf, frag_idx); // Fragment index
-        wpabuf_put_be16(buf, (u16)total_payload_len); // Total payload length
-        wpabuf_put_be16(buf, (u16)current_chunk_len); // Current
-
-        //Payload chunk
-        wpabuf_put_data(buf, full_payload + offset, current_chunk_len);
-        wpa_printf(MSG_DEBUG, "PQC_LOG: Sending PAKE-2 fragment %d (len: %zu) to BROADCAST", frag_idx, current_chunk_len);
- 
-        ret = hostapd_drv_send_action(hapd, hapd->iface->freq, 0,
-                                    bcast_mac,          // dst
-                                    wpabuf_head(buf), wpabuf_len(buf));
-
-        wpabuf_free(buf);
-        if (ret != 0) {
-            wpa_printf(MSG_ERROR, "PQC_LOG: Failed to send PAKE-2 fragment %d", frag_idx);
-            os_free(full_payload);
-            return ret; 
-        }
-        
-        offset += current_chunk_len;
-        frag_idx++;
-    }
-    wpa_printf(MSG_DEBUG, "PQC_LOG: Finished sending PAKE-2 (total fragments: %d)", frag_idx);
-    os_free(full_payload);
+    /* MTU slicing and headers */
+    int ret = pqc_send_fragmented_action_frame(sm, ap_tx_action_wrapper, broadcast_mac, 
+                                               PQC_OUI_TYPE_PAKE, PQC_PAKE_TYPE_2, 
+                                               wpabuf_head(payload), wpabuf_len(payload));
+    
+    wpabuf_free(payload);
     return ret;
 }
 
@@ -208,13 +165,18 @@ int pqc_ap_sm_rx_pake3(struct hostapd_pqc_sm *sm,
 
     /* saving s i T in state (needed for tag) */
     os_memcpy(sm->s, s, s_len);
+
+    /* Prevent memory leak on retransmissions */
+    os_free(sm->T);
+    sm->T_len = T_len;
     sm->T = os_malloc(T_len);
     if (!sm->T) return -1;
     os_memcpy(sm->T, T, T_len);
-    sm->T_len = T_len;
-
+    
     /* inverse Feistel network */
     sm->sta_first_kem_pub_len = T_len;
+
+    if (sm->sta_first_kem_public_key) os_free(sm->sta_first_kem_public_key);
     sm->sta_first_kem_public_key = os_malloc(sm->sta_first_kem_pub_len);
     if (!sm->sta_first_kem_public_key) goto cleanup;
 
@@ -229,6 +191,9 @@ int pqc_ap_sm_rx_pake3(struct hostapd_pqc_sm *sm,
 
     kem = OQS_KEM_new(alg_name);
     if (!kem) goto cleanup;
+
+    os_free(sm->ciphertext_2);
+    os_free(sm->shared_secret_K);
 
     sm->ciphertext_2_len = kem->length_ciphertext;
     sm->ciphertext_2 = os_malloc(sm->ciphertext_2_len);
@@ -285,39 +250,29 @@ cleanup:
 static int hostapd_pqc_send_pake4(struct hostapd_pqc_sm *sm, 
                                   const u8 *c, size_t c_len, 
                                   const u8 *tag, size_t tag_len) {
-    struct wpabuf *buf;
+    struct wpabuf *payload;
     int ret;
     const u8 bcast_mac[ETH_ALEN] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
     
     /*Frame structure: 
-     * Category (1B) + OUI (3B) + Subtype/ID (1B) + Payload (c2 + tag)
+     Payload (c2 + tag)
      */
-    size_t frame_len = 1 + 1 + 3 + 1 + 1 + c_len + tag_len;
-    buf = wpabuf_alloc(frame_len);
-    if (!buf) 
+    size_t payload_len = c_len + tag_len;
+    payload = wpabuf_alloc(payload_len);
+    if (!payload) 
         return -1;
 
-    /* Action Frame header */
-    wpabuf_put_u8(buf, WLAN_ACTION_PUBLIC);          // Cat: 4
-    wpabuf_put_u8(buf, WLAN_PA_VENDOR_SPECIFIC);     // Action: 9
-    wpabuf_put_u8(buf, PQC_OUI_0);                   // 0x00
-    wpabuf_put_u8(buf, PQC_OUI_1);                   // 0x90
-    wpabuf_put_u8(buf, PQC_OUI_2);                   // 0x4C
-    wpabuf_put_u8(buf, PQC_OUI_TYPE_PAKE);           // 0x10 (lub jak masz to zdefiniowane w .h)
-    wpabuf_put_u8(buf, PQC_PAKE_TYPE_4);             // Subtype: 0x04 = PAKE-4
-
     /* Payload PQC */
-    wpabuf_put_data(buf, c, c_len);
-    wpabuf_put_data(buf, tag, tag_len);
+    wpabuf_put_data(payload, c, c_len);
+    wpabuf_put_data(payload, tag, tag_len);
 
-    wpa_printf(MSG_DEBUG, "PQC_LOG: Sending PAKE-4 to BROADCAST");
+    wpa_printf(MSG_DEBUG, "PQC_LOG: Sending PAKE-4 to BROADCAST(Payload: %zu bytes)", payload_len);
 
     /* * Sending frame
-    * Parameters: wpa_s, freq, wait, dst_mac, src_mac, bssid, data, data_len, no_cck
     */
-    ret = hostapd_drv_send_action(sm->hapd, sm->hapd->iface->freq, 0, 
-                                  bcast_mac, 
-                                  wpabuf_head(buf), wpabuf_len(buf));
-    wpabuf_free(buf);
+    ret = pqc_send_fragmented_action_frame(sm, ap_tx_action_wrapper, bcast_mac, 
+                                           PQC_OUI_TYPE_PAKE, PQC_PAKE_TYPE_4, 
+                                           wpabuf_head(payload), wpabuf_len(payload));
+    wpabuf_free(payload);
     return ret;
 }

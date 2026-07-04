@@ -41,7 +41,7 @@
 #include "radiotap_iter.h"
 #include "rfkill.h"
 #include "driver_nl80211.h"
-
+#include "common/pqc_help.h"
 
 #ifndef NETLINK_CAP_ACK
 #define NETLINK_CAP_ACK 10
@@ -2672,16 +2672,28 @@ static int nl80211_mgmt_subscribe_non_ap(struct i802_bss *bss)
 	if (nl80211_register_action_frame(bss, (u8 *) "\x09\x0d", 2) < 0)
 		ret = -1;
 #endif /* CONFIG_P2P || CONFIG_INTERWORKING || CONFIG_DPP */
+
+	/* PQC Public Action Subscription */
+    /* Matches: Category (4) + Action (9) + PQC OUI (3 bytes) */
+    u8 pqc_pub_action[] = {
+        WLAN_ACTION_PUBLIC,
+        WLAN_PA_VENDOR_SPECIFIC,
+        PQC_OUI_0,
+        PQC_OUI_1,
+        PQC_OUI_2
+    };
+
+    if (nl80211_register_action_frame(bss, pqc_pub_action, sizeof(pqc_pub_action)) < 0) {
+        wpa_printf(MSG_ERROR, "nl80211: Failed to register PQC Public Action frame");
+        ret = -1;
+    }
+
 #ifdef CONFIG_P2P
 	/* P2P Public Action */
 	if (nl80211_register_action_frame(bss,
 					  (u8 *) "\x04\x09\x50\x6f\x9a\x09",
 					  6) < 0)
 		ret = -1;
-				
-	/* PQC Public Action (Cat: 4, Action: 9, OUI: 00:90:4C) */
-    if (nl80211_register_action_frame(bss, (const u8 *) "\x04\x09\x00\x90\x4c", 5) < 0)
-        ret = -1; // HARDCODED
 
 	/* P2P Action */
 	if (nl80211_register_action_frame(bss,

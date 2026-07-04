@@ -1738,17 +1738,22 @@ struct wpa_supplicant {
 	u8 pmkid_anonce[NONCE_LEN];
 	bool pmkid_anonce_set;
 #endif /* CONFIG_PMKSA_PRIVACY */
-	u8 pqc_kem_buffer[OQS_KEM_kyber_512_length_public_key];
 	/*
-	* PQC: new machine state used mainly for PQC parameters
-	*/
-	struct wpa_pqc_sm *pqc;
-	u32 pqc_fragments_mask;
-	size_t pqc_kem_received_len;
-	size_t pqc_kem_expected_len;
-	u8 pqc_kem_expected_frags;
-	bool pqc_kem_complete;
-	bool pqc_auth_started;
+     * PQC: new machine state used mainly for PQC parameters
+     */
+    struct wpa_pqc_sm *pqc;
+    
+    /* Dynamically allocated buffer for assembling AP's KEM Public Key from IEs */
+    u8 *pqc_kem_buffer;
+    size_t pqc_kem_buffer_size; /* Keep track of allocated size to prevent overflows */
+    
+    /* IE Fragmentation Trackers (Used in events.c) */
+    u32 pqc_fragments_mask;
+    size_t pqc_kem_received_len;
+    size_t pqc_kem_expected_len;
+    u8 pqc_kem_expected_frags;
+    bool pqc_kem_complete;
+    bool pqc_auth_started;
 };
 
 

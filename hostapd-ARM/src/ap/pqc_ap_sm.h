@@ -15,7 +15,10 @@ struct hostapd_pqc_sm {
     int pqc_enabled; // if PQC is used
 
     u8 K_aes[AES_KEY_LEN]; // derived after PAKE-1
-    u8 sid[16]; // random
+    u8 sid[PQC_SID_LEN]; // random
+    u8 enc_sid[PQC_SID_LEN];
+    size_t enc_sid_len;
+
     u8 pwd[128];    /* from AP config */
     size_t pwd_len;
     
@@ -28,13 +31,14 @@ struct hostapd_pqc_sm {
     size_t T_len;
 
     /* PQC keys */
-    u8 *dsa_pub_key;
+    u8 *dsa_pub_key;           /* AP ML-DSA public key generated before PAKE-1 */
     size_t dsa_pub_key_len;
-    u8 *dsa_secret_key;
+    u8 *dsa_secret_key;        /* AP ML-DSA secret key */
     size_t dsa_secret_key_len;
-    u8 *kem_pub_key;
+
+    u8 *kem_pub_key;           /* Holds AP KEM key first, then overwritten by STA KEM key in PASN-1 */
     size_t kem_pub_key_len;
-    u8 *kem_secret_key;
+    u8 *kem_secret_key;        /* AP KEM secret key */
     size_t kem_secret_key_len;
 
     u8 *sta_first_kem_public_key;  /* psk (Z) */
@@ -46,15 +50,7 @@ struct hostapd_pqc_sm {
     u8 *ciphertext_2;          /* c - generated during encapsulation */
     size_t ciphertext_2_len;
 
-    // PASN
-    u8 *ap_mldsa_public_key;   /* ML-DSA public key (AP) generated during PAKE */
-    size_t ap_mldsa_public_len;
-    u8 *ap_mldsa_secret_key;   /* ML-DSA secret key (AP) generated during PAKE */
-    size_t ap_mldsa_secret_len;
-    u8 *sta_mldsa_public_key;  /* ML-DSA public key (STA) received in PASN-1 */
-    size_t sta_mldsa_public_len;
-
-    /* PASN-2 derived materials */
+    /* PASN derived materials */
     u8 *pasn_ciphertext;       /* ML-KEM ciphertext (AP generated) */
     size_t pasn_ciphertext_len;
     u8 *pasn_shared_secret;    /* PQC shared secret from ML-KEM encapsulation */
@@ -68,6 +64,9 @@ struct hostapd_pqc_sm {
     u8 pasn_tk[TK_LEN];            /* Temporal Key */
     u8 pasn_mic1[MIC_LEN];          /* MIC1 for PASN-2 */
     u8 pasn_mic2[MIC_LEN];          /* MIC2 from PASN-3 */
+    
+    /* Fragmentation Reassembly Buffer */
+    struct wpabuf *rx_reassembly_buf;
 };
 
 struct hostapd_pqc_sm * pqc_ap_sm_init(struct hostapd_data *hapd, struct sta_info *sta);
