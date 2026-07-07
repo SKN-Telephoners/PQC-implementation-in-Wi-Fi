@@ -16,9 +16,36 @@ int wpas_pqc_send_pake3(struct wpa_pqc_sm *sm, const u8 *s, size_t s_len, const 
 
 static int sta_tx_action_wrapper(void *ctx, const u8 *dst_mac, const u8 *data, size_t data_len) {
     struct wpa_pqc_sm *sm = ctx;
-    /* Uses assoc_freq and handles BSSID routing */
-    return wpa_drv_send_action(sm->wpa_s, sm->wpa_s->assoc_freq, 0, dst_mac, 
-                               sm->wpa_s->own_addr, sm->wpa_s->bssid, 
+    unsigned int freq = 0;
+    const u8 *bssid = sm->wpa_s->bssid;
+
+    /* Safely resolve the frequency from the targeted AP's scan results */
+    if (sm->wpa_s->current_bss) {
+        freq = sm->wpa_s->current_bss->freq;
+    } else if (sm->wpa_s->assoc_freq > 0) {
+        freq = sm->wpa_s->assoc_freq;
+    } else {
+        /* Fallback if somehow both are missing, though this shouldn't happen */
+        wpa_printf(MSG_ERROR, "PQC_LOG: Cannot determine frequency to send Action frame!");
+        return -1; 
+    }
+
+    /* Safely resolve the BSSID */
+    static const u8 zero_mac[ETH_ALEN] = {0, 0, 0, 0, 0, 0};
+    if (os_memcmp(bssid, zero_mac, ETH_ALEN) == 0) {
+        if (sm->wpa_s->current_bss) {
+            bssid = sm->wpa_s->current_bss->bssid;
+        } else if (sm->wpa_s->pending_bssid) {
+            bssid = sm->wpa_s->pending_bssid;
+        }
+    }
+
+    wpa_printf(MSG_DEBUG, "PQC_LOG: Sending driver action on freq=%u, bssid=" MACSTR, 
+               freq, MAC2STR(bssid));
+
+    /* Send the frame with the corrected frequency and BSSID */
+    return wpa_drv_send_action(sm->wpa_s, freq, 0, dst_mac, 
+                               sm->wpa_s->own_addr, bssid, 
                                data, data_len, 0);
 }
 
