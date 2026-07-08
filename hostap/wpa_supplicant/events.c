@@ -7839,33 +7839,24 @@ void pqc_process_vendor_ie(struct wpa_supplicant *wpa_s, const u8 *ie, size_t ie
 	wpa_printf(MSG_INFO, "PQC_DEBUG: Processing key fragment. Len: %zu, FragIdx=%u, TotalLen=%u, DataLen=%zu",
 			   ie_len, frag_idx, total_len, data_len);
 
-	if (frag_idx == 0) {
-		/* Allocate buffer based on the incoming total length */
-        if (wpa_s->pqc_kem_buffer) {
-            os_free(wpa_s->pqc_kem_buffer);
-        }
-        wpa_s->pqc_kem_buffer = os_malloc(total_len);
-        if (!wpa_s->pqc_kem_buffer) {
-            wpa_printf(MSG_ERROR, "PQC_LOG: Failed to allocate memory for AP public key fragments");
-            return;
-        }
-        wpa_s->pqc_kem_buffer_size = total_len; /* Save size for bounds checking */
+	if (wpa_s->pqc_kem_buffer && wpa_s->pqc_kem_expected_len != total_len) {
+		os_free(wpa_s->pqc_kem_buffer);
+		wpa_s->pqc_kem_buffer = NULL;
+	}
 
+	if (!wpa_s->pqc_kem_buffer) {
+		wpa_s->pqc_kem_buffer = os_malloc(total_len);
+		if (!wpa_s->pqc_kem_buffer) {
+			wpa_printf(MSG_ERROR, "PQC_LOG: STA - Failed to allocate ML KEM buffer");
+			return;
+		}
+		wpa_s->pqc_kem_buffer_size = total_len; /* Save size for bounds checking */
 		wpa_s->pqc_fragments_mask = 0;
 		wpa_s->pqc_kem_received_len = 0;
 		wpa_s->pqc_kem_expected_len = total_len;
-		wpa_s->pqc_kem_expected_frags = (total_len + PQC_FRAGMENT_MAX_LEN - 1) / PQC_FRAGMENT_MAX_LEN;
-		wpa_s->pqc_kem_complete = false;
-		wpa_s->pqc_auth_started = false;
-	} else if (wpa_s->pqc_kem_expected_len != total_len) {
-		wpa_printf(MSG_INFO, "PQC_LOG: inconsistent total length");
-		return;
+
+		wpa_s->pqc_kem_expected_frags = (total_len + 199) / PQC_FRAGMENT_MAX_LEN;
 	}
-	/* Prevent writing if buffer wasn't allocated (e.g., missed frag 0) */
-    if (!wpa_s->pqc_kem_buffer) {
-        wpa_printf(MSG_DEBUG, "PQC_LOG: Missed fragment 0, skipping...");
-        return;
-    }
 
 	offset = (size_t) frag_idx * PQC_FRAGMENT_MAX_LEN;
 
@@ -7876,27 +7867,22 @@ void pqc_process_vendor_ie(struct wpa_supplicant *wpa_s, const u8 *ie, size_t ie
 		return;
 	}
 
+	if (wpa_s->pqc_fragments_mask & (1U << frag_idx)) {
+		return;
+	}
+
 	os_memcpy(wpa_s->pqc_kem_buffer + offset, data, data_len);
 	wpa_s->pqc_fragments_mask |= (1U << frag_idx);
-
-	if (offset + data_len > wpa_s->pqc_kem_received_len)
-		wpa_s->pqc_kem_received_len = offset + data_len;
+	wpa_s->pqc_kem_received_len += data_len;
 
 	expected_frags = wpa_s->pqc_kem_expected_frags;
-	if (expected_frags == 0)
-		expected_frags = (total_len + PQC_FRAGMENT_MAX_LEN - 1) / PQC_FRAGMENT_MAX_LEN;
+	expected_mask = (expected_frags >= 32) ? 0xffffffffU : (1U << expected_frags) - 1;
 
 	wpa_printf(MSG_DEBUG,
 		   "PQC_LOG: Fragment %u/%zu received (%zu bytes at offset %zu, total mask=0x%x)",
 		   frag_idx, expected_frags, data_len, offset, wpa_s->pqc_fragments_mask);
-		   
-	if (expected_frags >= 32)
-		expected_mask = 0xffffffffU;
-	else
-		expected_mask = (1U << expected_frags) - 1;
 
-	if (wpa_s->pqc_kem_received_len >= wpa_s->pqc_kem_expected_len &&
-	    wpa_s->pqc_fragments_mask == expected_mask) {
+	if (wpa_s->pqc_fragments_mask == expected_mask) {
 		wpa_s->pqc_kem_complete = true;
 		wpa_printf(MSG_INFO,
 			   "PQC_LOG: received a public key and assembled it (%zu bytes)",
