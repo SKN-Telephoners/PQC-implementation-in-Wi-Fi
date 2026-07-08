@@ -1059,6 +1059,34 @@ static void hostapd_gen_probe_resp(struct hostapd_data *hapd,
 #define MAX_PROBERESP_LEN 1536
 	buflen = MAX_PROBERESP_LEN;
 	buflen += hostapd_probe_resp_elems_len(hapd_probed, params);
+
+	/* --- PQC: Calculate extra buffer length needed for Probe Response --- */
+    if (hapd->conf->pqc_enabled) {
+        buflen += 5; /* 5 bytes for PQC Capabilities IE */
+
+        if (params->req) {
+            struct sta_info *sta_calc = ap_get_sta(hapd, params->req->sa);
+            if (sta_calc && sta_calc->pqc_negotiated && sta_calc->kem_pub_len > 0) {
+                
+                /* Calculate how many 200-byte fragments we will need */
+                size_t num_fragments = (sta_calc->kem_pub_len + 199) / 200;
+                
+                /* * Each fragment adds 9 bytes of overhead:
+                 * 2 bytes for standard 802.11 IE header (ID + Len)
+                 * 7 bytes for PQC Vendor header (OUI + Type + FragIdx + TotalLen)
+                 */
+                size_t pqc_overhead = num_fragments * 9;
+                
+                /* Add the key length and the overhead to the total buffer allocation */
+                buflen += sta_calc->kem_pub_len + pqc_overhead;
+                
+                wpa_printf(MSG_DEBUG, "PQC_LOG: AP - Expanded Probe Resp buflen by %zu bytes for PQC", 
+                           sta_calc->kem_pub_len + pqc_overhead);
+            }
+        }
+    }
+    /* --- END PQC BUFLEN CALCULATION --- */
+
 	params->resp = os_zalloc(buflen);
 	if (!params->resp) {
 		params->resp_len = 0;
@@ -1105,20 +1133,15 @@ static void hostapd_gen_probe_resp(struct hostapd_data *hapd,
 		size_t remaining = sta->kem_pub_len;
 		u8 fragment_index = 0;
 
-		u8 *end = params->resp->u.probe_resp.variable + buflen;
-
 		const u8 MAX_FRAGMENT_SIZE = 200;
-
 		/* OUI(3) + Type(1) + FragIdx(1) + TotalLen(2) = 7 bytes */
         const u8 IE_OVERHEAD = 7;
 
-		while (remaining > 0) {
+		const u8 MAX_FRAGS_PER_FRAME = 6;
+
+		while (remaining > 0 && fragment_index < MAX_FRAGS_PER_FRAME) {
 			u8 chunk = remaining > MAX_FRAGMENT_SIZE ? MAX_FRAGMENT_SIZE : (u8) remaining;
 
-			if ((size_t) (end - pos) < 2 + IE_OVERHEAD + chunk) {
-				wpa_printf(MSG_WARNING, "PQC_LOG: AP - Buffer too small to append remaining %zu bytes of KEM key", remaining);
-                break;
-			}
 
 			*pos++ = WLAN_EID_VENDOR_SPECIFIC;
 			*pos++ = IE_OVERHEAD + chunk;
@@ -1139,17 +1162,63 @@ static void hostapd_gen_probe_resp(struct hostapd_data *hapd,
 			fragment_index++;
 		}
 
-		sta->pqc_pub_sent = (remaining == 0);
-		if (sta->pqc_pub_sent) {
-			wpa_printf(MSG_INFO,
-				   "PQC_LOG: Sent %u fragments of ML-KEM public key (%zu bytes total)",
-				   fragment_index, sta->kem_pub_len);
-		} else {
-			wpa_printf(MSG_WARNING,
-				   "PQC_LOG: Buffer too small for all fragments (sent %u, remaining %zu bytes)",
-				   fragment_index, remaining);
-		}
-	}
+		/* Finalize Frame 1 length */
+		params->resp_len = pos - (u8 *) params->resp;
+
+		/* 2. Build and send Frame 2 if fragments are leftover */
+        if (remaining > 0) {
+            wpa_printf(MSG_INFO, "PQC_LOG: AP - Splitting Probe Response to bypass MTU limit. (Remaining: %zu bytes)", remaining);
+            
+            /* dynamically calculate exactly where the MAC header + Fixed Params end */
+            size_t hdr_len = ((u8 *)params->resp->u.probe_resp.variable) - ((u8 *)params->resp);
+            
+            /* Allocate enough space for Header + Remaining Data + IE Overhead */
+            size_t f2_size = hdr_len + remaining + (10 * (IE_OVERHEAD + MAX_FRAGMENT_SIZE)); 
+            u8 *frame2 = os_zalloc(f2_size);
+            
+            if (frame2) {
+                /* Copy identical 802.11 MAC header from Frame 1 into Frame 2 */
+                os_memcpy(frame2, params->resp, hdr_len);
+                u8 *f2_pos = frame2 + hdr_len;
+                
+                /* Pack the remaining KEM fragments directly after the header */
+                while (remaining > 0) {
+                    u8 chunk = remaining > MAX_FRAGMENT_SIZE ? MAX_FRAGMENT_SIZE : (u8) remaining;
+                    *f2_pos++ = WLAN_EID_VENDOR_SPECIFIC;
+                    *f2_pos++ = IE_OVERHEAD + chunk;
+                    *f2_pos++ = PQC_OUI_0;
+                    *f2_pos++ = PQC_OUI_1;
+                    *f2_pos++ = PQC_OUI_2;
+                    *f2_pos++ = 0x02;
+                    *f2_pos++ = fragment_index;
+                    
+                    WPA_PUT_LE16(f2_pos, sta->kem_pub_len);
+                    f2_pos += 2;
+                    
+                    os_memcpy(f2_pos, key_ptr, chunk);
+                    f2_pos += chunk;
+                    key_ptr += chunk;
+                    remaining -= chunk;
+                    fragment_index++;
+                }
+                
+                size_t frame2_len = f2_pos - frame2;
+                
+                /* Push Frame 2 to the Linux kernel via the MLME interface */
+                /* noack=1 (no ACK needed for Probe Resp), freq=current, no_cck=0, offchanok=0 */
+                if (hostapd_drv_send_mlme(hapd, frame2, frame2_len, 1, NULL, 0, 0) == 0) {
+                    wpa_printf(MSG_DEBUG, "PQC_LOG: AP - Frame 2 successfully injected into driver");
+                }
+                os_free(frame2);
+            }
+        }
+        
+        sta->pqc_pub_sent = (remaining == 0);
+        wpa_printf(MSG_INFO, "PQC_LOG: AP - Prepared all %u fragments of ML-KEM public key", fragment_index);
+        
+        /* Return early so hostapd natively transmits Frame 1 */
+        return; 
+    }
     //END
 
 	params->resp_len = pos - (u8 *) params->resp;
