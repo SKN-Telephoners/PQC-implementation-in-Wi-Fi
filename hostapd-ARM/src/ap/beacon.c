@@ -728,6 +728,8 @@ struct probe_resp_params {
 	const struct ieee80211_mgmt *req;
 	bool is_p2p;
 
+	u8 pqc_req_frag;
+
 	/* Generated IEs will be included inside an ML element */
 	struct hostapd_data *mld_ap;
 	struct mld_info *mld_info;
@@ -1120,106 +1122,68 @@ static void hostapd_gen_probe_resp(struct hostapd_data *hapd,
 					    params->resp->u.probe_resp.variable,
 					    buflen);
 
-	// PQC
+	/* PQC PAYLOAD INJECTION  */
     if (params->req) {
        sta = ap_get_sta(hapd, params->req->sa);
     }
 
     pos = hostapd_eid_pqc_capabilities(hapd, pos);
 
-	/* Add PQC key fragments */
-	if (sta && sta->pqc_negotiated && sta->kem_pub && sta->kem_pub_len > 0) {
-		const u8 *key_ptr = sta->kem_pub;
-		size_t remaining = sta->kem_pub_len;
-		u8 fragment_index = 0;
+    if (sta && sta->pqc_negotiated && sta->kem_pub && sta->kem_pub_len > 0) {
+        u8 requested_frag = params->pqc_req_frag;
 
-		const u8 MAX_FRAGMENT_SIZE = 200;
-		/* OUI(3) + Type(1) + FragIdx(1) + TotalLen(2) = 7 bytes */
+        const u8 MAX_FRAGMENT_SIZE = 200;
         const u8 IE_OVERHEAD = 7;
-
-		const u8 MAX_FRAGS_PER_FRAME = 6;
-
-		while (remaining > 0 && fragment_index < MAX_FRAGS_PER_FRAME) {
-			u8 chunk = remaining > MAX_FRAGMENT_SIZE ? MAX_FRAGMENT_SIZE : (u8) remaining;
-
-
-			*pos++ = WLAN_EID_VENDOR_SPECIFIC;
-			*pos++ = IE_OVERHEAD + chunk;
-
-			*pos++ = PQC_OUI_0;
-			*pos++ = PQC_OUI_1;
-			*pos++ = PQC_OUI_2;
-			*pos++ = 0x02; 							/* Type: KEM key fragment */
-			*pos++ = fragment_index;				/* Fragment Index */
-
-			WPA_PUT_LE16(pos, sta->kem_pub_len);
-			pos += 2;
-
-			os_memcpy(pos, key_ptr, chunk);
-			pos += chunk;
-			key_ptr += chunk;
-			remaining -= chunk;
-			fragment_index++;
-		}
-
-		/* Finalize Frame 1 length */
-		params->resp_len = pos - (u8 *) params->resp;
-
-		/* 2. Build and send Frame 2 if fragments are leftover */
-        if (remaining > 0) {
-            wpa_printf(MSG_INFO, "PQC_LOG: AP - Splitting Probe Response to bypass MTU limit. (Remaining: %zu bytes)", remaining);
-            
-            /* dynamically calculate exactly where the MAC header + Fixed Params end */
-            size_t hdr_len = ((u8 *)params->resp->u.probe_resp.variable) - ((u8 *)params->resp);
-            
-            /* Allocate enough space for Header + Remaining Data + IE Overhead */
-            size_t f2_size = hdr_len + remaining + (10 * (IE_OVERHEAD + MAX_FRAGMENT_SIZE)); 
-            u8 *frame2 = os_zalloc(f2_size);
-            
-            if (frame2) {
-                /* Copy identical 802.11 MAC header from Frame 1 into Frame 2 */
-                os_memcpy(frame2, params->resp, hdr_len);
-                u8 *f2_pos = frame2 + hdr_len;
+        
+        if (requested_frag != 0xFF) {
+            /* The STA asked for 1 specific fragment. */
+            size_t offset = (size_t)requested_frag * MAX_FRAGMENT_SIZE;
+            if (offset < sta->kem_pub_len) {
+                size_t chunk = sta->kem_pub_len - offset;
+                if (chunk > MAX_FRAGMENT_SIZE) chunk = MAX_FRAGMENT_SIZE;
                 
-                /* Pack the remaining KEM fragments directly after the header */
-                while (remaining > 0) {
-                    u8 chunk = remaining > MAX_FRAGMENT_SIZE ? MAX_FRAGMENT_SIZE : (u8) remaining;
-                    *f2_pos++ = WLAN_EID_VENDOR_SPECIFIC;
-                    *f2_pos++ = IE_OVERHEAD + chunk;
-                    *f2_pos++ = PQC_OUI_0;
-                    *f2_pos++ = PQC_OUI_1;
-                    *f2_pos++ = PQC_OUI_2;
-                    *f2_pos++ = 0x02;
-                    *f2_pos++ = fragment_index;
-                    
-                    WPA_PUT_LE16(f2_pos, sta->kem_pub_len);
-                    f2_pos += 2;
-                    
-                    os_memcpy(f2_pos, key_ptr, chunk);
-                    f2_pos += chunk;
-                    key_ptr += chunk;
-                    remaining -= chunk;
-                    fragment_index++;
-                }
-                
-                size_t frame2_len = f2_pos - frame2;
-                
-                /* Push Frame 2 to the Linux kernel via the MLME interface */
-                /* noack=1 (no ACK needed for Probe Resp), freq=current, no_cck=0, offchanok=0 */
-                if (hostapd_drv_send_mlme(hapd, frame2, frame2_len, 1, NULL, 0, 0) == 0) {
-                    wpa_printf(MSG_DEBUG, "PQC_LOG: AP - Frame 2 successfully injected into driver");
-                }
-                os_free(frame2);
+                *pos++ = WLAN_EID_VENDOR_SPECIFIC;
+                *pos++ = IE_OVERHEAD + chunk;
+                *pos++ = PQC_OUI_0;
+                *pos++ = PQC_OUI_1;
+                *pos++ = PQC_OUI_2;
+                *pos++ = 0x02; 
+                *pos++ = requested_frag;
+                WPA_PUT_LE16(pos, sta->kem_pub_len);
+                pos += 2;
+                os_memcpy(pos, sta->kem_pub + offset, chunk);
+                pos += chunk;
             }
+        } else {
+            /* send up to 6 fragments to fit safely in the MTU */
+            const u8 MAX_FRAGS_PER_FRAME = 6;
+            size_t remaining = sta->kem_pub_len;
+            u8 fragment_index = 0;
+            const u8 *key_ptr = sta->kem_pub;
+
+            while (remaining > 0 && fragment_index < MAX_FRAGS_PER_FRAME) {
+                u8 chunk = remaining > MAX_FRAGMENT_SIZE ? MAX_FRAGMENT_SIZE : (u8) remaining;
+
+                *pos++ = WLAN_EID_VENDOR_SPECIFIC;
+                *pos++ = IE_OVERHEAD + chunk;
+                *pos++ = PQC_OUI_0;
+                *pos++ = PQC_OUI_1;
+                *pos++ = PQC_OUI_2;
+                *pos++ = 0x02; 
+                *pos++ = fragment_index;
+                WPA_PUT_LE16(pos, sta->kem_pub_len);
+                pos += 2;
+
+                os_memcpy(pos, key_ptr, chunk);
+                pos += chunk;
+                key_ptr += chunk;
+                remaining -= chunk;
+                fragment_index++;
+            }
+            wpa_printf(MSG_INFO, "PQC_LOG: AP - Sent first %u fragments in standard Probe Response", fragment_index);
         }
-        
-        sta->pqc_pub_sent = (remaining == 0);
-        wpa_printf(MSG_INFO, "PQC_LOG: AP - Prepared all %u fragments of ML-KEM public key", fragment_index);
-        
-        /* Return early so hostapd natively transmits Frame 1 */
-        return; 
     }
-    //END
+    /* --- END PQC PAYLOAD INJECTION --- */
 
 	params->resp_len = pos - (u8 *) params->resp;
 }
@@ -1847,6 +1811,8 @@ void handle_probe_req(struct hostapd_data *hapd,
 	os_free(hex);
 
 	//PQC - parsing IE from probe request
+	u8 requested_frag = 0xFF;
+	
     if (hapd->conf->pqc_enabled && ie) {
         const u8 *pos = ie;
         size_t left = ie_len;
@@ -1862,70 +1828,73 @@ void handle_probe_req(struct hostapd_data *hapd,
             if (ie_id == WLAN_EID_VENDOR_SPECIFIC && ie_len_current == 5 && 
 				pos[2] == PQC_OUI_0 && 
                 pos[3] == PQC_OUI_1 && 
-                pos[4] == PQC_OUI_2 &&
-                pos[5] == 0x01
+                pos[4] == PQC_OUI_2 
 				) {
+				if (pos[5] == 0x01) {
 
-                u8 choice = pos[6]; 
+                	u8 choice = pos[6]; 
                 
-                struct sta_info *sta = ap_get_sta(hapd, mgmt->sa);
-                if (!sta) { // new STA
-                    sta = ap_sta_add(hapd, mgmt->sa);
-                }
+                	struct sta_info *sta = ap_get_sta(hapd, mgmt->sa);
+                	if (!sta) { // new STA
+                    	sta = ap_sta_add(hapd, mgmt->sa);
+                	}
                 
-				if (sta) { /* known STA */
-                    sta->pqc_choice = choice;
-                    sta->pqc_negotiated = 1;
-                    wpa_printf(MSG_INFO, "PQC_LOG: Received correct probe request from " MACSTR
-                               ". Saved algorithm config: 0x%02x", MAC2STR(mgmt->sa), choice);
-					
-					/* Wipe old keys if STA is reconnecting/re-probing */
-                    if (sta->kem_pub) os_free(sta->kem_pub);
-                    if (sta->kem_secr) OQS_MEM_secure_free(sta->kem_secr, sta->kem_secr_len);
-                    sta->kem_pub = NULL;
-                    sta->kem_secr = NULL;
-                    sta->kem_pub_len = 0;
-                    sta->kem_secr_len = 0;
-                    sta->pqc_pub_ready = false;
-                    sta->pqc_pub_sent = false;
+					if (sta) { /* known STA */
+						sta->pqc_choice = choice;
+						sta->pqc_negotiated = 1;
+						wpa_printf(MSG_INFO, "PQC_LOG: Received correct probe request from " MACSTR
+								". Saved algorithm config: 0x%02x", MAC2STR(mgmt->sa), choice);
+						
+						/* Wipe old keys if STA is reconnecting/re-probing */
+						if (sta->kem_pub) os_free(sta->kem_pub);
+						if (sta->kem_secr) OQS_MEM_secure_free(sta->kem_secr, sta->kem_secr_len);
+						sta->kem_pub = NULL;
+						sta->kem_secr = NULL;
+						sta->kem_pub_len = 0;
+						sta->kem_secr_len = 0;
+						sta->pqc_pub_ready = false;
+						sta->pqc_pub_sent = false;
 
-                    const char *kem_alg_name = get_oqs_kem_alg(sta->pqc_choice);
-                    if (!kem_alg_name) {
-                        wpa_printf(MSG_ERROR, "PQC_LOG: Unknown KEM choice: 0x%02x", choice);
-                        break;
-                    }
+						const char *kem_alg_name = get_oqs_kem_alg(sta->pqc_choice);
+						if (!kem_alg_name) {
+							wpa_printf(MSG_ERROR, "PQC_LOG: Unknown KEM choice: 0x%02x", choice);
+							break;
+						}
 
-                    OQS_KEM *kem = OQS_KEM_new(kem_alg_name);
-                    if (kem) {
-                        sta->kem_pub_len = kem->length_public_key;
-                        sta->kem_secr_len = kem->length_secret_key;
+						OQS_KEM *kem = OQS_KEM_new(kem_alg_name);
+						if (kem) {
+							sta->kem_pub_len = kem->length_public_key;
+							sta->kem_secr_len = kem->length_secret_key;
 
-                        sta->kem_pub = os_malloc(sta->kem_pub_len);
-                        sta->kem_secr = os_malloc(sta->kem_secr_len);
+							sta->kem_pub = os_malloc(sta->kem_pub_len);
+							sta->kem_secr = os_malloc(sta->kem_secr_len);
 
-                        if (sta->kem_pub && sta->kem_secr &&
-                            OQS_KEM_keypair(kem, sta->kem_pub, sta->kem_secr) == OQS_SUCCESS) {
-                            
-                            sta->pqc_pub_ready = true;
-                            wpa_printf(MSG_DEBUG, "PQC_LOG: Generated %s keypair for " MACSTR
-                                       " (Pub: %zu bytes, Sec: %zu bytes)",
-                                       kem_alg_name, MAC2STR(sta->addr), sta->kem_pub_len, sta->kem_secr_len);
-                        } else {
-                            if (sta->kem_pub) os_free(sta->kem_pub);
-                            if (sta->kem_secr) OQS_MEM_secure_free(sta->kem_secr, sta->kem_secr_len);
-                            sta->kem_pub = NULL;
-                            sta->kem_secr = NULL;
-                            sta->kem_pub_len = 0;
-                            sta->kem_secr_len = 0;
-                            wpa_printf(MSG_ERROR, "PQC_LOG: Failed to generate %s keypair for " MACSTR,
-                                       kem_alg_name, MAC2STR(sta->addr));
-                        }   
-                        OQS_KEM_free(kem);
-                    }
+							if (sta->kem_pub && sta->kem_secr &&
+								OQS_KEM_keypair(kem, sta->kem_pub, sta->kem_secr) == OQS_SUCCESS) {
+								
+								sta->pqc_pub_ready = true;
+								wpa_printf(MSG_DEBUG, "PQC_LOG: Generated %s keypair for " MACSTR
+										" (Pub: %zu bytes, Sec: %zu bytes)",
+										kem_alg_name, MAC2STR(sta->addr), sta->kem_pub_len, sta->kem_secr_len);
+							} else {
+								if (sta->kem_pub) os_free(sta->kem_pub);
+								if (sta->kem_secr) OQS_MEM_secure_free(sta->kem_secr, sta->kem_secr_len);
+								sta->kem_pub = NULL;
+								sta->kem_secr = NULL;
+								sta->kem_pub_len = 0;
+								sta->kem_secr_len = 0;
+								wpa_printf(MSG_ERROR, "PQC_LOG: Failed to generate %s keypair for " MACSTR,
+										kem_alg_name, MAC2STR(sta->addr));
+							}   
+							OQS_KEM_free(kem);
+						}
+					}
+            	}
+				else if (pos[5] == 0x03) {
+                    requested_frag = pos[6];
+                    wpa_printf(MSG_DEBUG, "PQC_LOG: AP - Parsed Probe Request asking for Fragment %u", requested_frag);
                 }
-                break;
-            }
-            
+			}
             /* find next IE */
             pos += 2 + ie_len_current;
             left -= 2 + ie_len_current;
@@ -1933,6 +1902,8 @@ void handle_probe_req(struct hostapd_data *hapd,
     }
     // end PQC
 	os_memset(&params, 0, sizeof(params));
+
+	params.pqc_req_frag = requested_frag; //PQC - pass requested fragment to probe response generator
 
 #ifdef CONFIG_IEEE80211BE
 	if (hapd->conf->mld_ap && elems.probe_req_mle &&

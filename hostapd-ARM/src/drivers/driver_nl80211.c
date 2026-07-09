@@ -2633,6 +2633,10 @@ static int nl80211_mgmt_subscribe_non_ap(struct i802_bss *bss)
 		nl80211_register_frame(bss, bss->nl_mgmt, type,
 				       (u8 *) "\x03\x00", 2, false);
 	}
+	/* PQC: Subscribe to raw Probe Responses (FC = 0x50) */
+    if (nl80211_register_frame(bss, bss->drv->global->nl, 0x0050, NULL, 0, false) < 0) {
+        wpa_printf(MSG_ERROR, "nl80211: Failed to register Probe Response frame");
+    }
 
 #ifdef CONFIG_PASN
 	/* register for PASN Authentication frames */
