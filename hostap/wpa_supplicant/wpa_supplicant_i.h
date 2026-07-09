@@ -2178,5 +2178,6 @@ void wpas_update_dfs_ap_info(struct wpa_supplicant *wpa_s, int freq,
 void wpas_configure_frame_filters(struct wpa_supplicant *wpa_s);
 
 void pqc_process_vendor_ie(struct wpa_supplicant *wpa_s, const u8 *ie, size_t ie_len);
+void pqc_request_next_fragment(struct wpa_supplicant *wpa_s, struct wpa_bss *target, u8 next_frag);
 
 #endif /* WPA_SUPPLICANT_I_H */

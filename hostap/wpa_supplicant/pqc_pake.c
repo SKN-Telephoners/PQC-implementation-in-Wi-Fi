@@ -35,7 +35,7 @@ static int sta_tx_action_wrapper(void *ctx, const u8 *dst_mac, const u8 *data, s
     if (os_memcmp(bssid, zero_mac, ETH_ALEN) == 0) {
         if (sm->wpa_s->current_bss) {
             bssid = sm->wpa_s->current_bss->bssid;
-        } else if (sm->wpa_s->pending_bssid) {
+        } else if (os_memcmp(sm->wpa_s->pending_bssid, zero_mac, ETH_ALEN) != 0) {
             bssid = sm->wpa_s->pending_bssid;
         }
     }
