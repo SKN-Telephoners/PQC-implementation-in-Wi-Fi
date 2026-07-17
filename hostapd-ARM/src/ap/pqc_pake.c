@@ -139,7 +139,7 @@ int hostapd_pqc_send_pake2(struct hostapd_pqc_sm *sm, const u8 *broadcast_mac)
     wpabuf_put_be16(payload, (u16)sm->dsa_pub_key_len);
     wpabuf_put_data(payload, sm->dsa_pub_key, sm->dsa_pub_key_len);
 
-    wpa_printf(MSG_DEBUG, "PQC_LOG: Sending PAKE-2 (Total Payload: %zu bytes)", payload_len);
+    wpa_printf(MSG_DEBUG, "PQC_LOG: Sending PAKE-2 (Total Payload: %zu bytes) [PQC_STAGE_3_END]", payload_len);
     
     /* MTU slicing and headers */
     int ret = pqc_send_fragmented_action_frame(sm, ap_tx_action_wrapper, broadcast_mac, 
@@ -266,7 +266,7 @@ static int hostapd_pqc_send_pake4(struct hostapd_pqc_sm *sm,
     wpabuf_put_data(payload, c, c_len);
     wpabuf_put_data(payload, tag, tag_len);
 
-    wpa_printf(MSG_DEBUG, "PQC_LOG: Sending PAKE-4 to BROADCAST(Payload: %zu bytes)", payload_len);
+    wpa_printf(MSG_DEBUG, "PQC_LOG: Sending PAKE-4 to BROADCAST(Payload: %zu bytes) [PQC_STAGE_4_END]", payload_len);
 
     /* * Sending frame
     */

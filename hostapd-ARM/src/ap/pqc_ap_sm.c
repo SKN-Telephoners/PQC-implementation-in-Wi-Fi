@@ -49,7 +49,7 @@ struct hostapd_pqc_sm * pqc_ap_sm_init(struct hostapd_data *hapd, struct sta_inf
         if (sm->kem_pub_key && sm->kem_secret_key) {
             os_memcpy(sm->kem_pub_key, sta->kem_pub, sm->kem_pub_key_len);
             os_memcpy(sm->kem_secret_key, sta->kem_secr, sm->kem_secret_key_len);
-            wpa_printf(MSG_DEBUG, "PQC_LOG: AP - KEM keys successfully imported from sta_info");
+            wpa_printf(MSG_DEBUG, "PQC_LOG: AP - KEM keys successfully imported from sta_info [PQC_STAGE_2_END]");
 
             /* delete from sta_info struct to save memory */
             os_free(sta->kem_pub);
@@ -128,7 +128,7 @@ int pqc_ap_sm_derive_pmk(struct hostapd_pqc_sm *sm, u8 *pmk_out) {
         return -1;
     }
 
-    wpa_printf(MSG_DEBUG, "PQC_LOG: Generating PMK (assoc verification)");
+    wpa_printf(MSG_DEBUG, "PQC_LOG: Generating PMK (assoc verification) [PQC_STAGE_5_START]");
 
     /* buffer and allocation */
     size_t Hkey_len = sm->fsid_len + sm->pwd_len + sm->sta_first_kem_pub_len + PQC_R_LEN + sm->T_len + sm->ciphertext_2_len;

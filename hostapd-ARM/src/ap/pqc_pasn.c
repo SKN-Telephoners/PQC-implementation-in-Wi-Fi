@@ -56,7 +56,7 @@ int pqc_ap_sm_rx_pasn1(struct hostapd_pqc_sm *sm, struct sta_info *sta, struct h
     int ret = -1;
     u8 pmk[PMK_LEN];
 
-    wpa_printf(MSG_DEBUG, "PQC_LOG: AP - Processing PASN-1 frame (ML-KEM focus)");
+    wpa_printf(MSG_DEBUG, "PQC_LOG: AP - Processing PASN-1 frame (ML-KEM focus) [PQC_STAGE_6_START]");
 
     if (!sm || !sta || !hapd || !payload || len < 2 +ETH_ALEN) {
         wpa_printf(MSG_ERROR, "PQC_LOG: AP - Invalid PASN-1 parameters (or frame too short)");
@@ -211,7 +211,7 @@ static int hostapd_pqc_send_pasn2(struct hostapd_pqc_sm *sm,
     wpabuf_put_data(payload, ciphertext, ciphertext_len);
     wpabuf_put_data(payload, mic1, MIC_LEN);
 
-    wpa_printf(MSG_INFO, "PQC_LOG: AP - Sending PASN-2 frame to " MACSTR
+    wpa_printf(MSG_INFO, "PQC_LOG: [PQC_STAGE_6_END_PAYLOAD] AP - Sending PASN-2 frame to " MACSTR
                " (ciphertext len: %zu)", MAC2STR(sm->sta->addr), ciphertext_len);
 
     ret = pqc_send_fragmented_action_frame(sm, ap_tx_action_wrapper, sm->sta->addr,
@@ -235,7 +235,7 @@ static int hostapd_pqc_send_pasn2_sig(struct hostapd_pqc_sm *sm,
     if (!sm || !sm->hapd || !sm->sta || !signature)
         return -1;                                        
 
-    wpa_printf(MSG_INFO, "PQC_LOG: AP - Sending PASN-2-SIG frame to " MACSTR
+    wpa_printf(MSG_INFO, "PQC_LOG: [PQC_STAGE_6_END_SIG] AP - Sending PASN-2-SIG frame to " MACSTR
                " (signature len: %zu bytes)", MAC2STR(sm->sta->addr), sig_len);
 
     ret = pqc_send_fragmented_action_frame(sm, ap_tx_action_wrapper, sm->sta->addr,
@@ -259,7 +259,7 @@ int pqc_ap_sm_rx_pasn3(struct hostapd_pqc_sm *sm, struct sta_info *sta, struct h
         return -1;
     }
 
-    wpa_printf(MSG_DEBUG, "PQC_LOG: AP - Processing PASN-3 frame. Verifying MIC2...");
+    wpa_printf(MSG_DEBUG, "PQC_LOG: AP - Processing PASN-3 frame. Verifying MIC2... [PQC_STAGE_7_START]");
 
     /* MIC2 Verification */
     u8 mic2_calculated[MIC_LEN];
@@ -326,7 +326,7 @@ int pqc_ap_sm_rx_pasn3(struct hostapd_pqc_sm *sm, struct sta_info *sta, struct h
     sta->flags |= WLAN_STA_AUTHORIZED;
     ap_sta_set_authorized(hapd, sta, 1);
 
-    wpa_printf(MSG_INFO, "PQC_LOG: AP - PASN phase complete. Station fully authorized.");
+    wpa_printf(MSG_INFO, "PQC_LOG: AP - PASN phase complete. Station fully authorized. [PQC_PROCESS_COMPLETE]");
     return 0;
 }
 
@@ -350,7 +350,7 @@ static int hostapd_pqc_send_pasn4(struct hostapd_pqc_sm *sm,
     wpabuf_put_data(payload, enc_keys, enc_keys_len);
     wpabuf_put_data(payload, mic3, MIC_LEN);
 
-    wpa_printf(MSG_INFO, "PQC_LOG: AP - Sending PASN-4 frame to " MACSTR, MAC2STR(sm->sta->addr));
+    wpa_printf(MSG_INFO, "PQC_LOG: [PQC_STAGE_7_END] AP - Sending PASN-4 frame to " MACSTR, MAC2STR(sm->sta->addr));
 
     ret = pqc_send_fragmented_action_frame(sm, ap_tx_action_wrapper, sm->sta->addr,
                                            PQC_OUI_TYPE_PASN, PQC_PASN_TYPE_4, 

@@ -407,7 +407,7 @@ u8 * hostapd_eid_pqc_capabilities(struct hostapd_data *hapd, u8 *pos)
 
 		*pos++ = hapd->conf->pqc_choice;   		// Payload: Selected KEM/DSA mask
 
-		wpa_printf(MSG_INFO, "PQC_LOG: Added PQC elements to beacon frame: 0x%02x", hapd->conf->pqc_choice);
+		wpa_printf(MSG_INFO, "PQC_LOG: Added PQC elements to beacon frame: 0x%02x [PQC_STAGE_1_FRAG_END]", hapd->conf->pqc_choice);
 		return pos;
 }
 
@@ -1180,7 +1180,7 @@ static void hostapd_gen_probe_resp(struct hostapd_data *hapd,
                 remaining -= chunk;
                 fragment_index++;
             }
-            wpa_printf(MSG_INFO, "PQC_LOG: AP - Sent first %u fragments in standard Probe Response", fragment_index);
+            wpa_printf(MSG_INFO, "PQC_LOG: AP - Sent first %u fragments in standard Probe Response [PQC_STAGE_1_INIT_END]", fragment_index);
         }
     }
     /* --- END PQC PAYLOAD INJECTION --- */
@@ -1843,7 +1843,7 @@ void handle_probe_req(struct hostapd_data *hapd,
 						sta->pqc_choice = choice;
 						sta->pqc_negotiated = 1;
 						wpa_printf(MSG_INFO, "PQC_LOG: Received correct probe request from " MACSTR
-								". Saved algorithm config: 0x%02x", MAC2STR(mgmt->sa), choice);
+								". Saved algorithm config: 0x%02x  [PQC_STAGE_1_INIT_START]", MAC2STR(mgmt->sa), choice);
 						
 						/* Wipe old keys if STA is reconnecting/re-probing */
 						if (sta->kem_pub) os_free(sta->kem_pub);
@@ -1892,7 +1892,7 @@ void handle_probe_req(struct hostapd_data *hapd,
             	}
 				else if (pos[5] == 0x03) {
                     requested_frag = pos[6];
-                    wpa_printf(MSG_DEBUG, "PQC_LOG: AP - Parsed Probe Request asking for Fragment %u", requested_frag);
+                    wpa_printf(MSG_DEBUG, "PQC_LOG: AP - Parsed Probe Request asking for Fragment %u [PQC_STAGE_1_FRAG_START]", requested_frag);
                 }
 			}
             /* find next IE */

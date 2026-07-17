@@ -3664,7 +3664,7 @@ static void handle_auth(struct hostapd_data *hapd,
 
 	/* PQC STATE MACHINE INIT (AP SIDE) */
     if (sta && hapd->conf->pqc_enabled) {
-        wpa_printf(MSG_DEBUG, "PQC_LOG: Received Auth Req - PQC session initialization start");
+        wpa_printf(MSG_DEBUG, "PQC_LOG: Received Auth Req - PQC session initialization start [PQC_STAGE_2_START]");
 
         if (sta->pqc) {
             pqc_ap_sm_deinit(sta->pqc);
@@ -5888,7 +5888,7 @@ static void handle_assoc(struct hostapd_data *hapd,
         u8 PMK[PMK_LEN];
         
         if (pqc_ap_sm_derive_pmk(sta->pqc, PMK) == 0) {
-            wpa_printf(MSG_INFO, "PQC_LOG: PMK for STA " MACSTR " generated.", MAC2STR(mgmt->sa));
+            wpa_printf(MSG_INFO, "PQC_LOG: PMK for STA " MACSTR " generated. [PQC_STAGE_5_END]", MAC2STR(mgmt->sa));
 
 #ifdef CONFIG_WPA
             if (hapd->wpa_auth) {
@@ -6663,23 +6663,23 @@ case WLAN_ACTION_PUBLIC:
         
         if (!complete_payload) {
             /* Still waiting for more chunks. Silently consume the frame. */
-            wpa_printf(MSG_DEBUG, "PQC_LOG: Reassembling fragment offset %u / %u", frag_offset, frag_total_len);
+            wpa_printf(MSG_DEBUG, "PQC_LOG: Reassembling fragment offset %u / %u [PQC_RX_DEFRAG_START]", frag_offset, frag_total_len);
             return 1; 
         }
 
         /* REASSEMBLY COMPLETE! Extract the full continuous payload */
         const u8 *payload = wpabuf_head(complete_payload);
         size_t payload_len = wpabuf_len(complete_payload);
-        wpa_printf(MSG_DEBUG, "PQC_LOG: Reassembly complete! Total size: %zu", payload_len);
+        wpa_printf(MSG_DEBUG, "PQC_LOG: Reassembly complete! Total size: %zu [PQC_RX_DEFRAG_END]", payload_len);
 
         /* --- PQC PAKE INTERCEPTION --- */
         if (type == PQC_OUI_TYPE_PAKE) {
             if (subtype == PQC_PAKE_TYPE_1) {
-                wpa_printf(MSG_DEBUG, "PQC_LOG: Received PAKE-1 from: " MACSTR, MAC2STR(mgmt->sa));
+                wpa_printf(MSG_DEBUG, "PQC_LOG: [PQC_STAGE_3_START] Received PAKE-1 from: " MACSTR, MAC2STR(mgmt->sa));
                 pqc_ap_sm_rx_pake1(sta->pqc, hapd, sta, payload, payload_len);
             }
             else if (subtype == PQC_PAKE_TYPE_3) {
-                wpa_printf(MSG_DEBUG, "PQC_LOG: Received PAKE-3 from: " MACSTR, MAC2STR(mgmt->sa));
+                wpa_printf(MSG_DEBUG, "PQC_LOG: [PQC_STAGE_4_START] Received PAKE-3 from: " MACSTR, MAC2STR(mgmt->sa));
                 if (payload_len >= 32) {
                     const u8 *s = payload;
                     const u8 *T = payload + 32;
