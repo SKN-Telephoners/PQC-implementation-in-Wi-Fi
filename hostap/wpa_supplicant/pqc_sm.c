@@ -121,7 +121,7 @@ int pqc_sm_rx_auth_req(struct wpa_pqc_sm *sm) {
     u8 enc_id[PQC_SID_LEN]; // 16B
     int ret = -1;
 
-    wpa_printf(MSG_DEBUG, "PQC_LOG: State Machine processing Auth Response, preparing PAKE-1 data");
+    wpa_printf(MSG_DEBUG, "PQC_LOG: State Machine processing Auth Response, preparing PAKE-1 data [PQC_STAGE_2_START]");
 
     if (!sm || !sm->ap_kem_public_key) {
         wpa_printf(MSG_ERROR, "PQC_LOG: Missing AP KEM public key");
@@ -172,7 +172,7 @@ int pqc_sm_assoc_success(struct wpa_pqc_sm *sm) {
 
     if (!sm || !sm->pqc_enabled) return -1;
 
-    wpa_printf(MSG_DEBUG, "PQC_LOG: Received Association Response. Generating the second pair of KEM keys");
+    wpa_printf(MSG_DEBUG, "PQC_LOG: Received Association Response. Generating the second pair of KEM keys [PQC_STAGE_5_START]");
 
     const char *alg_name = get_oqs_kem_alg(sm->pqc_choice);
     if (!alg_name) return -1;

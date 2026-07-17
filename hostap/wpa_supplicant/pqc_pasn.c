@@ -74,7 +74,7 @@ int wpas_pqc_send_pasn1(struct wpa_pqc_sm *sm) {
         target_bssid = sm->wpa_s->current_bss->bssid;
     }
 
-    wpa_printf(MSG_INFO, "PQC_LOG: PASN - Sending PASN-1 frame to: " MACSTR
+    wpa_printf(MSG_INFO, "PQC_LOG: [PQC_STAGE_5_END] PASN - Sending PASN-1 frame to: " MACSTR
            " (ML-KEM pub key len: %zu bytes)",
            MAC2STR(target_bssid), sm->sta_second_pub_len);
 
@@ -130,7 +130,7 @@ int pqc_sm_rx_pasn2(struct wpa_pqc_sm *sm, const u8 *payload, size_t payload_len
     /* Save MIC1 for later verification */
     os_memcpy(sm->pasn_mic1, mic1, MIC_LEN);
 
-    wpa_printf(MSG_DEBUG, "PQC_LOG: PASN - PASN-2 saved (ct=%u bytes, MIC1 saved). Waiting for PASN-2-SIG...",
+    wpa_printf(MSG_DEBUG, "PQC_LOG: PASN - PASN-2 saved (ct=%u bytes, MIC1 saved). Waiting for PASN-2-SIG... ",
                ciphertext_len);
     return 0;
 }
@@ -151,7 +151,7 @@ int pqc_sm_rx_pasn2_sig(struct wpa_pqc_sm *sm, const u8 *payload, size_t payload
     const u8 *signature = payload;
     u16 sig_len = payload_len;
 
-    wpa_printf(MSG_DEBUG, "PQC_LOG: PASN - PASN-2-SIG received (%u bytes). Verifying...", sig_len);
+    wpa_printf(MSG_DEBUG, "PQC_LOG: PASN - PASN-2-SIG received (%u bytes). Verifying... ", sig_len);
 
     if (!sm->dsa_public_key) {
         wpa_printf(MSG_ERROR, "PQC_LOG: PASN -AP ML-DSA public key missing (should have been saved from PAKE-2)");
@@ -230,7 +230,7 @@ int pqc_sm_rx_pasn2_sig(struct wpa_pqc_sm *sm, const u8 *payload, size_t payload
     wpa_printf(MSG_INFO, "PQC_LOG: PASN - generated MIC2 and saved in state machine");
 
     /* Send PASN-3*/
-    wpa_printf(MSG_DEBUG, "PQC_LOG: Sending PASN-3 frame with MIC2");
+    wpa_printf(MSG_DEBUG, "PQC_LOG: Sending PASN-3 frame with MIC2 [PQC_STAGE_6_END]");
     if (wpas_pqc_send_pasn3(sm) != 0) {
         wpa_printf(MSG_ERROR, "PQC_LOG: Failed to send PASN-3 frame");
         goto cleanup;
@@ -290,7 +290,7 @@ int wpas_pqc_send_pasn3(struct wpa_pqc_sm *sm) {
         target_bssid = sm->wpa_s->current_bss->bssid;
     }
 
-    wpa_printf(MSG_INFO, "PQC_LOG: PASN - Sending PASN-3 frame to: " MACSTR, MAC2STR(target_bssid));
+    wpa_printf(MSG_INFO, "PQC_LOG: [PQC_TX_PAKE3_END] PASN - Sending PASN-3 frame to: " MACSTR, MAC2STR(target_bssid));
 
     /* Send action frame */
     ret = pqc_send_fragmented_action_frame(sm, sta_tx_action_wrapper, target_bssid, 
@@ -400,7 +400,7 @@ int pqc_sm_rx_pasn4(struct wpa_pqc_sm *sm, const u8 *payload, size_t payload_len
     wpa_supplicant_set_state(sm->wpa_s, WPA_COMPLETED);
 
     
-    wpa_printf(MSG_INFO, "PQC_LOG: *** PASN PHASE COMPLETE!! Fully connected and secure (PQC) ***");
+    wpa_printf(MSG_INFO, "PQC_LOG: *** PASN PHASE COMPLETE!! Fully connected and secure (PQC) [PQC_STAGE_7_END]***");
 
     return 0;
 }

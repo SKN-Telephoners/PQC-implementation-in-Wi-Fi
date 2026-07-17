@@ -7237,7 +7237,7 @@ void wpa_supplicant_event(void *ctx, enum wpa_event_type event,
 						
 						if (!complete_payload) {
 							/* Still waiting for more chunks. Silently consume this frame. */
-							wpa_printf(MSG_DEBUG, "PQC_LOG: Reassembling fragment offset %u / %u", 
+							wpa_printf(MSG_DEBUG, "PQC_LOG: Reassembling fragment offset %u / %u [PQC_RX_DEFRAG_START]", 
 									frag_offset, frag_total_len);
 							goto skip_standard_rx; 
 						}
@@ -7245,18 +7245,18 @@ void wpa_supplicant_event(void *ctx, enum wpa_event_type event,
 						/* reassembly complete */
 						const u8 *payload = wpabuf_head(complete_payload);
 						size_t payload_len = wpabuf_len(complete_payload);
-						wpa_printf(MSG_DEBUG, "PQC_LOG: Reassembly complete! Total size: %zu", payload_len);
+						wpa_printf(MSG_DEBUG, "PQC_LOG: Reassembly complete! Total size: %zu [PQC_RX_DEFRAG_END]", payload_len);
 
 						/* PQC PAKE */
 						if (type == PQC_OUI_TYPE_PAKE) {
 							if (subtype == PQC_PAKE_TYPE_2) {
-								wpa_printf(MSG_DEBUG, "PQC_LOG: Processing complete PAKE-2");
+								wpa_printf(MSG_DEBUG, "PQC_LOG: Processing complete PAKE-2 [PQC_STAGE_3_START]");
 								pqc_sm_rx_pake2(wpa_s->pqc, payload, payload_len);
 							}
 							else if (subtype == PQC_PAKE_TYPE_4) {
-								wpa_printf(MSG_DEBUG, "PQC_LOG: Processing complete PAKE-4");
+								wpa_printf(MSG_DEBUG, "PQC_LOG: Processing complete PAKE-4 [PQC_STAGE_4_START]");
 								if (pqc_sm_rx_pake4(wpa_s->pqc, payload, payload_len) == 0) {
-									wpa_printf(MSG_INFO, "PQC_LOG: PAKE-4 processed successfully. Association triggered.");
+									wpa_printf(MSG_INFO, "PQC_LOG: PAKE-4 processed successfully. Association triggered. [PQC_STAGE_4_END]");
 								} else {
 									wpa_printf(MSG_ERROR, "PQC_LOG: Error processing PAKE-4! Aborting.");
 									wpa_supplicant_set_state(wpa_s, WPA_DISCONNECTED);
@@ -7266,7 +7266,7 @@ void wpa_supplicant_event(void *ctx, enum wpa_event_type event,
 						/* PQC PASN */
 						else if (type == PQC_OUI_TYPE_PASN) {
 							if (subtype == PQC_PASN_TYPE_2) {
-								wpa_printf(MSG_DEBUG, "PQC_LOG: Processing complete PASN-2");
+								wpa_printf(MSG_DEBUG, "PQC_LOG: Processing complete PASN-2 [PQC_STAGE_6_START]");
 								if (pqc_sm_rx_pasn2(wpa_s->pqc, payload, payload_len) == 0) {
 									wpa_printf(MSG_INFO, "PQC_LOG: PASN-2 processed successfully.");
 								} else {
@@ -7274,7 +7274,7 @@ void wpa_supplicant_event(void *ctx, enum wpa_event_type event,
 								}
 							}
 							else if (subtype == PQC_PASN_TYPE_2_SIG) {
-								wpa_printf(MSG_DEBUG, "PQC_LOG: Processing complete PASN-2-SIG");
+								wpa_printf(MSG_DEBUG, "PQC_LOG: Processing complete PASN-2-SIG [PQC_STAGE_6_SIG_START]");
 								if (pqc_sm_rx_pasn2_sig(wpa_s->pqc, payload, payload_len) == 0) {
 									wpa_printf(MSG_INFO, "PQC_LOG: PASN-2-SIG processed successfully.");
 								} else {
@@ -7282,7 +7282,7 @@ void wpa_supplicant_event(void *ctx, enum wpa_event_type event,
 								}
 							}
 							else if (subtype == PQC_PASN_TYPE_4) {
-								wpa_printf(MSG_DEBUG, "PQC_LOG: Processing complete PASN-4");
+								wpa_printf(MSG_DEBUG, "PQC_LOG: Processing complete PASN-4 [PQC_STAGE_7_START]");
 								if (pqc_sm_rx_pasn4(wpa_s->pqc, payload, payload_len) == 0) {
 									wpa_printf(MSG_INFO, "PQC_LOG: PASN-4 processed successfully.");
 								} else {
@@ -7915,7 +7915,7 @@ void pqc_process_vendor_ie(struct wpa_supplicant *wpa_s, const u8 *ie, size_t ie
     data = &ie[7];
     data_len = ie_len - 7;
 
-    wpa_printf(MSG_DEBUG, "PQC_LOG: STA - Processing key frag %u (DataLen=%zu, TotalLen=%u)", 
+    wpa_printf(MSG_DEBUG, "PQC_LOG: STA - Processing key frag %u (DataLen=%zu, TotalLen=%u) [PQC_RX_FRAG_START]", 
                frag_idx, data_len, total_len);
 
     if (wpa_s->pqc_kem_buffer && wpa_s->pqc_kem_expected_len != total_len) {
@@ -7952,7 +7952,7 @@ void pqc_process_vendor_ie(struct wpa_supplicant *wpa_s, const u8 *ie, size_t ie
     /* --- THE COMPLETION CHECK --- */
     if (wpa_s->pqc_fragments_mask == expected_mask) {
         wpa_s->pqc_kem_complete = true;
-        wpa_printf(MSG_INFO, "PQC_LOG: STA - Assembled ML-KEM public key. (%zu bytes)", wpa_s->pqc_kem_received_len);
+        wpa_printf(MSG_INFO, "PQC_LOG: STA - Assembled ML-KEM public key. (%zu bytes), [PQC_RX_FRAG_END]", wpa_s->pqc_kem_received_len);
         pqc_try_start_auth(wpa_s);
     } 
     /* If missing fragments AND we are actively trying to connect to this AP */

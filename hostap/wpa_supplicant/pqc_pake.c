@@ -81,7 +81,7 @@ int wpas_pqc_send_pake1(struct wpa_pqc_sm *sm, const u8 *c, size_t c_len, const 
     wpabuf_put_be16(payload, (u16)enc_id_len);
     wpabuf_put_data(payload, enc_id, enc_id_len);
 
-    wpa_printf(MSG_INFO, "PQC_LOG: Sending Public Action frame (PAKE-1) to: " MACSTR, MAC2STR(target_bssid));
+    wpa_printf(MSG_INFO, "PQC_LOG: [PQC_STAGE_2_END] Sending Public Action frame (PAKE-1) to: " MACSTR, MAC2STR(target_bssid));
 
     ret = pqc_send_fragmented_action_frame(sm, sta_tx_action_wrapper, target_bssid, 
                                            PQC_OUI_TYPE_PAKE, PQC_PAKE_TYPE_1, 
@@ -266,7 +266,7 @@ int wpas_pqc_send_pake3(struct wpa_pqc_sm *sm,
         target_bssid = sm->wpa_s->current_bss->bssid;
     }
 
-    wpa_printf(MSG_DEBUG, "PQC: Sending PAKE-3 Action Frame to " MACSTR " ",
+    wpa_printf(MSG_DEBUG, "PQC: [PQC_STAGE_3_END] Sending PAKE-3 Action Frame to " MACSTR " ",
                MAC2STR(sm->wpa_s->bssid));
 
     /* * Sending frame

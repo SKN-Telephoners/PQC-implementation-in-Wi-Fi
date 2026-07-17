@@ -662,7 +662,7 @@ static struct wpa_bss * wpa_bss_add(struct wpa_supplicant *wpa_s,
 
 				if (pqc_type == 0x02) {
 					wpa_printf(MSG_DEBUG,
-						   "PQC: Found PQC Key Fragment IE in wpa_bss_add (type=0x02), length=%u",
+						   "PQC: Found PQC Key Fragment IE in wpa_bss_add (type=0x02), length=%u [PQC_STAGE_1_START]",
 						   elen);
 					pqc_process_vendor_ie(wpa_s, &pqc_pos[2], elen);
 				}
