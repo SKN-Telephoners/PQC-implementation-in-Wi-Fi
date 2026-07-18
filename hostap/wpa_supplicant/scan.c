@@ -23,6 +23,7 @@
 #include "bss.h"
 #include "scan.h"
 #include "mesh.h"
+#include "common/pqc_help.h"
 
 static struct wpabuf * wpa_supplicant_extra_ies(struct wpa_supplicant *wpa_s);
 
@@ -900,7 +901,9 @@ static struct wpabuf * wpa_supplicant_extra_ies(struct wpa_supplicant *wpa_s)
 
             wpabuf_put_u8(extra_ie, WLAN_EID_VENDOR_SPECIFIC); /* 221 */
             wpabuf_put_u8(extra_ie, 5);                        /* length: OUI(3) + typ(1) + payload(1) */
-            wpabuf_put_be24(extra_ie, 0x00904C);               /* OUI */
+            wpabuf_put_u8(extra_ie, PQC_OUI_0);
+    		wpabuf_put_u8(extra_ie, PQC_OUI_1);
+    		wpabuf_put_u8(extra_ie, PQC_OUI_2);              /* OUI */
             wpabuf_put_u8(extra_ie, 0x01);                     /* Type */
             wpabuf_put_u8(extra_ie, safe_pqc_byte);            /* Payload: KEM & DSA */
 

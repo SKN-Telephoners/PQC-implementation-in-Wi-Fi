@@ -21,6 +21,7 @@
 #include "config_ssid.h"
 #include "wmm_ac.h"
 #include "pasn/pasn_common.h"
+#include <oqs/oqs.h>
 
 extern const char *const wpa_supplicant_version;
 extern const char *const wpa_supplicant_license;
@@ -1737,17 +1738,22 @@ struct wpa_supplicant {
 	u8 pmkid_anonce[NONCE_LEN];
 	bool pmkid_anonce_set;
 #endif /* CONFIG_PMKSA_PRIVACY */
-	u8 pqc_kem_buffer[800];
 	/*
-	* PQC: new machine state used mainly for PQC parameters
-	*/
-	struct wpa_pqc_sm *pqc;
-	u32 pqc_fragments_mask;
-	size_t pqc_kem_received_len;
-	size_t pqc_kem_expected_len;
-	u8 pqc_kem_expected_frags;
-	bool pqc_kem_complete;
-	bool pqc_auth_started;
+     * PQC: new machine state used mainly for PQC parameters
+     */
+    struct wpa_pqc_sm *pqc;
+    
+    /* Dynamically allocated buffer for assembling AP's KEM Public Key from IEs */
+    u8 *pqc_kem_buffer;
+    size_t pqc_kem_buffer_size; /* Keep track of allocated size to prevent overflows */
+    
+    /* IE Fragmentation Trackers (Used in events.c) */
+    u32 pqc_fragments_mask;
+    size_t pqc_kem_received_len;
+    size_t pqc_kem_expected_len;
+    u8 pqc_kem_expected_frags;
+    bool pqc_kem_complete;
+    bool pqc_auth_started;
 };
 
 
@@ -2172,5 +2178,6 @@ void wpas_update_dfs_ap_info(struct wpa_supplicant *wpa_s, int freq,
 void wpas_configure_frame_filters(struct wpa_supplicant *wpa_s);
 
 void pqc_process_vendor_ie(struct wpa_supplicant *wpa_s, const u8 *ie, size_t ie_len);
+void pqc_request_next_fragment(struct wpa_supplicant *wpa_s, struct wpa_bss *target, u8 next_frag);
 
 #endif /* WPA_SUPPLICANT_I_H */

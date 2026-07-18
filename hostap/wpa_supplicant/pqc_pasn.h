@@ -22,12 +22,5 @@ int pqc_sm_rx_pasn2_sig(struct wpa_pqc_sm *sm, const u8 *payload, size_t payload
 int wpas_pqc_send_pasn3(struct wpa_pqc_sm *sm);
 int pqc_sm_rx_pasn4(struct wpa_pqc_sm *sm, const u8 *payload, size_t payload_len);
 
-/**
- * pqc_pasn_generate_mldsa_keys - Generate ML-DSA key pair for PASN
- * @sm: PQC state machine
- * Returns: 0 on success, -1 on failure
- */
-int pqc_pasn_generate_mldsa_keys(struct wpa_pqc_sm *sm);
-
 #endif // PQC_STA_PASN_H
 

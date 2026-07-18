@@ -14,7 +14,7 @@ struct hostapd_pqc_sm {
     u8 pqc_choice;
     int pqc_enabled; // if PQC is used
 
-    u8 K_aes[32]; // derived after PAKE-1
+    u8 K_aes[AES_KEY_LEN]; // derived after PAKE-1
     u8 sid[16]; // random
     u8 pwd[128];    /* from AP config */
     size_t pwd_len;

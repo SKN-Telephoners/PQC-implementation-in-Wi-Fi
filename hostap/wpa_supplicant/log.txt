@@ -1,0 +1,1814 @@
+wpa_supplicant v2.12-devel
+random: Trying to read entropy from /dev/random
+Successfully initialized wpa_supplicant
+Initializing interface 'wlp8s0' conf 'test-sta.conf' driver 'default' ctrl_interface 'N/A' bridge 'N/A'
+Configuration file 'test-sta.conf' -> '/home/kolo/Pulpit/PQC/PQC_implementation/hostap/wpa_supplicant/test-sta.conf'
+Reading configuration file '/home/kolo/Pulpit/PQC/PQC_implementation/hostap/wpa_supplicant/test-sta.conf'
+ctrl_interface='/var/run/wpa_supplicant'
+update_config=0
+Line: 4 - start of a new network block
+ssid - hexdump_ascii(len=7):
+     53 69 65 63 50 51 43                              SiecPQC         
+key_mgmt: 0x4
+proto: 0x2
+group: 0x10
+pairwise: 0x10
+pqc_enabled=1 (0x1)
+pqc_choice=136 (0x88)
+PSK (ASCII passphrase) - hexdump_ascii(len=10):
+     68 61 73 6c 6f 6d 61 73 6c 6f                     haslomaslo      
+PSK (from passphrase) - hexdump(len=32): 15 e6 b6 c5 18 fa 97 29 0d 00 69 17 6e 65 b0 cb 5b 9e 4a b7 aa b5 c8 0f e6 ca 8f 91 db 4c a5 86
+Priority group 0
+   id=0 ssid='SiecPQC'
+nl80211: Kernel version: Linux 5.15.0-122-generic (#132-Ubuntu SMP Thu Aug 29 13:45:52 UTC 2024; x86_64)
+nl80211: Maximum supported attribute ID: 305
+nl80211: Initialize interface wlp8s0 (driver: mt7921e)
+nl80211: TDLS supported
+nl80211: TDLS external setup
+nl80211: Supported cipher 00-0f-ac:1
+nl80211: Supported cipher 00-0f-ac:5
+nl80211: Supported cipher 00-0f-ac:2
+nl80211: Supported cipher 00-0f-ac:4
+nl80211: Supported cipher 00-0f-ac:10
+nl80211: Supported cipher 00-0f-ac:8
+nl80211: Supported cipher 00-0f-ac:9
+nl80211: Supported cipher 00-0f-ac:6
+nl80211: Supported cipher 00-0f-ac:13
+nl80211: Supported cipher 00-0f-ac:11
+nl80211: Supported cipher 00-0f-ac:12
+nl80211: Using driver-based off-channel TX
+nl80211: Driver-advertised extended capabilities (default) - hexdump(len=8): 00 00 00 00 00 00 00 40
+nl80211: Driver-advertised extended capabilities mask (default) - hexdump(len=8): 00 00 00 00 00 00 00 40
+nl80211: key_mgmt=0x105ff0f enc=0xfef auth=0x7 flags=0x4003d10d35bd0e0 flags2=0x6000123 rrm_flags=0x30 probe_resp_offloads=0x0 max_stations=0 max_remain_on_chan=5000 max_scan_ssids=4
+nl80211: interface wlp8s0 in phy phy0
+nl80211: Set mode ifindex 3 iftype 2 (STATION)
+nl80211: Subscribe to mgmt frames with non-AP handle 0x5608aa4ed8c0
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x5608aa4ed8c0 match=0104 multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=2): 01 04
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x5608aa4ed8c0 match=040a multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=2): 04 0a
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x5608aa4ed8c0 match=040b multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=2): 04 0b
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x5608aa4ed8c0 match=040c multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=2): 04 0c
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x5608aa4ed8c0 match=040d multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=2): 04 0d
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x5608aa4ed8c0 match=090a multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=2): 09 0a
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x5608aa4ed8c0 match=090b multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=2): 09 0b
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x5608aa4ed8c0 match=090c multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=2): 09 0c
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x5608aa4ed8c0 match=090d multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=2): 09 0d
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x5608aa4ed8c0 match=0409506f9a09 multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=6): 04 09 50 6f 9a 09
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x5608aa4ed8c0 match=040900904c multicast=0
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x5608aa4ed8c0 match=7f506f9a09 multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=5): 7f 50 6f 9a 09
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x5608aa4ed8c0 match=0409506f9a1a multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=6): 04 09 50 6f 9a 1a
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x5608aa4ed8c0 match=0801 multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=2): 08 01
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x5608aa4ed8c0 match=040e multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=2): 04 0e
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x5608aa4ed8c0 match=06 multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=1): 06
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x5608aa4ed8c0 match=0a07 multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=2): 0a 07
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x5608aa4ed8c0 match=0a11 multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=2): 0a 11
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x5608aa4ed8c0 match=0a0b multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=2): 0a 0b
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x5608aa4ed8c0 match=0a1a multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=2): 0a 1a
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x5608aa4ed8c0 match=1101 multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=2): 11 01
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x5608aa4ed8c0 match=1102 multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=2): 11 02
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x5608aa4ed8c0 match=0505 multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=2): 05 05
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x5608aa4ed8c0 match=0500 multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=2): 05 00
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x5608aa4ed8c0 match=1301 multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=2): 13 01
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x5608aa4ed8c0 match=1305 multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=2): 13 05
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x5608aa4ed8c0 match=7e506f9a1a multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=5): 7e 50 6f 9a 1a
+nl80211: Failed to register Action frame processing - ignore for now
+rfkill: initial event: idx=1 type=1 op=0 soft=0 hard=0
+netlink: Operstate: ifindex=3 linkmode=1 (userspace-control), operstate=5 (IF_OPER_DORMANT)
+Add interface wlp8s0 to a new radio phy0
+nl80211: Regulatory information - country=00
+nl80211: 2402-2472 @ 40 MHz 20 mBm
+nl80211: 2457-2482 @ 20 MHz 20 mBm (no IR)
+nl80211: 2474-2494 @ 20 MHz 20 mBm (no OFDM) (no IR)
+nl80211: 5170-5250 @ 80 MHz 20 mBm (no IR)
+nl80211: 5250-5330 @ 80 MHz 20 mBm (DFS) (no IR)
+nl80211: 5490-5730 @ 160 MHz 20 mBm (DFS) (no IR)
+nl80211: 5735-5835 @ 80 MHz 20 mBm (no IR)
+nl80211: 57240-63720 @ 2160 MHz 0 mBm
+nl80211: Added 802.11b mode based on 802.11g information
+nl80211: Mode IEEE 802.11g: 2412 2417 2422 2427 2432 2437 2442 2447 2452 2457 2462 2467[NO_IR] 2472 2484[NO_IR]
+nl80211: Mode IEEE 802.11a: 5180[NO_IR] 5200[NO_IR] 5220[NO_IR] 5240[NO_IR] 5260[NO_IR][RADAR] 5280[NO_IR][RADAR] 5300[NO_IR][RADAR] 5320[NO_IR][RADAR] 5500[NO_IR][RADAR] 5520[NO_IR][RADAR] 5540[NO_IR][RADAR] 5560[NO_IR][RADAR] 5580[NO_IR][RADAR] 5600[NO_IR][RADAR] 5620[NO_IR][RADAR] 5640[NO_IR][RADAR] 5660[NO_IR][RADAR] 5680[NO_IR][RADAR] 5700[NO_IR][RADAR] 5720[NO_IR][RADAR] 5745[NO_IR] 5765[NO_IR] 5785[NO_IR] 5805[NO_IR] 5825[NO_IR] 5845[DISABLED] 5865[DISABLED]
+nl80211: Mode IEEE 802.11b: 2412 2417 2422 2427 2432 2437 2442 2447 2452 2457 2462 2467[NO_IR] 2472 2484[NO_IR]
+wlp8s0: Own MAC address: 14:ac:60:29:42:fb
+wpa_driver_nl80211_set_key: ifindex=3 (wlp8s0) alg=0 addr=(nil) key_idx=0 set_tx=0 seq_len=0 key_len=0 key_flag=0x10 link_id=-1
+nl80211: DEL_KEY
+   broadcast key
+wpa_driver_nl80211_set_key: ifindex=3 (wlp8s0) alg=0 addr=(nil) key_idx=1 set_tx=0 seq_len=0 key_len=0 key_flag=0x10 link_id=-1
+nl80211: DEL_KEY
+   broadcast key
+wpa_driver_nl80211_set_key: ifindex=3 (wlp8s0) alg=0 addr=(nil) key_idx=2 set_tx=0 seq_len=0 key_len=0 key_flag=0x10 link_id=-1
+nl80211: DEL_KEY
+   broadcast key
+wpa_driver_nl80211_set_key: ifindex=3 (wlp8s0) alg=0 addr=(nil) key_idx=3 set_tx=0 seq_len=0 key_len=0 key_flag=0x10 link_id=-1
+nl80211: DEL_KEY
+   broadcast key
+wpa_driver_nl80211_set_key: ifindex=3 (wlp8s0) alg=0 addr=(nil) key_idx=4 set_tx=0 seq_len=0 key_len=0 key_flag=0x10 link_id=-1
+nl80211: DEL_KEY
+   broadcast key
+wpa_driver_nl80211_set_key: ifindex=3 (wlp8s0) alg=0 addr=(nil) key_idx=5 set_tx=0 seq_len=0 key_len=0 key_flag=0x10 link_id=-1
+nl80211: DEL_KEY
+   broadcast key
+wlp8s0: RSN: flushing PMKID list in the driver
+nl80211: Flush PMKIDs
+TDLS: TDLS operation supported by driver
+TDLS: Driver uses external link setup
+TDLS: Driver does not support TDLS channel switching
+wlp8s0: WPS: UUID based on MAC address: 4423f8a8-6fc7-5f25-95cc-0f486bb1ff5a
+ENGINE: Loading builtin engines
+ENGINE: Loading builtin engines
+EAPOL: SUPP_PAE entering state DISCONNECTED
+EAPOL: Supplicant port status: Unauthorized
+nl80211: Skip set_supp_port(unauthorized) while not associated
+EAPOL: KEY_RX entering state NO_KEY_RECEIVE
+EAPOL: SUPP_BE entering state INITIALIZE
+EAP: EAP entering state DISABLED
+wlp8s0: Added interface wlp8s0
+wlp8s0: State: DISCONNECTED -> DISCONNECTED
+nl80211: Set wlp8s0 operstate 0->0 (DORMANT)
+netlink: Operstate: ifindex=3 linkmode=-1 (no change), operstate=5 (IF_OPER_DORMANT)
+random: Got 20/20 bytes from /dev/random
+RTM_NEWLINK: ifi_index=3 ifname=wlp8s0 operstate=2 linkmode=1 ifi_family=0 ifi_flags=0x1003 ([UP])
+wlp8s0: Starting delayed sched scan
+wlp8s0: Use normal scan instead of sched_scan for initial scans (normal_scans=0)
+wlp8s0: Setting scan request: 0.000000 sec
+wlp8s0: State: DISCONNECTED -> SCANNING
+wlp8s0: Starting AP scan for wildcard SSID
+PQC_LOG: Added IE to Probe Request, Byte: 0x88
+wlp8s0: Add radio work 'scan'@0x5608aa5cf970
+wlp8s0: First radio work item in the queue - schedule start immediately
+wlp8s0: Starting radio work 'scan'@0x5608aa5cf970 after 0.000011 second wait
+wlp8s0: nl80211: scan request
+nl80211: Scan SSID 
+nl80211: Scan co-located APs on 6 GHz
+nl80211: Scan extra IEs - hexdump(len=20): 7f 0b 00 00 0a 02 01 00 40 40 00 00 20 dd 05 00 90 4c 01 88
+Scan requested (ret=0) - scan timeout 10 seconds
+nl80211: Event message available
+nl80211: Drv Event 33 (NL80211_CMD_TRIGGER_SCAN) received for wlp8s0
+wlp8s0: nl80211: Scan trigger
+wlp8s0: Event SCAN_STARTED (47) received
+wlp8s0: Own scan request started a scan in 0.000066 seconds
+EAPOL: disable timer tick
+RTM_NEWLINK: ifi_index=3 ifname=wlp8s0 wext ifi_family=0 ifi_flags=0x1003 ([UP])
+nl80211: Event message available
+nl80211: Drv Event 34 (NL80211_CMD_NEW_SCAN_RESULTS) received for wlp8s0
+wlp8s0: nl80211: New scan results available
+nl80211: Scan probed for SSID ''
+nl80211: Scan included frequencies: 2412 2417 2422 2427 2432 2437 2442 2447 2452 2457 2462 2467 2472 2484 5180 5200 5220 5240 5260 5280 5300 5320 5500 5520 5540 5560 5580 5600 5620 5640 5660 5680 5700 5720 5745 5765 5785 5805 5825
+wlp8s0: Event SCAN_RESULTS (3) received
+wlp8s0: Scan completed in 2.566657 seconds
+nl80211: Received scan results (11 BSSes)
+wlp8s0: BSS: Start scan result update 1
+IEEE 802.11 element parse ignored unknown element (id=7 elen=6)
+IEEE 802.11 element parse ignored unknown element (id=32 elen=1)
+IEEE 802.11 element parse ignored unknown element (id=35 elen=2)
+wlp8s0: MLD: No Multi-Link element
+wlp8s0: BSS: Add new id 0 BSSID e4:5f:01:9e:4c:0f SSID 'JackSparrow' freq 2462
+IEEE 802.11 element parse ignored unknown element (id=7 elen=6)
+IEEE 802.11 element parse ignored unknown element (id=32 elen=1)
+IEEE 802.11 element parse ignored unknown element (id=11 elen=5)
+wlp8s0: MLD: No Multi-Link element
+wlp8s0: BSS: Add new id 1 BSSID 34:f8:e7:c2:9c:c7 SSID 'TeleAGH' freq 2437
+IEEE 802.11 element parse ignored unknown element (id=7 elen=6)
+IEEE 802.11 element parse ignored unknown element (id=32 elen=1)
+IEEE 802.11 element parse ignored unknown element (id=11 elen=5)
+IEEE 802.11 element parse ignored unknown element (id=149 elen=10)
+IEEE 802.11 element parse ignored unknown element (id=133 elen=30)
+wlp8s0: MLD: No Multi-Link element
+wlp8s0: BSS: Add new id 2 BSSID 34:f8:e7:c2:9c:c4 SSID 'TeleLAB' freq 2437
+IEEE 802.11 element parse ignored unknown element (id=7 elen=6)
+IEEE 802.11 element parse ignored unknown element (id=32 elen=1)
+IEEE 802.11 element parse ignored unknown element (id=11 elen=5)
+IEEE 802.11 element parse ignored unknown element (id=149 elen=10)
+IEEE 802.11 element parse ignored unknown element (id=133 elen=30)
+wlp8s0: MLD: No Multi-Link element
+wlp8s0: BSS: Add new id 3 BSSID 34:f8:e7:c2:9c:c3 SSID 'eduroam' freq 2437
+IEEE 802.11 element parse ignored unknown element (id=7 elen=6)
+IEEE 802.11 element parse ignored unknown element (id=32 elen=1)
+IEEE 802.11 element parse ignored unknown element (id=11 elen=5)
+IEEE 802.11 element parse ignored unknown element (id=149 elen=10)
+IEEE 802.11 element parse ignored unknown element (id=133 elen=30)
+wlp8s0: MLD: No Multi-Link element
+wlp8s0: BSS: Add new id 4 BSSID 34:f8:e7:c2:9c:c2 SSID 'AGH-WPA' freq 2437
+IEEE 802.11 element parse ignored unknown element (id=7 elen=60)
+IEEE 802.11 element parse ignored unknown element (id=32 elen=1)
+IEEE 802.11 element parse ignored unknown element (id=35 elen=2)
+IEEE 802.11 element parse ignored unknown element (id=11 elen=5)
+IEEE 802.11 element parse ignored unknown element (id=200 elen=3)
+IEEE 802.11 element parse ignored unknown element (id=231 elen=16)
+wlp8s0: MLD: No Multi-Link element
+wlp8s0: BSS: Add new id 5 BSSID b4:0f:3b:e5:14:99 SSID '\x00\x00\x00\x00' freq 5500
+IEEE 802.11 element parse ignored unknown element (id=7 elen=6)
+IEEE 802.11 element parse ignored unknown element (id=51 elen=8)
+IEEE 802.11 element parse ignored unknown element (id=51 elen=8)
+IEEE 802.11 element parse ignored unknown element (id=11 elen=5)
+wlp8s0: MLD: No Multi-Link element
+wlp8s0: BSS: Add new id 6 BSSID b0:0a:d5:49:0d:d9 SSID 'PLAY Internet 4G LTE-490DD4' freq 2472
+IEEE 802.11 element parse ignored unknown element (id=7 elen=6)
+IEEE 802.11 element parse ignored unknown element (id=32 elen=1)
+IEEE 802.11 element parse ignored unknown element (id=11 elen=5)
+wlp8s0: MLD: No Multi-Link element
+wlp8s0: BSS: Add new id 7 BSSID 34:f8:e7:c1:5f:c7 SSID 'TeleAGH' freq 2412
+IEEE 802.11 element parse ignored unknown element (id=7 elen=6)
+IEEE 802.11 element parse ignored unknown element (id=32 elen=1)
+IEEE 802.11 element parse ignored unknown element (id=11 elen=5)
+IEEE 802.11 element parse ignored unknown element (id=149 elen=10)
+IEEE 802.11 element parse ignored unknown element (id=133 elen=30)
+wlp8s0: MLD: No Multi-Link element
+wlp8s0: BSS: Add new id 8 BSSID 34:f8:e7:c2:9c:c5 SSID 'AGH-Events' freq 2437
+IEEE 802.11 element parse ignored unknown element (id=7 elen=6)
+IEEE 802.11 element parse ignored unknown element (id=32 elen=1)
+IEEE 802.11 element parse ignored unknown element (id=11 elen=5)
+IEEE 802.11 element parse ignored unknown element (id=149 elen=10)
+IEEE 802.11 element parse ignored unknown element (id=133 elen=30)
+wlp8s0: MLD: No Multi-Link element
+wlp8s0: BSS: Add new id 9 BSSID 34:f8:e7:c2:9c:c1 SSID 'AGH-Guest' freq 2437
+IEEE 802.11 element parse ignored unknown element (id=7 elen=6)
+IEEE 802.11 element parse ignored unknown element (id=32 elen=1)
+IEEE 802.11 element parse ignored unknown element (id=11 elen=5)
+IEEE 802.11 element parse ignored unknown element (id=149 elen=10)
+IEEE 802.11 element parse ignored unknown element (id=133 elen=30)
+wlp8s0: MLD: No Multi-Link element
+wlp8s0: BSS: Add new id 10 BSSID 34:f8:e7:c1:5f:c5 SSID 'AGH-Events' freq 2412
+BSS: last_scan_res_used=11/32
+wlp8s0: New scan results available (own=1 ext=0)
+wlp8s0: Radio work 'scan'@0x5608aa5cf970 done in 2.592661 seconds
+wlp8s0: radio_work_free('scan'@0x5608aa5cf970): num_active_works --> 0
+wlp8s0: Selecting BSS from priority group 0
+wlp8s0: 0: e4:5f:01:9e:4c:0f ssid='JackSparrow' wpa_ie_len=26 rsn_ie_len=0 caps=0x1511 level=-60 freq=2462 
+wlp8s0:    skip - SSID mismatch
+wlp8s0: 1: 34:f8:e7:c2:9c:c7 ssid='TeleAGH' wpa_ie_len=0 rsn_ie_len=30 caps=0x1431 level=-68 freq=2437 
+wlp8s0:    skip - SSID mismatch
+wlp8s0: 2: 34:f8:e7:c2:9c:c4 ssid='TeleLAB' wpa_ie_len=0 rsn_ie_len=30 caps=0x1431 level=-68 freq=2437 
+wlp8s0:    skip - SSID mismatch
+wlp8s0: 3: 34:f8:e7:c2:9c:c3 ssid='eduroam' wpa_ie_len=0 rsn_ie_len=20 caps=0x1431 level=-68 freq=2437 
+wlp8s0:    skip - SSID mismatch
+wlp8s0: 4: 34:f8:e7:c2:9c:c2 ssid='AGH-WPA' wpa_ie_len=0 rsn_ie_len=20 caps=0x1431 level=-68 freq=2437 
+wlp8s0:    skip - SSID mismatch
+wlp8s0: 5: b4:0f:3b:e5:14:99 ssid='\x00\x00\x00\x00' wpa_ie_len=22 rsn_ie_len=24 caps=0x111 level=-87 freq=5500 
+wlp8s0:    skip - SSID mismatch
+wlp8s0: 6: b0:0a:d5:49:0d:d9 ssid='PLAY Internet 4G LTE-490DD4' wpa_ie_len=22 rsn_ie_len=20 caps=0x411 level=-84 freq=2472 
+wlp8s0:    skip - SSID mismatch
+wlp8s0: 7: 34:f8:e7:c1:5f:c7 ssid='TeleAGH' wpa_ie_len=0 rsn_ie_len=30 caps=0x1431 level=-86 freq=2412 
+wlp8s0:    skip - SSID mismatch
+wlp8s0: 8: 34:f8:e7:c2:9c:c5 ssid='AGH-Events' wpa_ie_len=0 rsn_ie_len=0 caps=0x1421 level=-68 freq=2437 
+wlp8s0:    skip - SSID mismatch
+wlp8s0: 9: 34:f8:e7:c2:9c:c1 ssid='AGH-Guest' wpa_ie_len=0 rsn_ie_len=0 caps=0x1421 level=-68 freq=2437 
+wlp8s0:    skip - SSID mismatch
+wlp8s0: 10: 34:f8:e7:c1:5f:c5 ssid='AGH-Events' wpa_ie_len=0 rsn_ie_len=0 caps=0x1421 level=-86 freq=2412 
+wlp8s0:    skip - SSID mismatch
+wlp8s0: No suitable network found
+wlp8s0: Use normal scan instead of sched_scan for initial scans (normal_scans=1)
+wlp8s0: Setting scan request: 5.000000 sec
+wlp8s0: Starting AP scan for wildcard SSID
+PQC_LOG: Added IE to Probe Request, Byte: 0x88
+wlp8s0: Determining shared radio frequencies (max len 1)
+wlp8s0: Shared frequencies (len=0): completed iteration
+wlp8s0: Add radio work 'scan'@0x5608aa5cf970
+wlp8s0: First radio work item in the queue - schedule start immediately
+wlp8s0: Starting radio work 'scan'@0x5608aa5cf970 after 0.000028 second wait
+wlp8s0: nl80211: scan request
+nl80211: Scan SSID 
+nl80211: Scan co-located APs on 6 GHz
+nl80211: Scan extra IEs - hexdump(len=20): 7f 0b 00 00 0a 02 01 00 40 40 00 00 20 dd 05 00 90 4c 01 88
+Scan requested (ret=0) - scan timeout 30 seconds
+nl80211: Event message available
+nl80211: Drv Event 33 (NL80211_CMD_TRIGGER_SCAN) received for wlp8s0
+wlp8s0: nl80211: Scan trigger
+wlp8s0: Event SCAN_STARTED (47) received
+wlp8s0: Own scan request started a scan in 0.000117 seconds
+RTM_NEWLINK: ifi_index=3 ifname=wlp8s0 wext ifi_family=0 ifi_flags=0x1003 ([UP])
+nl80211: Event message available
+nl80211: Drv Event 34 (NL80211_CMD_NEW_SCAN_RESULTS) received for wlp8s0
+wlp8s0: nl80211: New scan results available
+nl80211: Scan probed for SSID ''
+nl80211: Scan included frequencies: 2412 2417 2422 2427 2432 2437 2442 2447 2452 2457 2462 2467 2472 2484 5180 5200 5220 5240 5260 5280 5300 5320 5500 5520 5540 5560 5580 5600 5620 5640 5660 5680 5700 5720 5745 5765 5785 5805 5825
+wlp8s0: Event SCAN_RESULTS (3) received
+wlp8s0: Scan completed in 2.568183 seconds
+nl80211: Received scan results (17 BSSes)
+wlp8s0: BSS: Start scan result update 2
+IEEE 802.11 element parse ignored unknown element (id=11 elen=5)
+wlp8s0: MLD: No Multi-Link element
+wlp8s0: BSS: Add new id 11 BSSID 94:f6:65:7f:77:73 SSID 'island-3F7770' freq 2437
+IEEE 802.11 element parse ignored unknown element (id=7 elen=60)
+IEEE 802.11 element parse ignored unknown element (id=32 elen=1)
+IEEE 802.11 element parse ignored unknown element (id=35 elen=2)
+IEEE 802.11 element parse ignored unknown element (id=11 elen=5)
+IEEE 802.11 element parse ignored unknown element (id=200 elen=3)
+IEEE 802.11 element parse ignored unknown element (id=231 elen=16)
+wlp8s0: MLD: No Multi-Link element
+IEEE 802.11 element parse ignored unknown element (id=7 elen=6)
+IEEE 802.11 element parse ignored unknown element (id=11 elen=5)
+wlp8s0: MLD: No Multi-Link element
+wlp8s0: BSS: Add new id 12 BSSID b4:69:5f:d1:2a:6a SSID 'TCL-2RFZ-2.4GHz' freq 2422
+IEEE 802.11 element parse ignored unknown element (id=7 elen=6)
+IEEE 802.11 element parse ignored unknown element (id=32 elen=1)
+IEEE 802.11 element parse ignored unknown element (id=11 elen=5)
+IEEE 802.11 element parse ignored unknown element (id=149 elen=10)
+IEEE 802.11 element parse ignored unknown element (id=133 elen=30)
+wlp8s0: MLD: No Multi-Link element
+wlp8s0: BSS: Add new id 13 BSSID 34:f8:e7:c1:5f:c2 SSID 'AGH-WPA' freq 2412
+wlp8s0: MLD: No Multi-Link element
+wlp8s0: BSS: Add new id 14 BSSID 1e:1c:b7:7a:e7:94 SSID 'SiecPQC' freq 2412
+PQC: Found PQC Key Fragment IE in wpa_bss_add (type=0x02), length=207
+PQC_DEBUG: Processing key fragment. Len: 207, FragIdx=0, TotalLen=800, DataLen=200
+PQC_LOG: Fragment 0/4 received (200 bytes at offset 0, total mask=0x1)
+PQC: Found PQC Key Fragment IE in wpa_bss_add (type=0x02), length=207
+PQC_DEBUG: Processing key fragment. Len: 207, FragIdx=1, TotalLen=800, DataLen=200
+PQC_LOG: Fragment 1/4 received (200 bytes at offset 200, total mask=0x3)
+PQC: Found PQC Key Fragment IE in wpa_bss_add (type=0x02), length=207
+PQC_DEBUG: Processing key fragment. Len: 207, FragIdx=2, TotalLen=800, DataLen=200
+PQC_LOG: Fragment 2/4 received (200 bytes at offset 400, total mask=0x7)
+PQC: Found PQC Key Fragment IE in wpa_bss_add (type=0x02), length=207
+PQC_DEBUG: Processing key fragment. Len: 207, FragIdx=3, TotalLen=800, DataLen=200
+PQC_LOG: Fragment 3/4 received (200 bytes at offset 600, total mask=0xf)
+PQC_LOG: received a public key and assembled it (800 bytes)
+IEEE 802.11 element parse ignored unknown element (id=11 elen=5)
+wlp8s0: MLD: No Multi-Link element
+wlp8s0: BSS: Add new id 15 BSSID 94:f6:65:3f:77:78 SSID 'Wireless1' freq 2437
+IEEE 802.11 element parse ignored unknown element (id=7 elen=6)
+IEEE 802.11 element parse ignored unknown element (id=32 elen=1)
+IEEE 802.11 element parse ignored unknown element (id=11 elen=5)
+IEEE 802.11 element parse ignored unknown element (id=149 elen=10)
+IEEE 802.11 element parse ignored unknown element (id=133 elen=30)
+wlp8s0: MLD: No Multi-Link element
+wlp8s0: BSS: Add new id 16 BSSID 34:f8:e7:c1:5f:c1 SSID 'AGH-Guest' freq 2412
+BSS: last_scan_res_used=17/32
+wlp8s0: New scan results available (own=1 ext=0)
+WPS: AP b4:69:5f:d1:2a:6a type 0 added
+WPS: AP[0] b4:69:5f:d1:2a:6a type=0 tries=0 last_attempt=-1 sec ago bssid_ignore=0
+wlp8s0: Radio work 'scan'@0x5608aa5cf970 done in 2.589930 seconds
+wlp8s0: radio_work_free('scan'@0x5608aa5cf970): num_active_works --> 0
+wlp8s0: Selecting BSS from priority group 0
+wlp8s0: 0: e4:5f:01:9e:4c:0f ssid='JackSparrow' wpa_ie_len=26 rsn_ie_len=0 caps=0x1511 level=-65 freq=2462 
+wlp8s0:    skip - SSID mismatch
+wlp8s0: 1: 34:f8:e7:c2:9c:c7 ssid='TeleAGH' wpa_ie_len=0 rsn_ie_len=30 caps=0x1431 level=-68 freq=2437 
+wlp8s0:    skip - SSID mismatch
+wlp8s0: 2: 34:f8:e7:c2:9c:c4 ssid='TeleLAB' wpa_ie_len=0 rsn_ie_len=30 caps=0x1431 level=-68 freq=2437 
+wlp8s0:    skip - SSID mismatch
+wlp8s0: 3: 34:f8:e7:c2:9c:c3 ssid='eduroam' wpa_ie_len=0 rsn_ie_len=20 caps=0x1431 level=-68 freq=2437 
+wlp8s0:    skip - SSID mismatch
+wlp8s0: 4: 34:f8:e7:c2:9c:c2 ssid='AGH-WPA' wpa_ie_len=0 rsn_ie_len=20 caps=0x1431 level=-68 freq=2437 
+wlp8s0:    skip - SSID mismatch
+wlp8s0: 5: 94:f6:65:7f:77:73 ssid='island-3F7770' wpa_ie_len=0 rsn_ie_len=20 caps=0x431 level=-83 freq=2437 
+wlp8s0:    skip - SSID mismatch
+wlp8s0: 6: b0:0a:d5:49:0d:d9 ssid='PLAY Internet 4G LTE-490DD4' wpa_ie_len=22 rsn_ie_len=20 caps=0x411 level=-84 freq=2472 
+wlp8s0:    skip - SSID mismatch
+wlp8s0: 7: b4:0f:3b:e5:14:99 ssid='\x00\x00\x00\x00' wpa_ie_len=22 rsn_ie_len=24 caps=0x111 level=-88 freq=5500 
+wlp8s0:    skip - SSID mismatch
+wlp8s0: 8: 34:f8:e7:c1:5f:c7 ssid='TeleAGH' wpa_ie_len=0 rsn_ie_len=30 caps=0x1431 level=-86 freq=2412 
+wlp8s0:    skip - SSID mismatch
+wlp8s0: 9: b4:69:5f:d1:2a:6a ssid='TCL-2RFZ-2.4GHz' wpa_ie_len=0 rsn_ie_len=22 caps=0x411 level=-86 freq=2422  wps
+wlp8s0:    skip - SSID mismatch
+wlp8s0: 10: 34:f8:e7:c1:5f:c2 ssid='AGH-WPA' wpa_ie_len=0 rsn_ie_len=20 caps=0x1431 level=-87 freq=2412 
+wlp8s0:    skip - SSID mismatch
+wlp8s0: 11: 34:f8:e7:c2:9c:c5 ssid='AGH-Events' wpa_ie_len=0 rsn_ie_len=0 caps=0x1421 level=-68 freq=2437 
+wlp8s0:    skip - SSID mismatch
+wlp8s0: 12: 34:f8:e7:c2:9c:c1 ssid='AGH-Guest' wpa_ie_len=0 rsn_ie_len=0 caps=0x1421 level=-68 freq=2437 
+wlp8s0:    skip - SSID mismatch
+wlp8s0: 13: 1e:1c:b7:7a:e7:94 ssid='SiecPQC' wpa_ie_len=0 rsn_ie_len=0 caps=0x401 level=-33 freq=2412 
+wlp8s0:    allow in non-WPA/WPA2
+wlp8s0:    selected BSS 1e:1c:b7:7a:e7:94 ssid='SiecPQC'
+wlp8s0: Considering connect request: reassociate: 0  selected: 1e:1c:b7:7a:e7:94  bssid: 00:00:00:00:00:00  pending: 00:00:00:00:00:00  wpa_state: SCANNING  ssid=0x5608aa4ede60  current_ssid=(nil)
+wlp8s0: Request association with 1e:1c:b7:7a:e7:94
+TDLS: TDLS is allowed in the target BSS
+TDLS: TDLS channel switch allowed in the target BSS
+PQC_LOG: Initializing State Machine (choice mask: 0x88)
+PQC_LOG: AP KEM Public Key imported from wpa_s buffer
+wlp8s0: PQC_LOG: State Machine Ready. Starting Authentication.
+wlp8s0: No ongoing scan/p2p-scan found to abort
+wlp8s0: Add radio work 'sme-connect'@0x5608aa5cf970
+wlp8s0: First radio work item in the queue - schedule start immediately
+wlp8s0: Starting radio work 'sme-connect'@0x5608aa5cf970 after 0.000034 second wait
+wlp8s0: WPA: clearing own WPA/RSN IE
+wlp8s0: RSN: clearing own RSNXE
+wlp8s0: Automatic auth_alg selection: 0x1
+wlp8s0: WPA: clearing AP WPA IE
+wlp8s0: WPA: clearing AP RSN IE
+wlp8s0: WPA: clearing AP RSNXE
+wlp8s0: RSN: Clearing AP RSNE Override element
+wlp8s0: RSN: Clearing AP RSNE Override 2 element
+wlp8s0: RSN: Clearing AP RSNXE Override element
+wlp8s0: WPA: clearing own WPA/RSN IE
+wlp8s0: RSN: clearing own RSNXE
+RRM: Determining whether RRM can be used - device support: 0x30
+RRM: No RRM in network
+Cannot determine channel width
+Added supported operating classes IE - hexdump(len=25): 3b 17 51 51 52 53 54 73 74 75 76 77 78 79 7a 7b 7c 7d 7e 7f 80 81 00 82 80
+EAPOL: External notification - EAP success=0
+EAPOL: External notification - EAP fail=0
+EAPOL: External notification - portControl=ForceAuthorized
+wlp8s0: Cancelling scan request
+wlp8s0: SME: Trying to authenticate with 1e:1c:b7:7a:e7:94 (SSID='SiecPQC' freq=2412 MHz)
+EAPOL: External notification - portValid=0
+wlp8s0: State: SCANNING -> AUTHENTICATING
+nl80211: Data frame filter flags=0x4
+wlp8s0: Determining shared radio frequencies (max len 1)
+wlp8s0: Shared frequencies (len=0): completed iteration
+nl80211: Authenticate (ifindex=3)
+  * bssid=1e:1c:b7:7a:e7:94
+  * freq=2412
+  * SSID=SiecPQC
+  * IEs - hexdump(len=0): [NULL]
+  * Auth Type 0
+nl80211: Authentication request send successfully
+nl80211: Event message available
+nl80211: Drv Event 19 (NL80211_CMD_NEW_STATION) received for wlp8s0
+nl80211: New station 1e:1c:b7:7a:e7:94
+nl80211: Event message available
+nl80211: Drv Event 37 (NL80211_CMD_AUTHENTICATE) received for wlp8s0
+nl80211: MLME event 37 (NL80211_CMD_AUTHENTICATE) on wlp8s0(14:ac:60:29:42:fb) A1=14:ac:60:29:42:fb A2=1e:1c:b7:7a:e7:94 on link_id=-1
+nl80211: MLME event frame - hexdump(len=30): b0 00 54 00 14 ac 60 29 42 fb 1e 1c b7 7a e7 94 1e 1c b7 7a e7 94 00 00 00 00 02 00 00 00
+nl80211: Authenticate event
+wlp8s0: Event AUTH (10) received
+PQC_LOG: Received EVENT_AUTH, stopping association for now. Waiting for PAKE phase to end.
+PQC_LOG: Extending SME auth timer to 15 seconds
+wlp8s0: State: AUTHENTICATING -> AUTHENTICATING
+PQC_LOG: State Machine processing Auth Response, preparing PAKE-1 data
+PQC_LOG: KEM Encapsulation successful, K_aes derived
+PQC_DBG STA: K_aes[0:8] - hexdump(len=8): 89 71 1c 36 b2 9f e6 fe
+PQC_LOG: Rozpoczecie budowy ramki PAKE-1
+PQC_LOG: Sending Public Action frame (PAKE-1) to: 1e:1c:b7:7a:e7:94
+nl80211: Send Action frame (ifindex=3, freq=2412 MHz wait=0 ms no_cck=0 offchanok=1 dst=1e:1c:b7:7a:e7:94 src=14:ac:60:29:42:fb bssid=1e:1c:b7:7a:e7:94, link_id=-1)
+nl80211: CMD_FRAME freq=2412 wait=0 no_cck=0 no_ack=0 offchanok=1
+CMD_FRAME - hexdump(len=819): d0 00 00 00 1e 1c b7 7a e7 94 14 ac 60 29 42 fb 1e 1c b7 7a e7 94 00 00 04 09 00 90 4c 10 01 03 00 ca 58 9a ce 1c 18 51 8e 36 71 99 4f 6a 47 14 4f bb 89 e9 7b c8 73 19 49 38 24 a1 0e 5e d7 65 4d 1c 50 bc c5 b7 e2 f8 f5 da b4 57 cb c6 60 22 e9 87 f1 c2 46 30 83 08 eb 80 eb 89 53 1e 3c e8 82 b1 a6 13 6c 1f 55 e3 a2 a3 af 54 58 0e 4e 2c 0d f8 54 f7 f1 96 a6 ef b5 f3 4a 2b bf c7 15 17 5c 65 69 f6 62 57 c0 d6 50 c1 fa 8e 11 a0 d7 8d fa 28 bf 80 91 43 71 12 ef 9f 91 ea 5a a8 22 ae 83 18 d3 5b 42 76 2c 7c 35 8a 39 8a 03 e0 2f a4 7f f7 c0 06 2c 0c 98 3a a1 11 0c c3 64 04 1a 79 4d fa af 5f 36 3b 2a be d7 94 b7 95 34 ba 20 8a 0a bb dd 92 b5 ac dd e9 1f 8b 44 f1 09 36 7f b9 19 2a 1c 97 55 c9 5a d1 d8 f0 6f 72 2d 9b 4e a9 5b 41 7e 27 02 81 40 3c 35 d5 b8 34 4f e6 9a 81 21 3f e5 65 66 7b ab 4b b6 3f 5b f5 da ba be c7 a5 3e b5 21 c8 ae e8 82 9a bc 8c 60 17 86 89 56 7d 24 92 93 b5 6d d2 c0 ea 75 2e f2 a8 fa 16 de 1a 48 42 34 b5 bc fb 65 31 dc c9 8b f1 a8 7c 49 a1 3d 9d d2 bd 3e e3 9b 32 d2 76 a9 b6 84 c2 35 0f 8d 3a 70 79 33 89 db 1a 56 4a 19 37 6f e1 19 77 67 c9 96 c9 fc ea c0 55 b9 b5 5a ce e5 21 24 d9 5c 48 47 5e 2d c5 a8 55 79 8b f1 83 60 13 23 d8 50 8e 10 72 50 97 35 3c b6 79 f9 3f 8b 21 cd db fe 9d 03 8a 72 24 9e dd f4 99 54 19 fc d7 67 85 32 0b b3 3d 44 bb 47 ef 36 b1 f5 79 4a 48 6c a2 09 ca 4e ab 0b 60 1f ed 5c 3c 5a 63 de 9b a5 47 b5 84 1b d8 c3 15 47 e1 e8 9a cc 6b 44 17 b9 9b 22 bc fc 9d c1 5b eb 48 b1 9d 03 30 35 00 db 14 c1 70 ce 48 8a 08 98 c6 4f c4 8e 64 08 0e da 50 29 75 35 3d c9 3b 45 2c 4f 23 e2 5c 51 4f d1 82 e9 69 57 08 e6 06 85 48 28 2c 08 f9 32 9f 05 47 1f 45 3b 9d 25 95 94 27 14 03 eb 09 ec 80 c6 a7 e0 3f c8 8e bb fd e3 b9 80 9b 09 d8 55 0e 4e 24 f8 0f b6 d2 43 86 d3 2d 74 aa 78 35 22 a8 c0 22 63 98 e2 2b 9d 34 c5 5d 1f ac 1a b6 0e e6 fd f1 c3 42 20 bc 81 cf 82 27 08 7b ee aa bf 72 c6 fa 5e 66 2e 92 2e 22 27 39 a4 d9 33 bf 18 04 24 bf 67 19 b4 8c 4f 79 e1 64 c1 5f 3c 66 a3 2d bb b0 00 5e 5e c2 29 e5 ea bf bb ca 57 fa 93 5d f8 f8 07 3c 2f af 0e 4f d4 46 05 b9 ec c4 82 3a e3 01 29 4a 63 d4 c4 9f 42 8d c2 c5 87 82 12 90 cf b3 46 3c d7 ee 60 f4 38 b9 e3 b4 f6 9a cf a5 a1 c9 16 01 26 22 94 cd 0c 5c 08 f8 91 61 b6 d8 a7 71 61 a9 98 aa 5e ab 72 9c da 62 5f 44 ff e2 38 ba 85 d9 d4 85 5c e8 9c f7 44 d0 c1 33 c5 33 f8 41 87 29 2b 11 fb 4a 12 9d aa b2 fe 3d af f3 99 ad 31 85 6f cd d0 45 7b 45 cb 80 f0 ac 69 c6 af f4 96 20 6d ee 99 02 6b de b9 69 89 8b a6 b8 8f 60 00 10 25 e4 a0 45 00 e5 f0 f2 d6 64 d2 1b dc ea 8a 2a
+nl80211: Frame TX command accepted; cookie 0x1a
+nl80211: Event message available
+nl80211: Drv Event 60 (NL80211_CMD_FRAME_TX_STATUS) received for wlp8s0
+nl80211: MLME event 60 (NL80211_CMD_FRAME_TX_STATUS) on wlp8s0(14:ac:60:29:42:fb) A1=1e:1c:b7:7a:e7:94 A2=14:ac:60:29:42:fb on link_id=-1
+nl80211: MLME event frame - hexdump(len=819): d0 00 00 00 1e 1c b7 7a e7 94 14 ac 60 29 42 fb 1e 1c b7 7a e7 94 00 00 04 09 00 90 4c 10 01 03 00 ca 58 9a ce 1c 18 51 8e 36 71 99 4f 6a 47 14 4f bb 89 e9 7b c8 73 19 49 38 24 a1 0e 5e d7 65 4d 1c 50 bc c5 b7 e2 f8 f5 da b4 57 cb c6 60 22 e9 87 f1 c2 46 30 83 08 eb 80 eb 89 53 1e 3c e8 82 b1 a6 13 6c 1f 55 e3 a2 a3 af 54 58 0e 4e 2c 0d f8 54 f7 f1 96 a6 ef b5 f3 4a 2b bf c7 15 17 5c 65 69 f6 62 57 c0 d6 50 c1 fa 8e 11 a0 d7 8d fa 28 bf 80 91 43 71 12 ef 9f 91 ea 5a a8 22 ae 83 18 d3 5b 42 76 2c 7c 35 8a 39 8a 03 e0 2f a4 7f f7 c0 06 2c 0c 98 3a a1 11 0c c3 64 04 1a 79 4d fa af 5f 36 3b 2a be d7 94 b7 95 34 ba 20 8a 0a bb dd 92 b5 ac dd e9 1f 8b 44 f1 09 36 7f b9 19 2a 1c 97 55 c9 5a d1 d8 f0 6f 72 2d 9b 4e a9 5b 41 7e 27 02 81 40 3c 35 d5 b8 34 4f e6 9a 81 21 3f e5 65 66 7b ab 4b b6 3f 5b f5 da ba be c7 a5 3e b5 21 c8 ae e8 82 9a bc 8c 60 17 86 89 56 7d 24 92 93 b5 6d d2 c0 ea 75 2e f2 a8 fa 16 de 1a 48 42 34 b5 bc fb 65 31 dc c9 8b f1 a8 7c 49 a1 3d 9d d2 bd 3e e3 9b 32 d2 76 a9 b6 84 c2 35 0f 8d 3a 70 79 33 89 db 1a 56 4a 19 37 6f e1 19 77 67 c9 96 c9 fc ea c0 55 b9 b5 5a ce e5 21 24 d9 5c 48 47 5e 2d c5 a8 55 79 8b f1 83 60 13 23 d8 50 8e 10 72 50 97 35 3c b6 79 f9 3f 8b 21 cd db fe 9d 03 8a 72 24 9e dd f4 99 54 19 fc d7 67 85 32 0b b3 3d 44 bb 47 ef 36 b1 f5 79 4a 48 6c a2 09 ca 4e ab 0b 60 1f ed 5c 3c 5a 63 de 9b a5 47 b5 84 1b d8 c3 15 47 e1 e8 9a cc 6b 44 17 b9 9b 22 bc fc 9d c1 5b eb 48 b1 9d 03 30 35 00 db 14 c1 70 ce 48 8a 08 98 c6 4f c4 8e 64 08 0e da 50 29 75 35 3d c9 3b 45 2c 4f 23 e2 5c 51 4f d1 82 e9 69 57 08 e6 06 85 48 28 2c 08 f9 32 9f 05 47 1f 45 3b 9d 25 95 94 27 14 03 eb 09 ec 80 c6 a7 e0 3f c8 8e bb fd e3 b9 80 9b 09 d8 55 0e 4e 24 f8 0f b6 d2 43 86 d3 2d 74 aa 78 35 22 a8 c0 22 63 98 e2 2b 9d 34 c5 5d 1f ac 1a b6 0e e6 fd f1 c3 42 20 bc 81 cf 82 27 08 7b ee aa bf 72 c6 fa 5e 66 2e 92 2e 22 27 39 a4 d9 33 bf 18 04 24 bf 67 19 b4 8c 4f 79 e1 64 c1 5f 3c 66 a3 2d bb b0 00 5e 5e c2 29 e5 ea bf bb ca 57 fa 93 5d f8 f8 07 3c 2f af 0e 4f d4 46 05 b9 ec c4 82 3a e3 01 29 4a 63 d4 c4 9f 42 8d c2 c5 87 82 12 90 cf b3 46 3c d7 ee 60 f4 38 b9 e3 b4 f6 9a cf a5 a1 c9 16 01 26 22 94 cd 0c 5c 08 f8 91 61 b6 d8 a7 71 61 a9 98 aa 5e ab 72 9c da 62 5f 44 ff e2 38 ba 85 d9 d4 85 5c e8 9c f7 44 d0 c1 33 c5 33 f8 41 87 29 2b 11 fb 4a 12 9d aa b2 fe 3d af f3 99 ad 31 85 6f cd d0 45 7b 45 cb 80 f0 ac 69 c6 af f4 96 20 6d ee 99 02 6b de b9 69 89 8b a6 b8 8f 60 00 10 25 e4 a0 45 00 e5 f0 f2 d6 64 d2 1b dc ea 8a 2a
+nl80211: Frame TX status event A1=1e:1c:b7:7a:e7:94 stype=13 cookie=0x1a ack=1
+nl80211: Frame TX status: cookie=0x1a (match) (ack=1)
+wlp8s0: Event TX_STATUS (16) received
+wlp8s0: EVENT_TX_STATUS dst=1e:1c:b7:7a:e7:94 type=0 stype=13
+Off-channel: Ignore Action TX status - no pending operation
+nl80211: Event message available
+nl80211: Drv Event 67 (NL80211_CMD_FRAME_WAIT_CANCEL) received for wlp8s0
+nl80211: TX frame wait expired for cookie 0x1a (match-saved)
+wlp8s0: Event TX_WAIT_EXPIRE (62) received
+nl80211: Event message available
+nl80211: BSS Event 59 (NL80211_CMD_FRAME) received for wlp8s0
+nl80211: MLME event 59 (NL80211_CMD_FRAME) on wlp8s0(14:ac:60:29:42:fb) A1=ff:ff:ff:ff:ff:ff A2=1e:1c:b7:7a:e7:94 on link_id=-1
+nl80211: MLME event frame - hexdump(len=386): d0 00 00 00 ff ff ff ff ff ff 1e 1c b7 7a e7 94 ff ff ff ff ff ff 40 00 04 09 00 90 4c 10 02 00 05 34 01 5e 00 10 a2 97 3e 57 0b 47 74 9b 97 2c 1e cf 9c 90 7e 59 05 20 f7 38 5f b5 10 ce 31 b4 92 3a 64 04 e0 08 8f d6 46 6c 7c d5 cc a2 51 2d 73 e2 a2 0f 32 6e ca 95 c1 f3 18 b6 c2 eb 11 65 00 96 76 7e 65 78 0f 6b f1 99 cb 1c 58 17 1e 3f 96 d2 59 d9 e0 30 d0 79 8e c1 fb 8f 88 d8 5d 50 12 fa 3f 4d 5a 4e a5 c0 ff a8 cc a8 f2 26 3a 8f 91 41 a6 b9 30 33 21 9a 1b ae 2d 93 ce e9 ab 83 4c 91 1f cc 68 63 18 7b 9a e5 72 8a ec 44 cc 45 41 4d 35 f0 37 f5 0a 18 2e 00 8b a2 40 55 dd 2e 40 55 08 77 72 f9 5f c6 b1 cf 6f a4 f2 5a 4c 31 89 26 c9 de 0f e2 fa 11 7a 96 9c db cf 15 98 6e c8 9e d5 ce 0e 0f e7 b7 d1 3d ec d9 a9 e5 fd d4 63 2c ff 05 47 bd 02 9e 8b a1 8f 33 ee 0d 44 fe f9 8c a2 2f 80 0a f5 2f 99 75 b7 b7 ed 55 4d 94 80 f7 42 d5 9b 3d be 97 3c b7 d4 6c 3f 44 d9 00 7d 90 2e de 25 fc 44 d4 ea a2 23 6a 3a 9a c6 f7 05 5a f7 2d 1a d1 11 ae bc 5f 5f aa 87 a3 77 ff b0 b1 a1 08 22 7c ca 2e 64 6e 76 2b 18 e9 3d 9c e8 d5 34 b9 d4 52 11 96 d3 04 5c 39 1e 57 1f 12 7e e6 33 ba e6 12 7c 8a f6 9e eb e1 a0 01 e9 81 48 06 85 38 3f 1b 5a 87 5c b6 a3 83 c0 3a b8 17 78 c5
+nl80211: Frame event
+nl80211: RX frame da=ff:ff:ff:ff:ff:ff sa=1e:1c:b7:7a:e7:94 bssid=ff:ff:ff:ff:ff:ff freq=2412 ssi_signal=-33 fc=0xd0 seq_ctrl=0x40 stype=13 (WLAN_FC_STYPE_ACTION) len=386
+wlp8s0: Event RX_MGMT (18) received
+PQC_LOG: Received PAKE-2 frame (Vendor Action), len=355
+PQC_LOG: State Machine processing PAKE-2
+PQC_LOG: Reassembled 350/1332 bytes
+wlp8s0: Received Action frame: SA=1e:1c:b7:7a:e7:94 Category=4 DataLen=361 freq=2412 MHz
+nl80211: Event message available
+nl80211: BSS Event 59 (NL80211_CMD_FRAME) received for wlp8s0
+nl80211: MLME event 59 (NL80211_CMD_FRAME) on wlp8s0(14:ac:60:29:42:fb) A1=ff:ff:ff:ff:ff:ff A2=1e:1c:b7:7a:e7:94 on link_id=-1
+nl80211: MLME event frame - hexdump(len=386): d0 00 00 00 ff ff ff ff ff ff 1e 1c b7 7a e7 94 ff ff ff ff ff ff 50 00 04 09 00 90 4c 10 02 01 05 34 01 5e b9 89 85 e8 b1 73 1c 90 65 68 97 9c a4 96 e7 f0 6f 72 6b dd 69 a5 a0 0c 77 14 d8 e7 47 7b 08 27 93 f7 c0 12 6a 2b 4b 3b bd e3 5c d4 01 a9 1c a3 00 b5 52 a3 eb 45 d6 d5 91 36 49 a2 54 84 ac 8c 29 e6 14 7d 35 d9 ea 39 4a 3e f6 f0 45 c7 28 bd 52 fe f0 eb b9 6b 33 f3 9a e6 35 cf 33 80 54 c4 d9 39 31 03 9a 4d b1 74 2d 3e 29 99 ce ac 42 c7 53 10 38 b1 e0 e9 b9 00 ff f3 27 a8 b1 83 ce dc 6c 8e 4e fe 96 b6 59 05 e1 60 9a 7e a9 f1 ee b3 38 3b 76 31 c5 c2 bb 1a 10 8c 1e fc 12 cf 95 78 f3 ab 0b 28 d0 e5 2a 08 97 60 41 10 3f 4d 7c 83 ef ab 22 23 1e af 21 ef 16 1d 37 10 da 59 2c 12 12 f4 b4 5e c0 06 b3 ae 75 ed 14 04 7d cd 64 af 38 2f 8b 15 02 8b 9c 7c e0 4b 6c 1e 56 6c b0 c4 16 4e 2b 66 04 49 3a e3 3c b5 dd 2b 37 23 c6 6d a3 c3 66 4a 2c df f9 62 30 95 53 e1 54 f2 f3 a3 ed f5 2c 70 ee 45 03 bc 6f 50 dc 00 aa 2f 12 b0 39 38 40 97 09 1b bd 4d 2d f8 e3 7b 0d dd b4 81 0a a9 b6 cf b6 99 b6 d5 f4 6b 3c ad 0b d3 b8 db e1 57 bd 01 93 aa 17 64 78 b2 56 9a 39 0e 19 f7 91 66 b4 6c c4 39 49 f9 9f 9e 6d 60 33 06 d1 77 1f 84 58 7c a8 10 16 ad 82 e1 1c a6 42 02
+nl80211: Frame event
+nl80211: RX frame da=ff:ff:ff:ff:ff:ff sa=1e:1c:b7:7a:e7:94 bssid=ff:ff:ff:ff:ff:ff freq=2412 ssi_signal=-33 fc=0xd0 seq_ctrl=0x50 stype=13 (WLAN_FC_STYPE_ACTION) len=386
+wlp8s0: Event RX_MGMT (18) received
+PQC_LOG: Received PAKE-2 frame (Vendor Action), len=355
+PQC_LOG: State Machine processing PAKE-2
+PQC_LOG: Reassembled 700/1332 bytes
+wlp8s0: Received Action frame: SA=1e:1c:b7:7a:e7:94 Category=4 DataLen=361 freq=2412 MHz
+nl80211: Event message available
+nl80211: BSS Event 59 (NL80211_CMD_FRAME) received for wlp8s0
+nl80211: MLME event 59 (NL80211_CMD_FRAME) on wlp8s0(14:ac:60:29:42:fb) A1=ff:ff:ff:ff:ff:ff A2=1e:1c:b7:7a:e7:94 on link_id=-1
+nl80211: MLME event frame - hexdump(len=386): d0 00 00 00 ff ff ff ff ff ff 1e 1c b7 7a e7 94 ff ff ff ff ff ff 60 00 04 09 00 90 4c 10 02 02 05 34 01 5e 1a 18 cf fd 07 19 9f 80 f3 2f 55 7e 8f 91 e1 1e 79 3d b8 dd 28 8b 68 0d 1e 08 e0 79 f7 27 48 b3 a9 bc 95 f1 a9 4c d7 30 71 21 94 22 83 5a 60 16 94 d9 69 f6 03 f2 a4 f9 37 a2 e6 2f ca 55 ab b3 99 0c 6e ff e8 9c f1 31 72 e2 10 3f 9a e5 11 05 0c c2 5b 99 e7 24 05 41 d1 60 91 cd f9 c1 83 14 48 27 2d 1b 39 fa bd e4 de 36 37 27 77 db a0 56 4e 30 69 b6 9b ac 82 5b 9d 81 bc 64 5c 74 2d 2a 61 80 76 81 67 f0 ea bf 2c 4c ee 9a b5 fc 7e 0d 8e 9f d5 b5 39 94 25 57 69 13 e0 9c 82 20 58 86 22 52 49 29 8c a5 19 6c d6 32 57 ee f8 40 75 c9 e8 05 62 e1 12 7e 9f 32 72 87 d4 61 a3 99 20 87 58 84 87 bb 20 53 7b 7c 1c 8c 9c 70 50 0c 54 9c 33 d7 27 75 ad 2c 00 02 77 4b 2f aa d2 72 40 62 24 03 f1 80 b3 b0 9a bb a2 75 ff b6 75 d4 b6 09 da b2 79 d0 1f 84 4c f7 80 ad 27 b8 7b 6e 03 3c 34 a2 6e b0 67 e4 00 64 d5 48 d8 ec 28 96 0a 3b 64 2b 8f 14 a8 b5 11 05 c2 8c 31 a0 f1 9e d1 45 73 dc 30 7e 4e 56 ae bc 50 fb 34 13 37 c6 6f ff 6e c1 02 48 85 a1 92 ab aa 36 8e b7 03 a9 77 7b a8 48 6f 06 72 55 2d 41 8e 21 9c 37 68 19 3f d1 ec b6 60 e0 37 99 be e9 fe d6 22 77 4a 8d
+nl80211: Frame event
+nl80211: RX frame da=ff:ff:ff:ff:ff:ff sa=1e:1c:b7:7a:e7:94 bssid=ff:ff:ff:ff:ff:ff freq=2412 ssi_signal=-33 fc=0xd0 seq_ctrl=0x60 stype=13 (WLAN_FC_STYPE_ACTION) len=386
+wlp8s0: Event RX_MGMT (18) received
+PQC_LOG: Received PAKE-2 frame (Vendor Action), len=355
+PQC_LOG: State Machine processing PAKE-2
+PQC_LOG: Reassembled 1050/1332 bytes
+wlp8s0: Received Action frame: SA=1e:1c:b7:7a:e7:94 Category=4 DataLen=361 freq=2412 MHz
+nl80211: Event message available
+nl80211: BSS Event 59 (NL80211_CMD_FRAME) received for wlp8s0
+nl80211: MLME event 59 (NL80211_CMD_FRAME) on wlp8s0(14:ac:60:29:42:fb) A1=ff:ff:ff:ff:ff:ff A2=1e:1c:b7:7a:e7:94 on link_id=-1
+nl80211: MLME event frame - hexdump(len=318): d0 00 00 00 ff ff ff ff ff ff 1e 1c b7 7a e7 94 ff ff ff ff ff ff 70 00 04 09 00 90 4c 10 02 03 05 34 01 1a 26 56 a7 90 26 70 80 d6 c5 ee 87 92 95 7b e8 d9 3d 81 11 ac 08 90 2f ab 59 3b 1f 7c 0a 74 b1 37 73 40 57 71 30 b9 87 ad e4 5e 60 55 07 29 12 05 25 72 48 af 52 04 d6 68 bd fb 08 f1 22 a9 4a b7 b7 b5 0a 12 e6 50 0d 15 fe bc 62 62 ce e8 92 4a 0b 80 47 12 94 73 a1 2d d5 25 06 c0 61 fa 67 e2 63 36 78 ac 48 33 c7 ba 17 2d f8 c4 47 b0 66 a0 49 1e 98 4d f4 88 93 ab d1 21 71 ca 8a 19 67 2c 7d 46 35 38 ba f8 da eb f2 87 68 d0 54 18 26 c6 4d 6c 42 3e 48 e7 c3 96 5d 12 5c c9 e9 39 1b 3e da 89 c5 34 1d ae 36 c3 43 a9 c3 aa 44 e5 22 93 99 ce 7a 3f 66 f9 1e a9 36 07 19 86 88 7b 6f 4e 24 7b ce 4b 2e c6 79 21 da c0 9e 59 d1 c8 e7 df 3d da 56 8c e2 97 94 66 31 44 8b d3 2e 39 80 7c 0f 04 6d cf 0d 8e 47 54 76 7e fa f6 2f 05 a4 bc 02 c1 da cf 42 91 d4 98 1f 7e 09 73 51 e8 58 40 70 b9 e8 61 68 bb 4d 05 9d c3 93 af f8 ac 30 69 22 d2 b6 87 ef 89 ee 7b 57 bd
+nl80211: Frame event
+nl80211: RX frame da=ff:ff:ff:ff:ff:ff sa=1e:1c:b7:7a:e7:94 bssid=ff:ff:ff:ff:ff:ff freq=2412 ssi_signal=-33 fc=0xd0 seq_ctrl=0x70 stype=13 (WLAN_FC_STYPE_ACTION) len=318
+wlp8s0: Event RX_MGMT (18) received
+PQC_LOG: Received PAKE-2 frame (Vendor Action), len=287
+PQC_LOG: State Machine processing PAKE-2
+PQC_LOG: Reassembled 1332/1332 bytes
+PQC_LOG: PAKE-2 fully reassembled. Proceeding with decapsulation.
+PQC_LOG: Actual reassembled payload length: 1332 bytes (expected 1332)
+PQC_LOG: Saved AP ML-DSA public key (len=1312)
+PQC_DBG STA: K_aes in rx_pake2[0:8] - hexdump(len=8): 89 71 1c 36 b2 9f e6 fe
+PQC_DBG STA: enc_sid received - hexdump(len=16): a2 97 3e 57 0b 47 74 9b 97 2c 1e cf 9c 90 7e 59
+PQC_DBG STA: sid decrypted - hexdump(len=16): a1 ef 6b 10 c3 ca 9f 85 98 82 85 4f 3e 31 05 eb
+PQC_LOG: PAKE-3 data ready (s_len=32, T_len=800)
+PQC: Sending PAKE-3 Action Frame to 00:00:00:00:00:00 on freq 2412
+nl80211: Send Action frame (ifindex=3, freq=2412 MHz wait=0 ms no_cck=0 offchanok=1 dst=1e:1c:b7:7a:e7:94 src=14:ac:60:29:42:fb bssid=1e:1c:b7:7a:e7:94, link_id=-1)
+nl80211: CMD_FRAME freq=2412 wait=0 no_cck=0 no_ack=0 offchanok=1
+CMD_FRAME - hexdump(len=863): d0 00 00 00 1e 1c b7 7a e7 94 14 ac 60 29 42 fb 1e 1c b7 7a e7 94 00 00 04 09 00 90 4c 10 03 dc a2 8d 75 8f 3b 13 7c 79 55 f6 ec 0d ea ee f5 80 91 82 fc f8 3f eb e1 88 54 a3 71 61 16 d7 72 60 7c 0e 71 1f d4 4b e3 6d 9b 3c af a3 d2 60 65 0b 00 5f 75 e3 1d d3 50 bc de 31 5b ef aa cb e0 e8 53 6a f4 6e 76 b3 67 95 00 ab 4d 5b c0 cc 13 9e 19 83 0c f4 d5 7b 78 84 f6 88 31 41 79 dd bd c6 0e 69 c7 76 46 9d 7e f8 85 a0 7d 5c 7a d3 e6 ea 33 47 41 4f fe 81 14 f9 54 8e 1b 5b f0 0c ac b4 7a 6c 90 9f 9b d3 ca 6b 91 e4 69 54 f5 d1 50 e8 b6 af 04 25 30 f0 57 9b 1e b8 c5 9f 79 8c 88 94 e9 f2 7e ad 9a b7 51 84 94 dc 0e 92 79 f0 14 ef 46 51 39 96 e7 82 09 76 62 19 3f 46 1b 3e d8 e8 de 77 7c 71 93 b8 72 74 e7 3a be 7b 88 b5 ec 34 54 b6 81 92 4f 25 4a 88 2b c6 13 4e 68 ee d0 26 72 32 cd 90 bc c9 59 1c 59 0b 86 ec 85 70 a3 16 b3 63 fa 7f 70 c4 3d 5c cd 9d ff 51 04 04 b9 7f 01 5d 09 32 2f 8e 9c 00 73 a5 bd 01 05 c2 a6 37 21 93 63 11 a6 68 cd 75 5b f5 2e dd b6 59 67 c5 f8 0e a1 08 b8 d9 7d fa 61 e8 2a 25 ab e2 df d1 e1 ba 19 a0 74 17 33 f0 7c 3b 2e 4a 33 2e 32 4b 63 82 39 22 49 9e 95 64 0d 18 e8 82 17 40 4b 58 9e d6 33 87 e3 e0 79 9e a4 0c 41 96 16 84 e5 78 71 6b 2e 17 a7 17 ae 17 93 22 0a e3 b3 66 3c e2 37 2c 5e 15 8c 0d 79 35 d0 83 0f aa 60 ea de b7 a7 c2 3a 65 d1 87 50 06 94 da e8 99 c6 51 00 6f d6 7c 86 a5 b5 7f 49 77 b0 69 15 dd b2 a2 58 cf 9e 78 3b df 02 7c ba 2e 81 26 fc 93 c1 87 51 d3 85 97 ba d4 66 c5 d3 c6 3a 93 b3 c0 85 2f 93 df a2 02 8f 27 80 bf f7 87 93 b6 dd 22 45 cb 10 e0 02 e0 a9 63 77 db d5 49 71 07 f5 04 95 d9 08 29 e1 68 b7 18 78 92 8f 61 b2 15 54 93 d1 dd 50 03 d2 f7 13 ba 6e 6a a5 4a c8 6a a5 5d 82 2f c9 2a ec 38 55 de 1a 04 89 a5 08 e0 60 62 af 94 3a d8 ad a9 ba bc 7b 87 cc d5 78 0c 9c 15 31 07 98 52 b8 bb c6 96 a3 1e d4 65 83 84 ee 63 2a d6 29 80 8b 02 67 87 72 86 a6 0e 51 d3 91 9d c0 74 ff f5 e0 95 18 8c b0 ca 51 ad f8 77 0d c7 3b f5 e2 2f ec 1f 38 5d 1f 88 08 0a 72 c2 53 00 47 9f 5b d4 5b f8 81 e4 3f 60 66 6d d9 7c 5d c0 4c a9 5c e3 a9 fd bf 7d 9c 58 5a 4a e3 20 b3 6f 52 dd d4 77 3e 9d 0a e0 53 0b ca ab 0a 08 e1 07 a9 70 41 d4 da 99 38 8e 86 64 d5 f8 d8 39 b9 b1 28 56 b8 25 2c f0 a9 85 40 23 cc 5b f3 d1 34 ec f9 98 36 db 37 b6 25 79 8c 36 de 3e 3f b9 ff f3 65 e0 1a 36 69 1f 5c 53 25 dc a7 8d a5 24 4f 4e 08 a1 e6 36 2f 24 34 ed 9a bf e4 48 ef 1b 75 b0 3b 58 76 e8 53 4b c1 0b 44 10 59 bb f6 6a 98 64 28 17 8c fe 44 53 68 45 6e f0 f8 1d 53 f4 cf c9 a1 57 02 97 98 0c 79 84 d0 ef bb 8e 35 0a b8 a5 35 ac b0 d6 4b f8 88 50 b9 00 af 02 9a bf fe e9 8d 1c 9f 3c 6e db 61 75 33 66 20 f1 a5 ce f6 29 f4 36 c2 ad b5 df 98 2c 21 fc ab df 60 23 4f 66 2f 43 1f
+nl80211: Frame TX command accepted; cookie 0x1b
+wlp8s0: Received Action frame: SA=1e:1c:b7:7a:e7:94 Category=4 DataLen=293 freq=2412 MHz
+nl80211: Event message available
+nl80211: Drv Event 60 (NL80211_CMD_FRAME_TX_STATUS) received for wlp8s0
+nl80211: MLME event 60 (NL80211_CMD_FRAME_TX_STATUS) on wlp8s0(14:ac:60:29:42:fb) A1=1e:1c:b7:7a:e7:94 A2=14:ac:60:29:42:fb on link_id=-1
+nl80211: MLME event frame - hexdump(len=863): d0 00 00 00 1e 1c b7 7a e7 94 14 ac 60 29 42 fb 1e 1c b7 7a e7 94 00 00 04 09 00 90 4c 10 03 dc a2 8d 75 8f 3b 13 7c 79 55 f6 ec 0d ea ee f5 80 91 82 fc f8 3f eb e1 88 54 a3 71 61 16 d7 72 60 7c 0e 71 1f d4 4b e3 6d 9b 3c af a3 d2 60 65 0b 00 5f 75 e3 1d d3 50 bc de 31 5b ef aa cb e0 e8 53 6a f4 6e 76 b3 67 95 00 ab 4d 5b c0 cc 13 9e 19 83 0c f4 d5 7b 78 84 f6 88 31 41 79 dd bd c6 0e 69 c7 76 46 9d 7e f8 85 a0 7d 5c 7a d3 e6 ea 33 47 41 4f fe 81 14 f9 54 8e 1b 5b f0 0c ac b4 7a 6c 90 9f 9b d3 ca 6b 91 e4 69 54 f5 d1 50 e8 b6 af 04 25 30 f0 57 9b 1e b8 c5 9f 79 8c 88 94 e9 f2 7e ad 9a b7 51 84 94 dc 0e 92 79 f0 14 ef 46 51 39 96 e7 82 09 76 62 19 3f 46 1b 3e d8 e8 de 77 7c 71 93 b8 72 74 e7 3a be 7b 88 b5 ec 34 54 b6 81 92 4f 25 4a 88 2b c6 13 4e 68 ee d0 26 72 32 cd 90 bc c9 59 1c 59 0b 86 ec 85 70 a3 16 b3 63 fa 7f 70 c4 3d 5c cd 9d ff 51 04 04 b9 7f 01 5d 09 32 2f 8e 9c 00 73 a5 bd 01 05 c2 a6 37 21 93 63 11 a6 68 cd 75 5b f5 2e dd b6 59 67 c5 f8 0e a1 08 b8 d9 7d fa 61 e8 2a 25 ab e2 df d1 e1 ba 19 a0 74 17 33 f0 7c 3b 2e 4a 33 2e 32 4b 63 82 39 22 49 9e 95 64 0d 18 e8 82 17 40 4b 58 9e d6 33 87 e3 e0 79 9e a4 0c 41 96 16 84 e5 78 71 6b 2e 17 a7 17 ae 17 93 22 0a e3 b3 66 3c e2 37 2c 5e 15 8c 0d 79 35 d0 83 0f aa 60 ea de b7 a7 c2 3a 65 d1 87 50 06 94 da e8 99 c6 51 00 6f d6 7c 86 a5 b5 7f 49 77 b0 69 15 dd b2 a2 58 cf 9e 78 3b df 02 7c ba 2e 81 26 fc 93 c1 87 51 d3 85 97 ba d4 66 c5 d3 c6 3a 93 b3 c0 85 2f 93 df a2 02 8f 27 80 bf f7 87 93 b6 dd 22 45 cb 10 e0 02 e0 a9 63 77 db d5 49 71 07 f5 04 95 d9 08 29 e1 68 b7 18 78 92 8f 61 b2 15 54 93 d1 dd 50 03 d2 f7 13 ba 6e 6a a5 4a c8 6a a5 5d 82 2f c9 2a ec 38 55 de 1a 04 89 a5 08 e0 60 62 af 94 3a d8 ad a9 ba bc 7b 87 cc d5 78 0c 9c 15 31 07 98 52 b8 bb c6 96 a3 1e d4 65 83 84 ee 63 2a d6 29 80 8b 02 67 87 72 86 a6 0e 51 d3 91 9d c0 74 ff f5 e0 95 18 8c b0 ca 51 ad f8 77 0d c7 3b f5 e2 2f ec 1f 38 5d 1f 88 08 0a 72 c2 53 00 47 9f 5b d4 5b f8 81 e4 3f 60 66 6d d9 7c 5d c0 4c a9 5c e3 a9 fd bf 7d 9c 58 5a 4a e3 20 b3 6f 52 dd d4 77 3e 9d 0a e0 53 0b ca ab 0a 08 e1 07 a9 70 41 d4 da 99 38 8e 86 64 d5 f8 d8 39 b9 b1 28 56 b8 25 2c f0 a9 85 40 23 cc 5b f3 d1 34 ec f9 98 36 db 37 b6 25 79 8c 36 de 3e 3f b9 ff f3 65 e0 1a 36 69 1f 5c 53 25 dc a7 8d a5 24 4f 4e 08 a1 e6 36 2f 24 34 ed 9a bf e4 48 ef 1b 75 b0 3b 58 76 e8 53 4b c1 0b 44 10 59 bb f6 6a 98 64 28 17 8c fe 44 53 68 45 6e f0 f8 1d 53 f4 cf c9 a1 57 02 97 98 0c 79 84 d0 ef bb 8e 35 0a b8 a5 35 ac b0 d6 4b f8 88 50 b9 00 af 02 9a bf fe e9 8d 1c 9f 3c 6e db 61 75 33 66 20 f1 a5 ce f6 29 f4 36 c2 ad b5 df 98 2c 21 fc ab df 60 23 4f 66 2f 43 1f
+nl80211: Frame TX status event A1=1e:1c:b7:7a:e7:94 stype=13 cookie=0x1b ack=1
+nl80211: Frame TX status: cookie=0x1b (match) (ack=1)
+wlp8s0: Event TX_STATUS (16) received
+wlp8s0: EVENT_TX_STATUS dst=1e:1c:b7:7a:e7:94 type=0 stype=13
+Off-channel: Ignore Action TX status - no pending operation
+nl80211: Event message available
+nl80211: Drv Event 67 (NL80211_CMD_FRAME_WAIT_CANCEL) received for wlp8s0
+nl80211: TX frame wait expired for cookie 0x1b (match-saved)
+wlp8s0: Event TX_WAIT_EXPIRE (62) received
+nl80211: Event message available
+nl80211: BSS Event 59 (NL80211_CMD_FRAME) received for wlp8s0
+nl80211: MLME event 59 (NL80211_CMD_FRAME) on wlp8s0(14:ac:60:29:42:fb) A1=ff:ff:ff:ff:ff:ff A2=1e:1c:b7:7a:e7:94 on link_id=-1
+nl80211: MLME event frame - hexdump(len=831): d0 00 00 00 ff ff ff ff ff ff 1e 1c b7 7a e7 94 ff ff ff ff ff ff 80 00 04 09 00 90 4c 10 04 70 71 23 93 0b 8c 5f 7d 01 03 db b8 50 73 fb 9c 2a fd 36 42 7a 04 87 ca a3 51 cb f4 07 2f a2 68 c5 99 1c 83 64 5d 1d bf 2b 16 8f 5d 7a d5 e7 dd 51 42 51 d1 88 d8 51 85 fc ca a7 d4 9d 78 9b ef fc 0c 79 7e 09 5d 8e 1c b6 4f 97 82 8f e0 fb 1c 15 32 7c 3b 3d 59 35 96 a9 b8 81 2b e1 3a 89 eb 4d a6 07 f8 fe 73 9d 77 5f 2b 54 35 03 ca 52 0e 5b 09 b7 ea 95 be 9c ce 55 a3 e6 87 47 52 0b ba 3d d2 bc 2b a5 0b f3 01 c3 84 52 5e b5 2a 44 76 76 10 77 9c 2f c8 e5 a9 78 d5 a0 d7 d6 ed 3e d5 e9 9b 21 ca 48 04 54 40 19 7e 87 42 58 a3 ea 85 43 2e bf 7b 9e e5 83 11 19 a3 03 08 bb 73 ea ee 6c ba 56 ff 53 75 32 73 ca d3 bb 11 77 43 70 5e fc 49 4b 13 42 ac bd c0 8f fb 3f b5 14 ec 2c 1a da 88 42 6d a0 9e 86 15 26 95 d9 5a 7e 1d 47 45 42 27 a9 73 c3 e9 ac 2c 9c 6f 2d 2f 59 7d 22 97 47 35 9f c9 0e 08 04 43 3f 0a c1 b5 cf 36 e7 69 90 b9 e9 10 16 03 e1 4d da d4 34 eb 0b 6f b0 2d d5 13 a6 a3 e1 ae 3b d4 57 2a a4 03 d6 ca 6f ce 88 d3 60 e9 96 2d ac 27 e9 53 4e 13 aa ef 90 24 5f 25 11 de 3b da ef 8c 1b 0b 3e 04 5a e4 bb 9f 36 62 80 63 10 9c f1 f6 8b a6 c4 17 43 4c 04 47 45 67 99 81 9b 7e 26 96 da 19 bf 2a 8a 74 8e bc bc 3d 50 c9 46 65 0f 45 a1 4e 1f c8 97 b5 2d ab 42 dc 7f c3 33 fe 6f d3 89 5b 1e c9 2b 6c fc c1 48 2b c6 58 02 77 94 f4 78 86 37 dc 3e 24 9f 07 58 60 a9 96 68 5d d2 12 1d 1c 70 74 2d fc 16 77 7f 2c d9 5f d0 b9 7e 97 1b 94 5a f3 44 b2 85 a9 69 22 b2 72 3b 9d a8 70 4c c7 3c 61 9d cb a4 87 e0 71 80 3f 9c a7 61 b4 a8 b8 c6 52 47 d3 06 0d b5 e3 ae 06 a4 b3 e2 10 a1 aa 73 74 50 e7 14 cd b3 c5 c9 fa 55 2e 69 95 91 bf 12 f0 50 58 19 a5 80 c2 f0 60 75 51 c4 38 b7 c4 10 ee cc c1 6c 18 21 11 45 d7 b9 28 5e ac 1d 5e 07 6a a4 6f ed a0 76 7b 7f 15 6f 84 03 fa c5 59 f3 c9 b4 7e 50 ea 8f 2b 18 8a ba 6d 2d e9 d0 0a b2 db 6e 5e 4c 55 45 7c 0b 3c bc 63 d2 e5 85 e9 4a 16 ce c4 83 89 e1 88 ca 84 b5 04 0e b0 6d 4b e0 06 31 00 cd c1 71 04 0e 61 67 eb bc 55 c4 99 a2 df c8 7f ff ea 45 0e 38 db 94 2e 89 c1 7c 62 77 f0 30 49 71 dd 3b 24 98 6f e8 a1 15 f6 08 58 94 98 3f 1d 25 76 d0 c7 75 7f 39 1b 17 e5 2b 02 83 4e 24 4b 7c 2f ba 3f bf dd 7d d6 1a b7 0e 64 f9 1b a0 fd c8 65 12 08 ab 5c 8b 19 80 82 ed 5b 74 f5 ed 89 29 51 75 6e 64 2e 20 91 63 0e 22 b6 69 e8 64 b6 b4 54 31 3c e8 3d 37 c8 6f e9 ac e7 94 fa 43 cd db 03 9f e1 cf f3 4e 96 33 81 11 f7 b0 cd 6f f1 17 b5 0c ce d2 73 76 56 2c bc 31 c2 d7 0c e3 b3 4d 3d 8a f7 a7 a2 e4 2e de 70 dd af e2 9a 02 06 1a 5f bd 4d d9 8b c7 84 1a b2 01 f6 2f a8 9d 76 37 56
+nl80211: Frame event
+nl80211: RX frame da=ff:ff:ff:ff:ff:ff sa=1e:1c:b7:7a:e7:94 bssid=ff:ff:ff:ff:ff:ff freq=2412 ssi_signal=-33 fc=0xd0 seq_ctrl=0x80 stype=13 (WLAN_FC_STYPE_ACTION) len=831
+wlp8s0: Event RX_MGMT (18) received
+PQC_LOG: Received PAKE-4 frame (Vendor Action), len=800
+PQC_LOG: State Machine processing PAKE-4
+PQC_LOG: Saved ciphertext 2 from AP (len=768)
+PQC_DBG STA: fsid[0:16] - hexdump(len=16): a1 ef 6b 10 c3 ca 9f 85 98 82 85 4f 3e 31 05 eb
+PQC_DBG STA: psk[0:8] - hexdump(len=8): 2e 1a 58 fa 22 46 d4 c3
+PQC_DBG STA: K[0:8] - hexdump(len=8): c3 3c 69 5d 54 0b 33 09
+PQC_DBG STA: computed tag - hexdump(len=32): 8a f7 a7 a2 e4 2e de 70 dd af e2 9a 02 06 1a 5f bd 4d d9 8b c7 84 1a b2 01 f6 2f a8 9d 76 37 56
+PQC_DBG STA: received tag - hexdump(len=32): 8a f7 a7 a2 e4 2e de 70 dd af e2 9a 02 06 1a 5f bd 4d d9 8b c7 84 1a b2 01 f6 2f a8 9d 76 37 56
+PQC_LOG: Tag verification success.
+WPA: Set PMK based on external data - hexdump(len=32): 00 01 99 a7 8c 4a e9 77 8c ae 14 88 06 02 6c ee b4 47 ef a2 da e0 17 ee 51 2c d1 ae e8 0e 18 85
+RSN: Derive PMKID using HMAC-SHA-1
+RSN: Derived PMKID - hexdump(len=16): fc 61 91 64 d7 05 c3 67 53 b0 ee 5c cf fe 25 f9
+RSN: Added PMKSA cache entry for 00:00:00:00:00:00 spa=14:ac:60:29:42:fb network_ctx=0x5608aa4ede60 akmp=0x4
+wlp8s0: PMKSA-CACHE-ADDED 00:00:00:00:00:00 0
+nl80211: Add PMKID for 00:00:00:00:00:00
+nl80211: NL80211_CMD_SET_PMKSA with skip_pmk=false pmk_len=32
+nl80211: NL80211_CMD_SET_PMKSA failed: -95 (Operation not supported)
+PQC_LOG: PAKE phase complete. Triggering Association...
+wlp8s0: State: AUTHENTICATING -> ASSOCIATING
+nl80211: Set wlp8s0 operstate 0->0 (DORMANT)
+netlink: Operstate: ifindex=3 linkmode=-1 (no change), operstate=5 (IF_OPER_DORMANT)
+SME: Association Request IEs - hexdump(len=35): 7f 08 00 00 0a 02 01 00 00 40 3b 17 51 51 52 53 54 73 74 75 76 77 78 79 7a 7b 7c 7d 7e 7f 80 81 00 82 80
+wlp8s0: Trying to associate with 1e:1c:b7:7a:e7:94 (SSID='SiecPQC' freq=2412 MHz)
+wlp8s0: State: ASSOCIATING -> ASSOCIATING
+nl80211: Set wlp8s0 operstate 0->0 (DORMANT)
+netlink: Operstate: ifindex=3 linkmode=-1 (no change), operstate=5 (IF_OPER_DORMANT)
+wlp8s0: WPA: clearing own WPA/RSN IE
+wlp8s0: RSN: clearing own RSNXE
+nl80211: Associate (ifindex=3)
+  * bssid=1e:1c:b7:7a:e7:94
+  * freq=2412
+  * SSID=SiecPQC
+  * IEs - hexdump(len=35): 7f 08 00 00 0a 02 01 00 00 40 3b 17 51 51 52 53 54 73 74 75 76 77 78 79 7a 7b 7c 7d 7e 7f 80 81 00 82 80
+nl80211: Association request send successfully
+PQC_LOG: PAKE-4 processed successfully. Association triggered.
+wlp8s0: Received Action frame: SA=1e:1c:b7:7a:e7:94 Category=4 DataLen=806 freq=2412 MHz
+RTM_NEWLINK: ifi_index=3 ifname=wlp8s0 wext ifi_family=0 ifi_flags=0x11003 ([UP][LOWER_UP])
+RTM_NEWLINK: ifi_index=3 ifname=wlp8s0 wext ifi_family=0 ifi_flags=0x11003 ([UP][LOWER_UP])
+RTM_NEWLINK: ifi_index=3 ifname=wlp8s0 wext ifi_family=0 ifi_flags=0x11003 ([UP][LOWER_UP])
+RTM_NEWLINK: ifi_index=3 ifname=wlp8s0 operstate=5 linkmode=1 ifi_family=0 ifi_flags=0x11003 ([UP][LOWER_UP])
+nl80211: Event message available
+nl80211: Drv Event 38 (NL80211_CMD_ASSOCIATE) received for wlp8s0
+nl80211: MLME event 38 (NL80211_CMD_ASSOCIATE) on wlp8s0(14:ac:60:29:42:fb) A1=14:ac:60:29:42:fb A2=1e:1c:b7:7a:e7:94 on link_id=-1
+nl80211: MLME event frame - hexdump(len=56): 10 00 54 00 14 ac 60 29 42 fb 1e 1c b7 7a e7 94 1e 1c b7 7a e7 94 10 00 01 04 00 00 01 c0 01 08 82 84 8b 96 0c 12 18 24 32 04 30 48 60 6c 7f 08 04 00 00 00 00 00 00 40
+nl80211: Associate event
+nl80211: Associated on 2412 MHz
+nl80211: Associated with 1e:1c:b7:7a:e7:94
+nl80211: Set drv->ssid based on scan res info to 'SiecPQC'
+wlp8s0: Event ASSOC (0) received
+wlp8s0: Association info event
+req_ies - hexdump(len=60): 00 07 53 69 65 63 50 51 43 01 08 02 04 0b 16 0c 12 18 24 32 04 30 48 60 6c 7f 08 00 00 0a 02 01 00 00 40 3b 17 51 51 52 53 54 73 74 75 76 77 78 79 7a 7b 7c 7d 7e 7f 80 81 00 82 80
+resp_ies - hexdump(len=26): 01 08 82 84 8b 96 0c 12 18 24 32 04 30 48 60 6c 7f 08 04 00 00 00 00 00 00 40
+wlp8s0: freq=2412 MHz
+wlp8s0: WPA: clearing own WPA/RSN IE
+wlp8s0: RSN: clearing own RSNXE
+wlp8s0: State: ASSOCIATING -> ASSOCIATED
+nl80211: Set wlp8s0 operstate 0->0 (DORMANT)
+netlink: Operstate: ifindex=3 linkmode=-1 (no change), operstate=5 (IF_OPER_DORMANT)
+wlp8s0: Associated to a new BSS: BSSID=1e:1c:b7:7a:e7:94
+wlp8s0: Associated with 1e:1c:b7:7a:e7:94
+wlp8s0: WPA: Association event - clear replay counter
+wlp8s0: WPA: Clear old PTK
+TDLS: Remove peers on association
+EAPOL: External notification - portEnabled=0
+EAPOL: External notification - portValid=0
+EAPOL: External notification - portEnabled=1
+EAPOL: SUPP_PAE entering state S_FORCE_AUTH
+EAPOL: Supplicant port status: Authorized
+nl80211: Set supplicant port authorized for 1e:1c:b7:7a:e7:94
+EAPOL: SUPP_BE entering state IDLE
+wlp8s0: Cancelling authentication timeout
+wlp8s0: State: ASSOCIATED -> COMPLETED
+wlp8s0: Radio work 'sme-connect'@0x5608aa5cf970 done in 0.142524 seconds
+wlp8s0: radio_work_free('sme-connect'@0x5608aa5cf970): num_active_works --> 0
+wlp8s0: CTRL-EVENT-CONNECTED - Connection to 1e:1c:b7:7a:e7:94 completed [id=0 id_str=]
+nl80211: Set wlp8s0 operstate 0->1 (UP)
+netlink: Operstate: ifindex=3 linkmode=-1 (no change), operstate=6 (IF_OPER_UP)
+wlp8s0: Cancelling scan request
+WMM AC: No WMM IE
+PQC_LOG: Association done.
+PQC_LOG: Received Association Response. Generating the second pair of KEM keys
+PQC_LOG: Generation of the second key pair ended successfully
+PQC_LOG: Transitioning to PASN phase. Generating ML-DSA keys...
+PQC_LOG: PASN - Generating ML-DSA key pair
+PQC_LOG: PASN - ML-DSA key pair generated successfully (public_len=1312, secret_len=2560)
+PQC_LOG: Sending PASN-1 frame with ML-DSA public key
+PQC_LOG: PASN - Sending PASN-1 frame to: 1e:1c:b7:7a:e7:94 (ML-KEM pub key len: 800 bytes)
+nl80211: Send Action frame (ifindex=3, freq=2412 MHz wait=0 ms no_cck=0 offchanok=1 dst=1e:1c:b7:7a:e7:94 src=14:ac:60:29:42:fb bssid=1e:1c:b7:7a:e7:94, link_id=-1)
+nl80211: CMD_FRAME freq=2412 wait=0 no_cck=0 no_ack=0 offchanok=1
+CMD_FRAME - hexdump(len=839): d0 00 00 00 1e 1c b7 7a e7 94 14 ac 60 29 42 fb 1e 1c b7 7a e7 94 00 00 04 09 00 90 4c 11 01 03 20 50 f4 61 d8 91 a2 cb 5c 43 41 13 1c 38 f2 6d b9 5a 43 94 ba 1f 3b 07 a5 1b 98 70 63 d7 ab 1a 89 84 f8 66 cf c1 d8 a6 30 f5 6b 92 d3 1c af d7 74 3d c1 11 f8 ca 6f 1e 98 5a 09 d2 7c 38 4b b2 03 c5 5c e2 9a 84 77 4c 66 1e 21 cd 15 45 c1 5e 1a 1a 1f 38 95 f5 b2 4a 5c 8b ae 56 db 1b f4 74 7b 3f f5 4c 34 47 6c f9 ab 5e 8e e2 a0 be 96 be a0 00 1d 3f 24 8e a4 e3 9e e3 9a 46 cd 64 26 e2 86 77 98 65 35 fa 70 a2 68 75 6b 85 67 40 86 82 64 d2 61 56 dd 1a 2a 4e 78 39 6c 45 82 53 d5 37 f3 ba 74 65 28 52 db 9b 18 6b f3 c9 81 f6 0d 04 b3 ca 3d ac 5a d1 b4 19 94 4b 97 06 22 be b8 e6 1d 41 3a be c4 7a 83 5b c3 14 6c 68 0f 48 bc 6c c9 b0 b9 86 bc 19 92 07 87 6c 14 37 22 e9 4d f2 94 45 80 67 24 1d 29 ad cb b5 c7 bf 42 43 8d 48 1e d0 f8 3a 64 e3 2b 21 c4 a2 93 2b 22 d2 ba be 54 14 c2 0d 5c 99 5b f1 31 4e f6 5e 5c f6 c2 3f bb a4 4a f5 cf b1 7b 83 22 e6 96 1d 83 04 ab 7a 8b 9e 77 b2 18 a9 50 df b6 91 76 bc 65 b0 42 a6 72 a8 5a a7 5a 6e 63 5a 9f 40 50 2f 47 f3 7f bb 56 b7 0a 3c 2d 14 e1 1f 43 8a 08 5b 01 85 49 42 c1 5f a8 6c da 83 38 13 27 a4 9f 02 48 e8 49 4c 6d b3 93 81 66 cc 88 46 27 fb 79 95 2c e6 56 6f 9b 03 dc 25 a2 19 b3 1c 6a 84 71 c6 e0 a3 9b a4 04 96 01 8c 03 74 ae a1 7b 2b 69 75 ae 60 c9 71 7f b9 16 19 bc 07 29 e9 25 4a 28 6b 11 d6 a0 0f bc 3d e9 7b 32 bf 8b 7a d5 18 12 33 68 05 79 c5 85 c8 94 0d 27 ac ca d5 82 a2 e6 ca be f2 31 09 92 80 7d eb 26 2a 7c 12 31 5f d7 47 20 38 15 20 5a 6f 35 fa 47 d5 d1 4d ce a8 b1 8d 31 6d b9 9b 39 51 f4 31 a3 b3 96 91 96 43 8f 10 90 1d 99 5e 97 f0 26 19 42 16 ab 5b 33 53 09 99 a1 a9 8e 17 d9 af 8f f1 98 e7 d2 41 27 04 b8 10 78 c7 93 a8 18 1b e2 a9 1d 86 4d e7 ea 40 da 3b a0 fd 27 87 c7 f6 40 1b 4b 44 60 e4 a2 15 38 8d 58 40 31 79 d2 00 da 72 4c 3f 6c 3b 5f a6 91 1b a1 38 8a 30 19 9e a9 7a f9 f2 a8 85 85 62 98 1a 4a 43 3a 09 21 36 79 ab 3b a4 2b 08 ce 49 0b 17 c4 bb 83 47 d4 56 c2 c9 af 56 6a b9 de 54 97 9a a1 7a 06 2c 5a 65 ea 62 56 b9 09 3b 12 ce c8 d9 c4 40 a4 a4 9e c9 1f 1d a0 3c a5 eb 6b 68 28 88 3c fa 1b 40 b8 4a 0f 99 66 db 9a 1f 1e 0c 6b ce 5c 9a d3 4a 29 f7 07 10 20 1c 16 80 e8 43 81 04 18 71 b2 1e fa ab a3 10 65 64 5c 3c 41 0a 85 0e 1e 1b 24 b3 61 10 52 a7 89 aa 6c 92 03 2a 99 d4 f7 5f 23 d0 3d 2f fa 10 52 4b 5b b7 f6 49 4c e8 39 91 b0 8c 6a 58 8d e6 97 34 4a 63 6b 86 08 ce 13 d6 35 f2 2a 99 0b 9a 84 46 37 6e 38 73 65 a6 2c 45 b4 41 b5 c1 09 04 2a 83 75 04 66 64 6b 1b 82 a7 ee 91 75 3d a1 45 f7 83 1a fe 2a 9e 52 91 8a f9 77 28 c7 14 ac 60 29 42 fb
+nl80211: Frame TX command accepted; cookie 0x1c
+PQC_LOG: PASN - PASN-1 frame sent successfully
+PQC_LOG: PASN-1 frame sent successfully. Waiting for PASN-2...
+wlp8s0: Cancelling authentication timeout
+wlp8s0: State: COMPLETED -> COMPLETED
+PQC_LOG: Port opened
+RTM_NEWLINK: ifi_index=3 ifname=wlp8s0 operstate=6 linkmode=1 ifi_family=0 ifi_flags=0x11043 ([UP][RUNNING][LOWER_UP])
+nl80211: Event message available
+nl80211: Drv Event 46 (NL80211_CMD_CONNECT) received for wlp8s0
+nl80211: Ignore connect event (cmd=46) when using userspace SME
+nl80211: Event message available
+nl80211: Drv Event 60 (NL80211_CMD_FRAME_TX_STATUS) received for wlp8s0
+nl80211: MLME event 60 (NL80211_CMD_FRAME_TX_STATUS) on wlp8s0(14:ac:60:29:42:fb) A1=1e:1c:b7:7a:e7:94 A2=14:ac:60:29:42:fb on link_id=-1
+nl80211: MLME event frame - hexdump(len=839): d0 00 00 00 1e 1c b7 7a e7 94 14 ac 60 29 42 fb 1e 1c b7 7a e7 94 00 00 04 09 00 90 4c 11 01 03 20 50 f4 61 d8 91 a2 cb 5c 43 41 13 1c 38 f2 6d b9 5a 43 94 ba 1f 3b 07 a5 1b 98 70 63 d7 ab 1a 89 84 f8 66 cf c1 d8 a6 30 f5 6b 92 d3 1c af d7 74 3d c1 11 f8 ca 6f 1e 98 5a 09 d2 7c 38 4b b2 03 c5 5c e2 9a 84 77 4c 66 1e 21 cd 15 45 c1 5e 1a 1a 1f 38 95 f5 b2 4a 5c 8b ae 56 db 1b f4 74 7b 3f f5 4c 34 47 6c f9 ab 5e 8e e2 a0 be 96 be a0 00 1d 3f 24 8e a4 e3 9e e3 9a 46 cd 64 26 e2 86 77 98 65 35 fa 70 a2 68 75 6b 85 67 40 86 82 64 d2 61 56 dd 1a 2a 4e 78 39 6c 45 82 53 d5 37 f3 ba 74 65 28 52 db 9b 18 6b f3 c9 81 f6 0d 04 b3 ca 3d ac 5a d1 b4 19 94 4b 97 06 22 be b8 e6 1d 41 3a be c4 7a 83 5b c3 14 6c 68 0f 48 bc 6c c9 b0 b9 86 bc 19 92 07 87 6c 14 37 22 e9 4d f2 94 45 80 67 24 1d 29 ad cb b5 c7 bf 42 43 8d 48 1e d0 f8 3a 64 e3 2b 21 c4 a2 93 2b 22 d2 ba be 54 14 c2 0d 5c 99 5b f1 31 4e f6 5e 5c f6 c2 3f bb a4 4a f5 cf b1 7b 83 22 e6 96 1d 83 04 ab 7a 8b 9e 77 b2 18 a9 50 df b6 91 76 bc 65 b0 42 a6 72 a8 5a a7 5a 6e 63 5a 9f 40 50 2f 47 f3 7f bb 56 b7 0a 3c 2d 14 e1 1f 43 8a 08 5b 01 85 49 42 c1 5f a8 6c da 83 38 13 27 a4 9f 02 48 e8 49 4c 6d b3 93 81 66 cc 88 46 27 fb 79 95 2c e6 56 6f 9b 03 dc 25 a2 19 b3 1c 6a 84 71 c6 e0 a3 9b a4 04 96 01 8c 03 74 ae a1 7b 2b 69 75 ae 60 c9 71 7f b9 16 19 bc 07 29 e9 25 4a 28 6b 11 d6 a0 0f bc 3d e9 7b 32 bf 8b 7a d5 18 12 33 68 05 79 c5 85 c8 94 0d 27 ac ca d5 82 a2 e6 ca be f2 31 09 92 80 7d eb 26 2a 7c 12 31 5f d7 47 20 38 15 20 5a 6f 35 fa 47 d5 d1 4d ce a8 b1 8d 31 6d b9 9b 39 51 f4 31 a3 b3 96 91 96 43 8f 10 90 1d 99 5e 97 f0 26 19 42 16 ab 5b 33 53 09 99 a1 a9 8e 17 d9 af 8f f1 98 e7 d2 41 27 04 b8 10 78 c7 93 a8 18 1b e2 a9 1d 86 4d e7 ea 40 da 3b a0 fd 27 87 c7 f6 40 1b 4b 44 60 e4 a2 15 38 8d 58 40 31 79 d2 00 da 72 4c 3f 6c 3b 5f a6 91 1b a1 38 8a 30 19 9e a9 7a f9 f2 a8 85 85 62 98 1a 4a 43 3a 09 21 36 79 ab 3b a4 2b 08 ce 49 0b 17 c4 bb 83 47 d4 56 c2 c9 af 56 6a b9 de 54 97 9a a1 7a 06 2c 5a 65 ea 62 56 b9 09 3b 12 ce c8 d9 c4 40 a4 a4 9e c9 1f 1d a0 3c a5 eb 6b 68 28 88 3c fa 1b 40 b8 4a 0f 99 66 db 9a 1f 1e 0c 6b ce 5c 9a d3 4a 29 f7 07 10 20 1c 16 80 e8 43 81 04 18 71 b2 1e fa ab a3 10 65 64 5c 3c 41 0a 85 0e 1e 1b 24 b3 61 10 52 a7 89 aa 6c 92 03 2a 99 d4 f7 5f 23 d0 3d 2f fa 10 52 4b 5b b7 f6 49 4c e8 39 91 b0 8c 6a 58 8d e6 97 34 4a 63 6b 86 08 ce 13 d6 35 f2 2a 99 0b 9a 84 46 37 6e 38 73 65 a6 2c 45 b4 41 b5 c1 09 04 2a 83 75 04 66 64 6b 1b 82 a7 ee 91 75 3d a1 45 f7 83 1a fe 2a 9e 52 91 8a f9 77 28 c7 14 ac 60 29 42 fb
+nl80211: Frame TX status event A1=1e:1c:b7:7a:e7:94 stype=13 cookie=0x1c ack=1
+nl80211: Frame TX status: cookie=0x1c (match) (ack=1)
+wlp8s0: Event TX_STATUS (16) received
+wlp8s0: EVENT_TX_STATUS dst=1e:1c:b7:7a:e7:94 type=0 stype=13
+Off-channel: Ignore Action TX status - no pending operation
+nl80211: Event message available
+nl80211: BSS Event 59 (NL80211_CMD_FRAME) received for wlp8s0
+nl80211: MLME event 59 (NL80211_CMD_FRAME) on wlp8s0(14:ac:60:29:42:fb) A1=14:ac:60:29:42:fb A2=1e:1c:b7:7a:e7:94 on link_id=-1
+nl80211: MLME event frame - hexdump(len=833): d0 00 54 00 14 ac 60 29 42 fb 1e 1c b7 7a e7 94 1e 1c b7 7a e7 94 20 00 04 09 00 90 4c 11 02 03 00 77 21 8d 79 18 84 ff 64 7a 66 4b 2c 2f 1d b3 43 86 67 7c 62 e7 b7 52 d0 ff 1b 5b e9 2b 91 2e bd 1b 6e fd 87 64 dd 0a 80 f2 c9 f4 75 56 6a 7b 82 4f 7e 18 0e db 55 c8 dc bd 3e 77 43 04 72 7e 6e 9f 65 90 34 14 95 9e 9c 0f 9f 09 8a 11 5c 18 08 19 45 24 05 fd 4a 9c 4e 7d 9c d5 ad 3a 09 02 3f b2 1d 01 92 92 a6 17 56 1a ae 93 78 48 88 26 f3 d6 cc 00 52 2a b0 ce d0 36 92 71 24 1f e1 f7 c0 5a e8 65 f7 93 7a 43 ef 5c 52 42 2a 93 10 8d 9c b0 3a 24 e0 4c 6e 10 74 57 bf c4 d0 fa 0d 76 47 04 19 b1 f7 6a b6 14 14 55 5b 82 eb ad b6 5d 71 9e b2 4d 46 aa 40 85 6d d3 3a 30 07 1b 86 5e 6b c6 00 41 d7 09 e9 67 77 e0 01 e3 81 46 0b 08 82 d2 b3 9e 6a 0e 23 59 56 a1 23 8e bb 26 b0 fa 09 ec e0 33 76 14 e3 1c b5 3a f9 5b d0 fd f0 63 10 95 a8 4f 30 46 f4 05 fa 4a 40 6a 79 7a 91 2c a1 00 ef ce 5f 78 ef a3 08 53 69 ad 08 36 fc 81 70 b6 43 02 48 2e 51 c7 af 82 1e 43 12 a8 e3 5b c3 77 14 31 e1 37 18 ce c1 0a 31 49 93 22 78 8f 18 aa 95 95 bb f4 26 08 da 8e e0 1e 56 96 26 61 70 07 2a 4b 44 2a 28 80 fb 44 e2 ff d9 47 67 d1 60 62 76 fc 1a c7 51 35 37 62 dc 58 26 f4 13 0c 13 90 8c 4f d7 8f c4 93 91 1f 9f f0 8d f8 91 5d 1d 3d 18 99 41 8b 7c d8 0e 6c e7 7d 72 d6 d5 dc b7 c3 f6 a4 42 d4 66 8f 45 2f 7d 06 fa bf 07 22 41 34 60 45 7d d1 7a 8c 65 46 a4 d0 4a b8 4c 14 d7 93 8c e1 9c ad 74 31 87 d8 25 ab 37 f4 e2 dd e5 43 e2 75 9c d6 21 fb ac 06 42 be 3d 87 0a 14 1a eb 78 78 af 2c da ee 6e ab 76 0b 64 56 3c ee 86 7e 90 30 b6 d1 20 a6 1c cb a8 49 f5 aa 8b 30 0e 07 13 3e 41 c2 27 2c 5d 9d 21 e3 ba ca 18 76 38 a3 65 a1 e8 ae a3 b9 a8 1e ea ea d0 a5 df ef e2 01 a3 34 16 cd 00 32 69 2b 02 dc 0b fa 1c 58 ad f9 f8 a6 1b 06 dd b8 b0 42 65 18 0b b9 62 91 21 b9 98 78 0f df ee ef 5b 40 06 a4 6c 8e 37 aa 8f 0b 25 3b 37 75 ee 7a 2e d8 0c 9e 02 47 e4 28 ad 97 37 8b e6 cf b1 fc 5b f0 e6 fe fd 00 66 d4 fa 51 cf c4 fa 3e b3 3f 09 8a bf 25 85 3f 84 98 7c f5 6d f6 1a 48 5d fd 94 7c 01 8e 53 b8 2e ec fc fd 80 d2 30 9f e3 a5 93 f9 a8 65 83 2e 85 44 5b 9f bf 36 ef 97 76 2d 70 72 92 db 61 c2 4f 4a cb af 88 85 c4 90 d9 83 c1 4d 24 e0 c6 42 c9 34 95 75 a4 6b bb 06 e1 18 a6 29 db 57 92 32 79 d9 aa 8a 4f bf 92 0a 37 f1 1a 22 41 ac 81 73 94 68 f2 73 54 69 e1 1b 0f 87 0c a6 7f 61 0c 3c 72 37 e9 71 03 7c 9d 39 11 d6 7a 7e c0 65 9b ee ab 10 6f 7f 47 fc 7a af 74 ab 64 53 49 73 58 50 c8 7e 72 b1 db 5b d1 ed 53 0b e8 33 c0 6a aa a2 9b 30 bb 76 cd 33 78 78 f0 3d 13 18 a3 1a a3 41 de 1f 4b 08 61 11 78 9f da 54 f6 c4 80 00 0a 0d 51 be 60
+nl80211: Frame event
+nl80211: RX frame da=14:ac:60:29:42:fb sa=1e:1c:b7:7a:e7:94 bssid=1e:1c:b7:7a:e7:94 freq=2412 ssi_signal=-29 fc=0xd0 seq_ctrl=0x20 stype=13 (WLAN_FC_STYPE_ACTION) len=833
+wlp8s0: Event RX_MGMT (18) received
+PQC_LOG: Received PASN-2 frame (Vendor Action), len=802
+PQC_LOG: PASN - Processing PASN-2 frame from AP
+PQC_LOG: PASN - PASN-2 payload length: 802 bytes
+PQC_LOG: PASN - PASN-2 saved (ct=768 bytes, MIC1 saved). Waiting for PASN-2-SIG...
+PQC_LOG: PASN-2 processed successfully.
+wlp8s0: Received Action frame: SA=1e:1c:b7:7a:e7:94 Category=4 DataLen=808 freq=2412 MHz
+nl80211: Event message available
+nl80211: BSS Event 59 (NL80211_CMD_FRAME) received for wlp8s0
+nl80211: MLME event 59 (NL80211_CMD_FRAME) on wlp8s0(14:ac:60:29:42:fb) A1=14:ac:60:29:42:fb A2=1e:1c:b7:7a:e7:94 on link_id=-1
+nl80211: MLME event frame - hexdump(len=336): d0 00 54 00 14 ac 60 29 42 fb 1e 1c b7 7a e7 94 1e 1c b7 7a e7 94 30 00 04 09 00 90 4c 11 03 00 09 74 01 2c c8 5a 80 b4 85 9f 0f 32 06 b4 e9 40 f1 09 de d2 f9 2c e0 4c 8e 43 59 46 b2 f9 cb ee 54 e4 6a 24 2b b0 db 28 7b ca 3c 49 1b c3 99 09 c4 43 a5 5c 0f 9c 99 df a4 e1 6f cb 93 c5 3f ca 32 b1 9a 25 47 aa b8 db 1d 19 fd 44 ac 77 7d 42 f0 bc 13 79 cd 4d ef 95 6f cf 17 c7 ea 46 25 97 26 17 50 78 fc 60 7b 45 2f 4a 25 df 49 fc 41 20 85 e8 fe 89 8d b6 fc 70 27 7c c0 c8 6a 89 88 f6 b7 76 87 8b 8d ba c5 4f 3f 3f 03 af 9f b5 80 7e 84 7e 9c 47 29 f7 47 b8 45 d9 11 21 65 0f 8a 11 1f 9b 69 d4 46 6b 0e 04 63 c9 1f 3b bd 2c 0b d5 a0 63 f1 95 e0 bc 7b 7c c0 20 ce e8 a8 66 47 a2 32 93 8d 72 29 b0 12 5b ab d0 2f 93 38 ab 7d df 5c 16 1d 95 6f 4b 23 74 dd cf 1d 02 ed d6 ec 93 9c f3 a4 3a fd af b2 d9 cc 40 3d 0c 99 46 10 80 f9 ca 4c c7 de d1 28 49 87 14 af 7e da fd 8c 0a bb 23 b4 7e f6 28 ef 42 27 e4 60 70 f5 a0 0c 49 7f dd 5e 9f 4b 7d f2 4a b8 c0 18 25 d2 18 c0 99 cc b2 c2 25 8f d2 c2 3e 02 da f7 b2 3a f7 c5 38
+nl80211: Frame event
+nl80211: RX frame da=14:ac:60:29:42:fb sa=1e:1c:b7:7a:e7:94 bssid=1e:1c:b7:7a:e7:94 freq=2412 ssi_signal=-29 fc=0xd0 seq_ctrl=0x30 stype=13 (WLAN_FC_STYPE_ACTION) len=336
+wlp8s0: Event RX_MGMT (18) received
+PQC_LOG: Received PASN-2-SIG frame (Vendor Action), len=305
+PQC_LOG: PASN - PASN-2-SIG frag 0 received (300 bytes, total 300/2420)
+PQC_LOG: PASN-2-SIG processed successfully.
+wlp8s0: Received Action frame: SA=1e:1c:b7:7a:e7:94 Category=4 DataLen=311 freq=2412 MHz
+nl80211: Event message available
+nl80211: BSS Event 59 (NL80211_CMD_FRAME) received for wlp8s0
+nl80211: MLME event 59 (NL80211_CMD_FRAME) on wlp8s0(14:ac:60:29:42:fb) A1=14:ac:60:29:42:fb A2=1e:1c:b7:7a:e7:94 on link_id=-1
+nl80211: MLME event frame - hexdump(len=336): d0 00 54 00 14 ac 60 29 42 fb 1e 1c b7 7a e7 94 1e 1c b7 7a e7 94 40 00 04 09 00 90 4c 11 03 01 09 74 01 2c 52 49 11 cb b9 6c 2c cc 64 ca 33 cd bd 1d 35 14 04 9a 42 01 9b 61 9f 52 15 2e 5c e1 da 81 e4 0e f0 19 98 33 28 03 3a 6e 46 77 aa c1 89 7a ee dd 4b 7b df bb ed 17 e4 fb 36 c9 8c 0c 1e aa 2e ca 78 66 27 1a 75 24 6f 01 b7 0c 7f 16 ff 9f cc 03 f7 19 86 4d 4a 07 2b d6 49 8b cc 2b 71 13 b6 e7 50 bf fb 53 12 1a 0d df 62 44 e7 d0 b2 55 ab 33 39 34 0d a4 a7 30 a2 e0 a7 03 c1 b9 ff 90 91 54 60 69 b7 07 f6 81 0b 99 90 ec ef d0 c4 e5 28 7e 84 e3 9f 4b cd 26 6f 7f 8a 5a 01 db 18 2f 3c eb 18 5f 5e 0d dd 22 98 a6 8d 60 78 1d 0b 3d ab f7 d7 6e e3 bb af 05 72 c1 7b 13 39 a5 19 ef 4e bc 41 87 a5 c3 17 ff d0 cc e5 5f 16 ae f4 24 a5 20 57 e8 74 e6 4a d5 e2 52 bb e1 e7 8b 3e fe ac 95 d5 89 a0 8d 48 e1 cb 49 34 37 f6 78 c8 d7 71 32 7e 8a 24 37 99 40 22 8e 6e 13 20 e1 c3 5c be 20 bb cb d1 23 fc bd 75 4d 41 e8 88 01 ed ff 49 2b bd 0d e3 bb 89 1b 42 91 58 61 ab cf 2b 9f a0 20 13 61 78 10 17 84 28 0d d4 e6 64 84
+nl80211: Frame event
+nl80211: RX frame da=14:ac:60:29:42:fb sa=1e:1c:b7:7a:e7:94 bssid=1e:1c:b7:7a:e7:94 freq=2412 ssi_signal=-29 fc=0xd0 seq_ctrl=0x40 stype=13 (WLAN_FC_STYPE_ACTION) len=336
+wlp8s0: Event RX_MGMT (18) received
+PQC_LOG: Received PASN-2-SIG frame (Vendor Action), len=305
+PQC_LOG: PASN - PASN-2-SIG frag 1 received (300 bytes, total 600/2420)
+PQC_LOG: PASN-2-SIG processed successfully.
+wlp8s0: Received Action frame: SA=1e:1c:b7:7a:e7:94 Category=4 DataLen=311 freq=2412 MHz
+nl80211: Event message available
+nl80211: BSS Event 59 (NL80211_CMD_FRAME) received for wlp8s0
+nl80211: MLME event 59 (NL80211_CMD_FRAME) on wlp8s0(14:ac:60:29:42:fb) A1=14:ac:60:29:42:fb A2=1e:1c:b7:7a:e7:94 on link_id=-1
+nl80211: MLME event frame - hexdump(len=336): d0 00 54 00 14 ac 60 29 42 fb 1e 1c b7 7a e7 94 1e 1c b7 7a e7 94 50 00 04 09 00 90 4c 11 03 02 09 74 01 2c 9a 88 6f 9a 37 58 e5 14 a7 9b 55 b9 f8 a7 b4 d2 82 c1 07 a6 bf 85 f2 cc 4e 69 46 02 31 a4 71 4c 75 a3 2d 2a 9a 93 bf 83 03 2b 81 94 f5 b4 de 4f 73 4f 23 98 2a 73 ce 18 d4 75 d1 6a 0b 59 95 6c 27 51 41 aa da a6 3e 28 69 32 90 ed 5f 78 6b 19 d5 40 de aa a3 e7 64 e7 97 d6 56 07 ca 64 8d 1a 81 8c d4 46 e9 d1 45 99 cf ac 36 8f 9f c6 b0 7b 5c 36 47 c2 12 1f 7a ae c0 81 9e 41 73 ba a2 e1 be 9e 7a d8 c4 ac a4 e4 e8 89 e1 24 73 64 36 05 75 4c e8 cf d3 62 34 f2 8c 4d 61 19 3c 0d 6f eb a4 39 fb cc a3 c1 a8 3a f3 3b a4 e5 44 52 d0 87 a0 45 1a 6f 54 8c 9c 7a ab c5 e3 9a eb a5 85 83 c9 dc 3f 75 d5 62 2a 11 d6 fc a5 11 90 f6 27 b7 a6 3c eb c8 78 86 32 c2 44 ee f0 c5 f4 3f 4d 4a d6 53 30 26 24 eb 42 c3 fc ca 7c b2 dd 99 ae d4 56 77 a7 20 59 c4 84 06 49 41 4e 3d e8 db 60 4d 4e f4 56 95 fc d3 d6 a4 37 7c 0e 81 ff f5 44 46 a6 95 67 4b ab 33 db 46 5a 3d a2 b0 65 d2 df 3f b2 d2 5e c9 24 ae 17 81 da 7e 83 1b
+nl80211: Frame event
+nl80211: RX frame da=14:ac:60:29:42:fb sa=1e:1c:b7:7a:e7:94 bssid=1e:1c:b7:7a:e7:94 freq=2412 ssi_signal=-29 fc=0xd0 seq_ctrl=0x50 stype=13 (WLAN_FC_STYPE_ACTION) len=336
+wlp8s0: Event RX_MGMT (18) received
+PQC_LOG: Received PASN-2-SIG frame (Vendor Action), len=305
+PQC_LOG: PASN - PASN-2-SIG frag 2 received (300 bytes, total 900/2420)
+PQC_LOG: PASN-2-SIG processed successfully.
+wlp8s0: Received Action frame: SA=1e:1c:b7:7a:e7:94 Category=4 DataLen=311 freq=2412 MHz
+nl80211: Event message available
+nl80211: BSS Event 59 (NL80211_CMD_FRAME) received for wlp8s0
+nl80211: MLME event 59 (NL80211_CMD_FRAME) on wlp8s0(14:ac:60:29:42:fb) A1=14:ac:60:29:42:fb A2=1e:1c:b7:7a:e7:94 on link_id=-1
+nl80211: MLME event frame - hexdump(len=336): d0 00 54 00 14 ac 60 29 42 fb 1e 1c b7 7a e7 94 1e 1c b7 7a e7 94 60 00 04 09 00 90 4c 11 03 03 09 74 01 2c 51 e0 54 84 91 57 e0 ab 21 d6 80 b0 54 f2 d0 63 34 25 52 6f fd 76 6b 1c 09 64 87 ee 71 bb a6 4e 7f 37 87 c1 bc d1 9e bb cb ef d0 58 cd 22 18 a6 a1 bb 97 0b a1 37 09 86 7e 84 eb 72 28 21 26 ea df 81 7f 77 a7 78 89 03 7a fd ec d7 95 3e 75 28 ae a9 9f 8d 17 c7 4c c4 9e 2d 95 2c de 0b 58 49 a6 49 64 6b 95 ad e3 b8 fd 94 62 03 7f 4b f1 2f 99 17 32 17 b3 48 de 8e 7f 3c 1e c3 df e4 dc 14 3b 5e d3 18 df 7f f9 74 cb 70 bf 00 4b ac e1 fc e7 16 86 b7 4e 75 a7 76 67 77 9f 65 49 7e 7f 95 73 51 09 79 49 bf 43 40 f8 cc 68 bd 4b 8d d5 03 ca 1b 06 c7 a2 a7 b3 96 f7 b6 b8 ff ed eb 17 5f 1a 8a 95 d2 87 c3 9f c7 f9 d5 cf 7e 86 e5 d6 a9 6e fe bf eb 06 78 f0 df 0f f4 60 30 94 a8 97 86 d1 f2 26 bc e4 4e 29 8e 75 95 1d 31 f1 3d 78 6d 72 29 55 1b e7 7e ee 30 d6 67 7b c0 66 bb bd ae 04 43 1e 67 f4 64 e0 d9 21 91 ea 7d a1 ca 5c 13 7a 2e d2 f0 a3 08 ab d6 26 3c 92 59 13 f3 fe f4 9a f1 17 94 ee 4f d6 f0 00 27 92 24
+nl80211: Frame event
+nl80211: RX frame da=14:ac:60:29:42:fb sa=1e:1c:b7:7a:e7:94 bssid=1e:1c:b7:7a:e7:94 freq=2412 ssi_signal=-28 fc=0xd0 seq_ctrl=0x60 stype=13 (WLAN_FC_STYPE_ACTION) len=336
+wlp8s0: Event RX_MGMT (18) received
+PQC_LOG: Received PASN-2-SIG frame (Vendor Action), len=305
+PQC_LOG: PASN - PASN-2-SIG frag 3 received (300 bytes, total 1200/2420)
+PQC_LOG: PASN-2-SIG processed successfully.
+wlp8s0: Received Action frame: SA=1e:1c:b7:7a:e7:94 Category=4 DataLen=311 freq=2412 MHz
+nl80211: Event message available
+nl80211: BSS Event 59 (NL80211_CMD_FRAME) received for wlp8s0
+nl80211: MLME event 59 (NL80211_CMD_FRAME) on wlp8s0(14:ac:60:29:42:fb) A1=14:ac:60:29:42:fb A2=1e:1c:b7:7a:e7:94 on link_id=-1
+nl80211: MLME event frame - hexdump(len=336): d0 00 54 00 14 ac 60 29 42 fb 1e 1c b7 7a e7 94 1e 1c b7 7a e7 94 70 00 04 09 00 90 4c 11 03 04 09 74 01 2c 0b 26 55 f0 5e 95 8f be fb 0f db f6 15 22 39 f6 11 b6 28 e1 f8 78 41 5e 70 23 ac 4e 8c 43 4b 7b 18 57 a7 ce 2a 9e 63 5f fa b4 eb ba 7f cb 26 52 99 41 cb 34 a4 2e 27 d1 f6 85 b4 be 4d 07 96 ba 63 6f 2c 6e df 37 8a c4 44 9f a5 78 5b ef 24 48 53 95 30 72 59 28 73 3c ad 68 ec 2f 9b aa e7 3e 73 66 8b 53 fd f3 df 12 70 fb ac 42 d1 47 c2 cb 12 bf ab ff c8 69 55 21 9e 01 3a 27 7f af 9b c3 e3 82 21 68 24 57 67 3b 62 88 d9 ab c8 22 45 cf 91 24 83 2b a8 d0 de 78 2e c4 14 23 40 3e 03 60 29 ef 68 4b 78 ab 6c 87 8a c0 6d 31 73 92 4f 5d f9 7a f8 16 44 77 60 3a 3e bb b2 16 36 b0 85 24 35 ac 76 03 f9 d1 f2 08 99 54 16 a9 fa 22 40 7b dd 1f 81 d4 74 86 9f 68 16 1b a4 70 6a 98 fc 07 db 8e f1 d4 cf 03 60 b6 69 b9 9c 4a a8 4c ab 12 da 02 41 ad 8c ba 43 45 08 7e 52 8a fe b7 be 9d c3 a0 8c a2 13 59 e7 30 94 af c2 26 45 6b 6e e5 8c 30 11 33 77 ff 17 99 2f 2a 39 18 aa 1a 27 b2 b0 83 e9 32 9f af ca 8a 72 11 70 7c
+nl80211: Frame event
+nl80211: RX frame da=14:ac:60:29:42:fb sa=1e:1c:b7:7a:e7:94 bssid=1e:1c:b7:7a:e7:94 freq=2412 ssi_signal=-29 fc=0xd0 seq_ctrl=0x70 stype=13 (WLAN_FC_STYPE_ACTION) len=336
+wlp8s0: Event RX_MGMT (18) received
+PQC_LOG: Received PASN-2-SIG frame (Vendor Action), len=305
+PQC_LOG: PASN - PASN-2-SIG frag 4 received (300 bytes, total 1500/2420)
+PQC_LOG: PASN-2-SIG processed successfully.
+wlp8s0: Received Action frame: SA=1e:1c:b7:7a:e7:94 Category=4 DataLen=311 freq=2412 MHz
+nl80211: Event message available
+nl80211: BSS Event 59 (NL80211_CMD_FRAME) received for wlp8s0
+nl80211: MLME event 59 (NL80211_CMD_FRAME) on wlp8s0(14:ac:60:29:42:fb) A1=14:ac:60:29:42:fb A2=1e:1c:b7:7a:e7:94 on link_id=-1
+nl80211: MLME event frame - hexdump(len=336): d0 00 54 00 14 ac 60 29 42 fb 1e 1c b7 7a e7 94 1e 1c b7 7a e7 94 80 00 04 09 00 90 4c 11 03 05 09 74 01 2c 15 2b 3a 1d 86 8e 91 a1 89 5b f8 b8 7f bc c2 6d cd c3 93 b3 31 7c 0a 24 c8 56 85 14 3f 7f 0f f8 d6 2a b1 51 bc 57 78 5c d8 52 ee 18 bd 68 7c cd 95 2d 45 c8 b7 67 d7 48 e7 5c eb ed 20 72 cb 74 42 64 2b a0 43 29 86 bc 2e 87 5b 1d ec b9 96 27 ae 34 ca ed 4f fd c6 4d ce 65 39 ba ee 40 8f db cf 9e dd 2c aa b2 7c 8a 39 b8 12 fe ae d3 b1 34 65 0a 5a 35 0a 12 d1 bf f9 ff 40 c2 8e 9b 9d af b9 bb 89 71 29 0c 62 31 52 fb 8e 55 27 f8 cf f5 e9 f4 76 3f 17 91 c4 e9 ac 48 f6 51 e0 88 70 dc be 03 d1 94 ca d5 1c 6e 4e 89 7d 9b e8 e3 28 6c ab 9f 3a 1d e6 cd 4b 6f a0 0f 1f e9 90 4d 5b 0d cd e1 71 d3 16 2c db 61 4a 89 3e 91 78 21 16 0b 8e b7 86 20 5d 40 8b 99 9c 77 06 80 5b d2 49 a7 42 0d f3 47 42 6d 84 57 26 a5 08 66 aa d5 c8 de 69 6b a8 6b 43 57 6c 96 fe cc ac ec ec 24 b8 6b 64 d5 33 28 da 47 7c b4 5a b5 33 49 f1 56 36 5b 8f bf db 01 6b c3 8b a2 0e f8 62 cb 59 bf 7b de c0 e5 d8 a7 e7 07 6d 20 0a 8d 0e 4e
+nl80211: Frame event
+nl80211: RX frame da=14:ac:60:29:42:fb sa=1e:1c:b7:7a:e7:94 bssid=1e:1c:b7:7a:e7:94 freq=2412 ssi_signal=-28 fc=0xd0 seq_ctrl=0x80 stype=13 (WLAN_FC_STYPE_ACTION) len=336
+wlp8s0: Event RX_MGMT (18) received
+PQC_LOG: Received PASN-2-SIG frame (Vendor Action), len=305
+PQC_LOG: PASN - PASN-2-SIG frag 5 received (300 bytes, total 1800/2420)
+PQC_LOG: PASN-2-SIG processed successfully.
+wlp8s0: Received Action frame: SA=1e:1c:b7:7a:e7:94 Category=4 DataLen=311 freq=2412 MHz
+nl80211: Event message available
+nl80211: BSS Event 59 (NL80211_CMD_FRAME) received for wlp8s0
+nl80211: MLME event 59 (NL80211_CMD_FRAME) on wlp8s0(14:ac:60:29:42:fb) A1=14:ac:60:29:42:fb A2=1e:1c:b7:7a:e7:94 on link_id=-1
+nl80211: MLME event frame - hexdump(len=336): d0 00 54 00 14 ac 60 29 42 fb 1e 1c b7 7a e7 94 1e 1c b7 7a e7 94 90 00 04 09 00 90 4c 11 03 06 09 74 01 2c 1b 8f 17 4d b9 e6 1b f9 d9 88 76 d6 e4 ab 64 2f 2d f9 71 0c 67 6c 03 5e 92 67 d9 1e 40 b9 8e 9d a5 61 75 af d8 3b c4 d3 2b d2 22 24 d1 22 93 a5 1b 24 b3 0c ac 97 a5 b3 c6 8b 2d 64 3c 21 33 43 1a b9 92 31 65 50 0a 40 8e 45 74 4a 2d 88 25 04 65 f0 b0 c8 9e 19 5c 34 e2 9c 5b 4a 5c 1d 32 24 f5 f2 17 ad 40 b3 8f ff ab 82 93 25 c1 37 0e ba 04 51 7e ca 71 06 81 67 1e fd 87 b2 38 96 ab 3d fd 29 29 e7 86 d7 98 7e 84 e8 4a 4d e2 20 f8 96 3f 9b 9c 46 07 1c 17 50 d7 9c 56 c6 45 31 53 dd d4 75 be be e3 af 1a 92 65 ea 5d 9f a2 e5 31 53 a9 c8 73 e6 64 b8 ca e3 09 2d 8e 5a 79 44 c0 5a fb 94 24 e1 85 1d b4 fe a3 9d 21 20 c7 e6 ae 26 7b 51 62 28 d2 07 c2 da 9c f0 a2 db 2a 9c 25 89 8d a7 e0 2d 75 62 55 63 28 4c c6 1d c3 07 2d 12 5b 51 f3 45 d0 a5 84 4f 4e 0d 9f d3 69 1e a8 c6 5b 14 a6 7e aa c6 5c 10 ff 37 0b ea c4 98 09 4a 10 83 1a 4c 07 28 4b a5 b1 4f 1f cd 4e c4 6b 06 fb e7 84 e9 02 56 fd 80 06 5c 73 27
+nl80211: Frame event
+nl80211: RX frame da=14:ac:60:29:42:fb sa=1e:1c:b7:7a:e7:94 bssid=1e:1c:b7:7a:e7:94 freq=2412 ssi_signal=-28 fc=0xd0 seq_ctrl=0x90 stype=13 (WLAN_FC_STYPE_ACTION) len=336
+wlp8s0: Event RX_MGMT (18) received
+PQC_LOG: Received PASN-2-SIG frame (Vendor Action), len=305
+PQC_LOG: PASN - PASN-2-SIG frag 6 received (300 bytes, total 2100/2420)
+PQC_LOG: PASN-2-SIG processed successfully.
+wlp8s0: Received Action frame: SA=1e:1c:b7:7a:e7:94 Category=4 DataLen=311 freq=2412 MHz
+nl80211: Event message available
+nl80211: BSS Event 59 (NL80211_CMD_FRAME) received for wlp8s0
+nl80211: MLME event 59 (NL80211_CMD_FRAME) on wlp8s0(14:ac:60:29:42:fb) A1=14:ac:60:29:42:fb A2=1e:1c:b7:7a:e7:94 on link_id=-1
+nl80211: MLME event frame - hexdump(len=336): d0 00 54 00 14 ac 60 29 42 fb 1e 1c b7 7a e7 94 1e 1c b7 7a e7 94 a0 00 04 09 00 90 4c 11 03 07 09 74 01 2c 1c 55 a0 6a 97 52 6b 49 2e 73 50 df 57 e2 f0 aa 9e e3 e9 e7 aa 5b 70 70 35 63 c8 91 bc ae 9c 61 f7 0f 25 80 c4 44 21 57 b2 b4 7b a9 be 66 9a cd 5e 57 1d 83 88 e7 5f e8 18 ab f7 f0 29 4a aa a7 1d 72 3d f9 d6 89 48 98 50 29 c0 22 33 b2 d4 9c 81 07 f2 78 89 cd 73 1a d1 99 a3 29 04 d9 79 24 e4 6a 63 d2 97 b1 7d fc 9a 04 a0 4b 5b 34 9e 58 2f fb 7a 2b d0 a0 6a d1 72 70 97 0e 7d 56 0f 53 b2 2e 25 10 66 f6 cf de 7f db af b5 95 ef 34 e2 09 f7 76 79 81 a3 61 e8 7d cf 7f 83 73 f7 8e fa 6a 1c a5 e7 84 35 dd 57 44 2d 9d 0d 69 62 30 bc e1 ce 37 21 23 fc 22 63 e4 ad 2b c9 75 4f cd a5 0f a6 c6 8f bc 41 3b 7a 2e 7e fa 5e dd 25 be c3 1c d8 38 31 37 79 d6 40 d2 96 e1 52 fa 77 f9 47 8f 16 77 4c 01 8a cf d9 d5 ee c9 47 1c 21 30 31 3a 79 88 a5 e6 e8 21 34 3d 4c 4e 68 72 84 8b dc e5 ea ef f8 f9 32 4b 51 7c 97 a9 bf de e9 f2 07 0d 40 4e 5e 72 74 7e 84 86 95 af b4 c6 ef f0 00 00 00 00 00 00 00 00 00 00 00 00 00
+nl80211: Frame event
+nl80211: RX frame da=14:ac:60:29:42:fb sa=1e:1c:b7:7a:e7:94 bssid=1e:1c:b7:7a:e7:94 freq=2412 ssi_signal=-29 fc=0xd0 seq_ctrl=0xa0 stype=13 (WLAN_FC_STYPE_ACTION) len=336
+wlp8s0: Event RX_MGMT (18) received
+PQC_LOG: Received PASN-2-SIG frame (Vendor Action), len=305
+PQC_LOG: PASN - PASN-2-SIG frag 7 received (300 bytes, total 2400/2420)
+PQC_LOG: PASN-2-SIG processed successfully.
+wlp8s0: Received Action frame: SA=1e:1c:b7:7a:e7:94 Category=4 DataLen=311 freq=2412 MHz
+nl80211: Event message available
+nl80211: BSS Event 59 (NL80211_CMD_FRAME) received for wlp8s0
+nl80211: MLME event 59 (NL80211_CMD_FRAME) on wlp8s0(14:ac:60:29:42:fb) A1=14:ac:60:29:42:fb A2=1e:1c:b7:7a:e7:94 on link_id=-1
+nl80211: MLME event frame - hexdump(len=56): d0 00 78 00 14 ac 60 29 42 fb 1e 1c b7 7a e7 94 1e 1c b7 7a e7 94 b0 00 04 09 00 90 4c 11 03 08 09 74 00 14 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 0a 19 23 33
+nl80211: Frame event
+nl80211: RX frame da=14:ac:60:29:42:fb sa=1e:1c:b7:7a:e7:94 bssid=1e:1c:b7:7a:e7:94 freq=2412 ssi_signal=-29 fc=0xd0 seq_ctrl=0xb0 stype=13 (WLAN_FC_STYPE_ACTION) len=56
+wlp8s0: Event RX_MGMT (18) received
+PQC_LOG: Received PASN-2-SIG frame (Vendor Action), len=25
+PQC_LOG: PASN - PASN-2-SIG frag 8 received (20 bytes, total 2420/2420)
+PQC_LOG: PASN - All PASN-2-SIG fragments received (2420 bytes). Verifying...
+PQC_LOG: PASN - ML-DSA signature verification successful
+PQC_LOG: PASN - ML-KEM decapsulation successful (shared secret len: 32)
+PQC_DEBUG_STA: PMK - hexdump(len=16): 00 01 99 a7 8c 4a e9 77 8c ae 14 88 06 02 6c ee
+PQC_LOG: PASN - PTK derived successfully
+PQC_LOG: PASN - generated MIC2 and saved in state machine
+PQC_LOG: Sending PASN-3 frame with MIC2
+PQC_LOG: PASN - Sending PASN-3 frame to: 1e:1c:b7:7a:e7:94
+nl80211: Send Action frame (ifindex=3, freq=2412 MHz wait=0 ms no_cck=0 offchanok=1 dst=1e:1c:b7:7a:e7:94 src=14:ac:60:29:42:fb bssid=1e:1c:b7:7a:e7:94, link_id=-1)
+nl80211: CMD_FRAME freq=2412 wait=0 no_cck=0 no_ack=0 offchanok=1
+CMD_FRAME - hexdump(len=63): d0 00 00 00 1e 1c b7 7a e7 94 14 ac 60 29 42 fb 1e 1c b7 7a e7 94 00 00 04 09 00 90 4c 11 04 2c 9f 36 c3 12 a9 b9 02 7d c8 bf 33 26 a1 77 90 e0 68 b4 55 c7 94 d1 1b 20 88 fd 7c 81 61 e7 9f
+nl80211: Frame TX command accepted; cookie 0x1d
+PQC_LOG: PASN - PASN-3 frame sent successfully
+PQC_LOG: PASN-3 frame sent successfully. Waiting for group keys...
+PQC_LOG: PASN-2-SIG processed successfully.
+wlp8s0: Received Action frame: SA=1e:1c:b7:7a:e7:94 Category=4 DataLen=31 freq=2412 MHz
+nl80211: Event message available
+nl80211: Drv Event 60 (NL80211_CMD_FRAME_TX_STATUS) received for wlp8s0
+nl80211: MLME event 60 (NL80211_CMD_FRAME_TX_STATUS) on wlp8s0(14:ac:60:29:42:fb) A1=1e:1c:b7:7a:e7:94 A2=14:ac:60:29:42:fb on link_id=-1
+nl80211: MLME event frame - hexdump(len=63): d0 00 00 00 1e 1c b7 7a e7 94 14 ac 60 29 42 fb 1e 1c b7 7a e7 94 00 00 04 09 00 90 4c 11 04 2c 9f 36 c3 12 a9 b9 02 7d c8 bf 33 26 a1 77 90 e0 68 b4 55 c7 94 d1 1b 20 88 fd 7c 81 61 e7 9f
+nl80211: Frame TX status event A1=1e:1c:b7:7a:e7:94 stype=13 cookie=0x1d ack=1
+nl80211: Frame TX status: cookie=0x1d (match) (ack=1)
+wlp8s0: Event TX_STATUS (16) received
+wlp8s0: EVENT_TX_STATUS dst=1e:1c:b7:7a:e7:94 type=0 stype=13
+Off-channel: Ignore Action TX status - no pending operation
+nl80211: Event message available
+nl80211: BSS Event 59 (NL80211_CMD_FRAME) received for wlp8s0
+nl80211: MLME event 59 (NL80211_CMD_FRAME) on wlp8s0(14:ac:60:29:42:fb) A1=14:ac:60:29:42:fb A2=1e:1c:b7:7a:e7:94 on link_id=-1
+nl80211: MLME event frame - hexdump(len=103): d0 00 78 00 14 ac 60 29 42 fb 1e 1c b7 7a e7 94 1e 1c b7 7a e7 94 c0 00 04 09 00 90 4c 11 05 e3 99 7a ca 30 b6 50 09 aa a5 8b 2c 9e b9 ec 27 25 67 f2 53 30 ba c9 ee fc 2e 58 92 0b 08 2e db 6c 46 c9 ce 13 cc 28 91 cd 58 84 92 7d 7f db 64 25 d0 37 bc 23 24 b2 92 2e 12 db 79 d2 f6 a3 6a 2f 49 34 1a b1 17 de 65
+nl80211: Frame event
+nl80211: RX frame da=14:ac:60:29:42:fb sa=1e:1c:b7:7a:e7:94 bssid=1e:1c:b7:7a:e7:94 freq=2412 ssi_signal=-29 fc=0xd0 seq_ctrl=0xc0 stype=13 (WLAN_FC_STYPE_ACTION) len=103
+wlp8s0: Event RX_MGMT (18) received
+PQC_LOG: Received PASN-4 frame (Vendor Action), len=72
+PQC_LOG: PASN - Processing PASN-4 frame from AP
+PQC_LOG: PASN - MIC3 verified successfully
+PQC_LOG: PASN - Group keys decrypted successfully
+PQC_DEBUG_STA: TK - hexdump(len=16): 0a 3d 3f 07 d6 cb 55 e1 f8 34 ef 9b 55 f1 47 e9
+PQC_DEBUG_STA: KEK - hexdump(len=16): 86 cd a0 f2 47 8d 57 49 9c 82 71 65 69 d0 80 b4
+PQC_DEBUG_STA: KCK - hexdump(len=16): 99 10 28 96 1b 34 d6 a5 c7 02 13 4d 16 5f c1 4e
+PQC_DEBUG_STA: PTK - hexdump(len=48): 86 cd a0 f2 47 8d 57 49 9c 82 71 65 69 d0 80 b4 99 10 28 96 1b 34 d6 a5 c7 02 13 4d 16 5f c1 4e 0a 3d 3f 07 d6 cb 55 e1 f8 34 ef 9b 55 f1 47 e9
+wpa_driver_nl80211_set_key: ifindex=3 (wlp8s0) alg=3 addr=0x5608aa4ea7f8 key_idx=0 set_tx=1 seq_len=0 key_len=16 key_flag=0x20 link_id=-1
+nl80211: NEW_KEY
+nl80211: KEY_DATA - hexdump(len=16): 0a 3d 3f 07 d6 cb 55 e1 f8 34 ef 9b 55 f1 47 e9
+   addr=1e:1c:b7:7a:e7:94
+   pairwise key
+PQC_LOG: PASN - TK installed successfully
+PQC_DEBUG_STA: GTK - hexdump(len=16): 52 c8 2c 3b 76 51 f6 e2 7e 26 52 b3 e6 40 0c ea
+wpa_driver_nl80211_set_key: ifindex=3 (wlp8s0) alg=3 addr=0x7fff3327620a key_idx=1 set_tx=0 seq_len=0 key_len=16 key_flag=0x10 link_id=-1
+nl80211: NEW_KEY
+nl80211: KEY_DATA - hexdump(len=16): 52 c8 2c 3b 76 51 f6 e2 7e 26 52 b3 e6 40 0c ea
+   broadcast key
+PQC_LOG: PASN - GTK installed successfully
+PQC_DEBUG_STA: IGTK - hexdump(len=16): fe f1 9b 1e 00 a4 26 96 b9 d5 a4 b2 b9 5e 3d cd
+wpa_driver_nl80211_set_key: ifindex=3 (wlp8s0) alg=4 addr=0x7fff3327620a key_idx=4 set_tx=0 seq_len=0 key_len=16 key_flag=0x10 link_id=-1
+nl80211: NEW_KEY
+nl80211: KEY_DATA - hexdump(len=16): fe f1 9b 1e 00 a4 26 96 b9 d5 a4 b2 b9 5e 3d cd
+   broadcast key
+PQC_LOG: PASN - IGTK installed successfully
+nl80211: Set supplicant port authorized for 1e:1c:b7:7a:e7:94
+PQC_LOG: PASN - Port authorized successfully!
+wlp8s0: State: COMPLETED -> COMPLETED
+PQC_LOG: *** PASN PHASE COMPLETE! Fully connected and secure. ***
+PQC_LOG: PASN-4 processed successfully.
+wlp8s0: Received Action frame: SA=1e:1c:b7:7a:e7:94 Category=4 DataLen=78 freq=2412 MHz
+wlp8s0: Removing interface wlp8s0
+nl80211: Getting wowlan status
+nl80211: wowlan is disabled
+wlp8s0: Request to deauthenticate - bssid=1e:1c:b7:7a:e7:94 pending_bssid=00:00:00:00:00:00 reason=3 (DEAUTH_LEAVING) state=COMPLETED valid_links=0x0 ap_mld_addr=00:00:00:00:00:00
+TDLS: Tear down peers
+wpa_driver_nl80211_deauthenticate(addr=1e:1c:b7:7a:e7:94 reason_code=3)
+wlp8s0: Event DEAUTH (11) received
+wlp8s0: Deauthentication notification
+wlp8s0:  * reason 3 (DEAUTH_LEAVING) locally_generated=1
+Deauthentication frame IE(s) - hexdump(len=0): [NULL]
+wlp8s0: CTRL-EVENT-DISCONNECTED bssid=1e:1c:b7:7a:e7:94 reason=3 locally_generated=1
+wlp8s0: Auto connect disabled: do not try to re-connect
+wlp8s0: Ignore connection failure indication since interface has been put into disconnected state
+RSN: Clear current PMKSA entry selection
+TDLS: Remove peers on disassociation
+wlp8s0: WPA: Clear old PMK and PTK
+Disconnect event of DFS AP
+wlp8s0: Disconnect event - remove keys
+wpa_driver_nl80211_set_key: ifindex=3 (wlp8s0) alg=0 addr=(nil) key_idx=0 set_tx=0 seq_len=0 key_len=0 key_flag=0x10 link_id=-1
+nl80211: DEL_KEY
+   broadcast key
+wpa_driver_nl80211_set_key: ifindex=3 (wlp8s0) alg=0 addr=(nil) key_idx=1 set_tx=0 seq_len=0 key_len=0 key_flag=0x10 link_id=-1
+nl80211: DEL_KEY
+   broadcast key
+wpa_driver_nl80211_set_key: ifindex=3 (wlp8s0) alg=0 addr=(nil) key_idx=4 set_tx=0 seq_len=0 key_len=0 key_flag=0x10 link_id=-1
+nl80211: DEL_KEY
+   broadcast key
+wpa_driver_nl80211_set_key: ifindex=3 (wlp8s0) alg=0 addr=0x5608aa4ea7f8 key_idx=0 set_tx=0 seq_len=0 key_len=0 key_flag=0x20 link_id=-1
+nl80211: DEL_KEY
+   addr=1e:1c:b7:7a:e7:94
+   pairwise key
+nl80211: Data frame filter flags=0x0
+wlp8s0: State: COMPLETED -> DISCONNECTED
+nl80211: Set wlp8s0 operstate 1->0 (DORMANT)
+netlink: Operstate: ifindex=3 linkmode=-1 (no change), operstate=5 (IF_OPER_DORMANT)
+EAPOL: External notification - portEnabled=0
+EAPOL: SUPP_PAE entering state DISCONNECTED
+EAPOL: Supplicant port status: Unauthorized
+nl80211: Skip set_supp_port(unauthorized) while not associated
+EAPOL: SUPP_BE entering state INITIALIZE
+EAPOL: External notification - portValid=0
+PQC_LOG: Deinitializing State Machine
+nl80211: Data frame filter flags=0x0
+wlp8s0: State: DISCONNECTED -> DISCONNECTED
+nl80211: Set wlp8s0 operstate 0->0 (DORMANT)
+netlink: Operstate: ifindex=3 linkmode=-1 (no change), operstate=5 (IF_OPER_DORMANT)
+EAPOL: External notification - portEnabled=0
+EAPOL: External notification - portValid=0
+QM: Clear all active DSCP policies
+wlp8s0: CTRL-EVENT-DSCP-POLICY clear_all
+RSN: Flush PMKSA cache entry for 00:00:00:00:00:00
+wlp8s0: PMKSA-CACHE-REMOVED 00:00:00:00:00:00 0
+nl80211: Delete PMKID for 00:00:00:00:00:00
+nl80211: NL80211_CMD_DEL_PMKSA failed: -95 (Operation not supported)
+wlp8s0: RSN: PMKSA cache entry free_cb: 00:00:00:00:00:00 reason=0
+wlp8s0: WPA: Clear old PMK and PTK
+wlp8s0: BSS: Remove id 0 BSSID e4:5f:01:9e:4c:0f SSID 'JackSparrow' due to wpa_bss_flush
+wlp8s0: BSS: Remove id 1 BSSID 34:f8:e7:c2:9c:c7 SSID 'TeleAGH' due to wpa_bss_flush
+wlp8s0: BSS: Remove id 2 BSSID 34:f8:e7:c2:9c:c4 SSID 'TeleLAB' due to wpa_bss_flush
+wlp8s0: BSS: Remove id 3 BSSID 34:f8:e7:c2:9c:c3 SSID 'eduroam' due to wpa_bss_flush
+wlp8s0: BSS: Remove id 4 BSSID 34:f8:e7:c2:9c:c2 SSID 'AGH-WPA' due to wpa_bss_flush
+wlp8s0: BSS: Remove id 11 BSSID 94:f6:65:7f:77:73 SSID 'island-3F7770' due to wpa_bss_flush
+wlp8s0: BSS: Remove id 6 BSSID b0:0a:d5:49:0d:d9 SSID 'PLAY Internet 4G LTE-490DD4' due to wpa_bss_flush
+wlp8s0: BSS: Remove id 5 BSSID b4:0f:3b:e5:14:99 SSID '\x00\x00\x00\x00' due to wpa_bss_flush
+wlp8s0: BSS: Remove id 7 BSSID 34:f8:e7:c1:5f:c7 SSID 'TeleAGH' due to wpa_bss_flush
+wlp8s0: BSS: Remove id 12 BSSID b4:69:5f:d1:2a:6a SSID 'TCL-2RFZ-2.4GHz' due to wpa_bss_flush
+wlp8s0: BSS: Remove id 13 BSSID 34:f8:e7:c1:5f:c2 SSID 'AGH-WPA' due to wpa_bss_flush
+wlp8s0: BSS: Remove id 8 BSSID 34:f8:e7:c2:9c:c5 SSID 'AGH-Events' due to wpa_bss_flush
+wlp8s0: BSS: Remove id 9 BSSID 34:f8:e7:c2:9c:c1 SSID 'AGH-Guest' due to wpa_bss_flush
+wlp8s0: BSS: Remove id 14 BSSID 1e:1c:b7:7a:e7:94 SSID 'SiecPQC' due to wpa_bss_flush
+wlp8s0: BSS: Remove id 15 BSSID 94:f6:65:3f:77:78 SSID 'Wireless1' due to wpa_bss_flush
+wlp8s0: BSS: Remove id 10 BSSID 34:f8:e7:c1:5f:c5 SSID 'AGH-Events' due to wpa_bss_flush
+wlp8s0: BSS: Remove id 16 BSSID 34:f8:e7:c1:5f:c1 SSID 'AGH-Guest' due to wpa_bss_flush
+wlp8s0: Cancelling delayed sched scan
+wlp8s0: Cancelling scan request
+wlp8s0: Cancelling authentication timeout
+Off-channel: Clear pending Action frame TX (pending_action_tx=(nil)
+nl80211: Data frame filter flags=0x0
+Off-channel: Action frame sequence done notification: pending_action_tx=(nil) drv_offchan_tx=1 action_tx_wait_time=0 off_channel_freq=0 roc_waiting_drv_freq=0
+QM: Clear all active DSCP policies
+wlp8s0: CTRL-EVENT-DSCP-POLICY clear_all
+Remove interface wlp8s0 from radio phy0
+Remove radio phy0
+nl80211: deinit ifname=wlp8s0 disabled_11b_rates=0
+netlink: Operstate: ifindex=3 linkmode=0 (kernel-control), operstate=6 (IF_OPER_UP)
+nl80211: Set mode ifindex 3 iftype 2 (STATION)
+nl80211: Unsubscribe mgmt frames handle 0x8888de8022c65049 (mode change)
+wlp8s0: CTRL-EVENT-TERMINATING 
+wpa_supplicant v2.12-devel
+random: Trying to read entropy from /dev/random
+Successfully initialized wpa_supplicant
+Initializing interface 'wlp8s0' conf 'test-sta.conf' driver 'default' ctrl_interface 'N/A' bridge 'N/A'
+Configuration file 'test-sta.conf' -> '/home/kolo/Pulpit/PQC/PQC_implementation/hostap/wpa_supplicant/test-sta.conf'
+Reading configuration file '/home/kolo/Pulpit/PQC/PQC_implementation/hostap/wpa_supplicant/test-sta.conf'
+ctrl_interface='/var/run/wpa_supplicant'
+update_config=0
+Line: 4 - start of a new network block
+ssid - hexdump_ascii(len=7):
+     53 69 65 63 50 51 43                              SiecPQC         
+key_mgmt: 0x4
+proto: 0x2
+group: 0x10
+pairwise: 0x10
+pqc_enabled=1 (0x1)
+pqc_choice=136 (0x88)
+PSK (ASCII passphrase) - hexdump_ascii(len=10):
+     68 61 73 6c 6f 6d 61 73 6c 6f                     haslomaslo      
+PSK (from passphrase) - hexdump(len=32): 15 e6 b6 c5 18 fa 97 29 0d 00 69 17 6e 65 b0 cb 5b 9e 4a b7 aa b5 c8 0f e6 ca 8f 91 db 4c a5 86
+Priority group 0
+   id=0 ssid='SiecPQC'
+nl80211: Kernel version: Linux 5.15.0-122-generic (#132-Ubuntu SMP Thu Aug 29 13:45:52 UTC 2024; x86_64)
+nl80211: Maximum supported attribute ID: 305
+nl80211: Initialize interface wlp8s0 (driver: mt7921e)
+nl80211: TDLS supported
+nl80211: TDLS external setup
+nl80211: Supported cipher 00-0f-ac:1
+nl80211: Supported cipher 00-0f-ac:5
+nl80211: Supported cipher 00-0f-ac:2
+nl80211: Supported cipher 00-0f-ac:4
+nl80211: Supported cipher 00-0f-ac:10
+nl80211: Supported cipher 00-0f-ac:8
+nl80211: Supported cipher 00-0f-ac:9
+nl80211: Supported cipher 00-0f-ac:6
+nl80211: Supported cipher 00-0f-ac:13
+nl80211: Supported cipher 00-0f-ac:11
+nl80211: Supported cipher 00-0f-ac:12
+nl80211: Using driver-based off-channel TX
+nl80211: Driver-advertised extended capabilities (default) - hexdump(len=8): 00 00 00 00 00 00 00 40
+nl80211: Driver-advertised extended capabilities mask (default) - hexdump(len=8): 00 00 00 00 00 00 00 40
+nl80211: key_mgmt=0x105ff0f enc=0xfef auth=0x7 flags=0x4003d10d35bd0e0 flags2=0x6000123 rrm_flags=0x30 probe_resp_offloads=0x0 max_stations=0 max_remain_on_chan=5000 max_scan_ssids=4
+nl80211: interface wlp8s0 in phy phy0
+nl80211: Set mode ifindex 3 iftype 2 (STATION)
+nl80211: Subscribe to mgmt frames with non-AP handle 0x55ba50c3b8c0
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x55ba50c3b8c0 match=0104 multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=2): 01 04
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x55ba50c3b8c0 match=040a multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=2): 04 0a
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x55ba50c3b8c0 match=040b multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=2): 04 0b
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x55ba50c3b8c0 match=040c multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=2): 04 0c
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x55ba50c3b8c0 match=040d multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=2): 04 0d
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x55ba50c3b8c0 match=090a multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=2): 09 0a
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x55ba50c3b8c0 match=090b multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=2): 09 0b
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x55ba50c3b8c0 match=090c multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=2): 09 0c
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x55ba50c3b8c0 match=090d multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=2): 09 0d
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x55ba50c3b8c0 match=0409506f9a09 multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=6): 04 09 50 6f 9a 09
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x55ba50c3b8c0 match=040900904c multicast=0
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x55ba50c3b8c0 match=7f506f9a09 multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=5): 7f 50 6f 9a 09
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x55ba50c3b8c0 match=0409506f9a1a multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=6): 04 09 50 6f 9a 1a
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x55ba50c3b8c0 match=0801 multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=2): 08 01
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x55ba50c3b8c0 match=040e multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=2): 04 0e
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x55ba50c3b8c0 match=06 multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=1): 06
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x55ba50c3b8c0 match=0a07 multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=2): 0a 07
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x55ba50c3b8c0 match=0a11 multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=2): 0a 11
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x55ba50c3b8c0 match=0a0b multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=2): 0a 0b
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x55ba50c3b8c0 match=0a1a multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=2): 0a 1a
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x55ba50c3b8c0 match=1101 multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=2): 11 01
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x55ba50c3b8c0 match=1102 multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=2): 11 02
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x55ba50c3b8c0 match=0505 multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=2): 05 05
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x55ba50c3b8c0 match=0500 multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=2): 05 00
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x55ba50c3b8c0 match=1301 multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=2): 13 01
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x55ba50c3b8c0 match=1305 multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=2): 13 05
+nl80211: Register frame type=0xd0 (WLAN_FC_STYPE_ACTION) nl_handle=0x55ba50c3b8c0 match=7e506f9a1a multicast=0
+wlp8s0: nl80211: kernel reports: Match already configured
+nl80211: Register frame command failed (type=208): ret=-114 (Operation already in progress)
+nl80211: Register frame match - hexdump(len=5): 7e 50 6f 9a 1a
+nl80211: Failed to register Action frame processing - ignore for now
+rfkill: initial event: idx=1 type=1 op=0 soft=0 hard=0
+netlink: Operstate: ifindex=3 linkmode=1 (userspace-control), operstate=5 (IF_OPER_DORMANT)
+Add interface wlp8s0 to a new radio phy0
+nl80211: Regulatory information - country=00
+nl80211: 2402-2472 @ 40 MHz 20 mBm
+nl80211: 2457-2482 @ 20 MHz 20 mBm (no IR)
+nl80211: 2474-2494 @ 20 MHz 20 mBm (no OFDM) (no IR)
+nl80211: 5170-5250 @ 80 MHz 20 mBm (no IR)
+nl80211: 5250-5330 @ 80 MHz 20 mBm (DFS) (no IR)
+nl80211: 5490-5730 @ 160 MHz 20 mBm (DFS) (no IR)
+nl80211: 5735-5835 @ 80 MHz 20 mBm (no IR)
+nl80211: 57240-63720 @ 2160 MHz 0 mBm
+nl80211: Added 802.11b mode based on 802.11g information
+nl80211: Mode IEEE 802.11g: 2412 2417 2422 2427 2432 2437 2442 2447 2452 2457 2462 2467[NO_IR] 2472 2484[NO_IR]
+nl80211: Mode IEEE 802.11a: 5180 5200[NO_IR] 5220[NO_IR] 5240[NO_IR] 5260[NO_IR][RADAR] 5280[NO_IR][RADAR] 5300[NO_IR][RADAR] 5320[NO_IR][RADAR] 5500[NO_IR][RADAR] 5520[NO_IR][RADAR] 5540[NO_IR][RADAR] 5560[NO_IR][RADAR] 5580[NO_IR][RADAR] 5600[NO_IR][RADAR] 5620[NO_IR][RADAR] 5640[NO_IR][RADAR] 5660[NO_IR][RADAR] 5680[NO_IR][RADAR] 5700[NO_IR][RADAR] 5720[NO_IR][RADAR] 5745[NO_IR] 5765[NO_IR] 5785[NO_IR] 5805[NO_IR] 5825[NO_IR] 5845[DISABLED] 5865[DISABLED]
+nl80211: Mode IEEE 802.11b: 2412 2417 2422 2427 2432 2437 2442 2447 2452 2457 2462 2467[NO_IR] 2472 2484[NO_IR]
+wlp8s0: Own MAC address: 14:ac:60:29:42:fb
+wpa_driver_nl80211_set_key: ifindex=3 (wlp8s0) alg=0 addr=(nil) key_idx=0 set_tx=0 seq_len=0 key_len=0 key_flag=0x10 link_id=-1
+nl80211: DEL_KEY
+   broadcast key
+wpa_driver_nl80211_set_key: ifindex=3 (wlp8s0) alg=0 addr=(nil) key_idx=1 set_tx=0 seq_len=0 key_len=0 key_flag=0x10 link_id=-1
+nl80211: DEL_KEY
+   broadcast key
+wpa_driver_nl80211_set_key: ifindex=3 (wlp8s0) alg=0 addr=(nil) key_idx=2 set_tx=0 seq_len=0 key_len=0 key_flag=0x10 link_id=-1
+nl80211: DEL_KEY
+   broadcast key
+wpa_driver_nl80211_set_key: ifindex=3 (wlp8s0) alg=0 addr=(nil) key_idx=3 set_tx=0 seq_len=0 key_len=0 key_flag=0x10 link_id=-1
+nl80211: DEL_KEY
+   broadcast key
+wpa_driver_nl80211_set_key: ifindex=3 (wlp8s0) alg=0 addr=(nil) key_idx=4 set_tx=0 seq_len=0 key_len=0 key_flag=0x10 link_id=-1
+nl80211: DEL_KEY
+   broadcast key
+wpa_driver_nl80211_set_key: ifindex=3 (wlp8s0) alg=0 addr=(nil) key_idx=5 set_tx=0 seq_len=0 key_len=0 key_flag=0x10 link_id=-1
+nl80211: DEL_KEY
+   broadcast key
+wlp8s0: RSN: flushing PMKID list in the driver
+nl80211: Flush PMKIDs
+TDLS: TDLS operation supported by driver
+TDLS: Driver uses external link setup
+TDLS: Driver does not support TDLS channel switching
+wlp8s0: WPS: UUID based on MAC address: 4423f8a8-6fc7-5f25-95cc-0f486bb1ff5a
+ENGINE: Loading builtin engines
+ENGINE: Loading builtin engines
+EAPOL: SUPP_PAE entering state DISCONNECTED
+EAPOL: Supplicant port status: Unauthorized
+nl80211: Skip set_supp_port(unauthorized) while not associated
+EAPOL: KEY_RX entering state NO_KEY_RECEIVE
+EAPOL: SUPP_BE entering state INITIALIZE
+EAP: EAP entering state DISABLED
+wlp8s0: Added interface wlp8s0
+wlp8s0: State: DISCONNECTED -> DISCONNECTED
+nl80211: Set wlp8s0 operstate 0->0 (DORMANT)
+netlink: Operstate: ifindex=3 linkmode=-1 (no change), operstate=5 (IF_OPER_DORMANT)
+random: Got 20/20 bytes from /dev/random
+RTM_NEWLINK: ifi_index=3 ifname=wlp8s0 operstate=2 linkmode=1 ifi_family=0 ifi_flags=0x1003 ([UP])
+wlp8s0: Starting delayed sched scan
+wlp8s0: Use normal scan instead of sched_scan for initial scans (normal_scans=0)
+wlp8s0: Setting scan request: 0.000000 sec
+wlp8s0: State: DISCONNECTED -> SCANNING
+wlp8s0: Starting AP scan for wildcard SSID
+PQC_LOG: Added IE to Probe Request, Byte: 0x88
+wlp8s0: Add radio work 'scan'@0x55ba50d1d970
+wlp8s0: First radio work item in the queue - schedule start immediately
+wlp8s0: Starting radio work 'scan'@0x55ba50d1d970 after 0.000011 second wait
+wlp8s0: nl80211: scan request
+nl80211: Scan SSID 
+nl80211: Scan co-located APs on 6 GHz
+nl80211: Scan extra IEs - hexdump(len=20): 7f 0b 00 00 0a 02 01 00 40 40 00 00 20 dd 05 00 90 4c 01 88
+Scan requested (ret=0) - scan timeout 10 seconds
+nl80211: Event message available
+nl80211: Drv Event 33 (NL80211_CMD_TRIGGER_SCAN) received for wlp8s0
+wlp8s0: nl80211: Scan trigger
+wlp8s0: Event SCAN_STARTED (47) received
+wlp8s0: Own scan request started a scan in 0.000065 seconds
+EAPOL: disable timer tick
+RTM_NEWLINK: ifi_index=3 ifname=wlp8s0 wext ifi_family=0 ifi_flags=0x1003 ([UP])
+nl80211: Event message available
+nl80211: Drv Event 34 (NL80211_CMD_NEW_SCAN_RESULTS) received for wlp8s0
+wlp8s0: nl80211: New scan results available
+nl80211: Scan probed for SSID ''
+nl80211: Scan included frequencies: 2412 2417 2422 2427 2432 2437 2442 2447 2452 2457 2462 2467 2472 2484 5180 5200 5220 5240 5260 5280 5300 5320 5500 5520 5540 5560 5580 5600 5620 5640 5660 5680 5700 5720 5745 5765 5785 5805 5825
+wlp8s0: Event SCAN_RESULTS (3) received
+wlp8s0: Scan completed in 2.580450 seconds
+nl80211: Received scan results (9 BSSes)
+wlp8s0: BSS: Start scan result update 1
+IEEE 802.11 element parse ignored unknown element (id=7 elen=6)
+IEEE 802.11 element parse ignored unknown element (id=32 elen=1)
+IEEE 802.11 element parse ignored unknown element (id=35 elen=2)
+wlp8s0: MLD: No Multi-Link element
+wlp8s0: BSS: Add new id 0 BSSID e4:5f:01:9e:4c:0f SSID 'JackSparrow' freq 2462
+IEEE 802.11 element parse ignored unknown element (id=7 elen=6)
+IEEE 802.11 element parse ignored unknown element (id=32 elen=1)
+IEEE 802.11 element parse ignored unknown element (id=11 elen=5)
+IEEE 802.11 element parse ignored unknown element (id=149 elen=10)
+IEEE 802.11 element parse ignored unknown element (id=133 elen=30)
+wlp8s0: MLD: No Multi-Link element
+wlp8s0: BSS: Add new id 1 BSSID 34:f8:e7:c2:9c:c4 SSID 'TeleLAB' freq 2437
+IEEE 802.11 element parse ignored unknown element (id=7 elen=6)
+IEEE 802.11 element parse ignored unknown element (id=32 elen=1)
+IEEE 802.11 element parse ignored unknown element (id=11 elen=5)
+IEEE 802.11 element parse ignored unknown element (id=149 elen=10)
+IEEE 802.11 element parse ignored unknown element (id=133 elen=30)
+wlp8s0: MLD: No Multi-Link element
+wlp8s0: BSS: Add new id 2 BSSID 34:f8:e7:c2:9c:c2 SSID 'AGH-WPA' freq 2437
+IEEE 802.11 element parse ignored unknown element (id=7 elen=6)
+IEEE 802.11 element parse ignored unknown element (id=32 elen=1)
+IEEE 802.11 element parse ignored unknown element (id=11 elen=5)
+wlp8s0: MLD: No Multi-Link element
+wlp8s0: BSS: Add new id 3 BSSID 34:f8:e7:c2:9c:c7 SSID 'TeleAGH' freq 2437
+IEEE 802.11 element parse ignored unknown element (id=7 elen=6)
+IEEE 802.11 element parse ignored unknown element (id=32 elen=1)
+IEEE 802.11 element parse ignored unknown element (id=11 elen=5)
+IEEE 802.11 element parse ignored unknown element (id=149 elen=10)
+IEEE 802.11 element parse ignored unknown element (id=133 elen=30)
+wlp8s0: MLD: No Multi-Link element
+wlp8s0: BSS: Add new id 4 BSSID 34:f8:e7:c2:9c:c3 SSID 'eduroam' freq 2437
+IEEE 802.11 element parse ignored unknown element (id=7 elen=60)
+IEEE 802.11 element parse ignored unknown element (id=32 elen=1)
+IEEE 802.11 element parse ignored unknown element (id=35 elen=2)
+IEEE 802.11 element parse ignored unknown element (id=11 elen=5)
+IEEE 802.11 element parse ignored unknown element (id=200 elen=3)
+IEEE 802.11 element parse ignored unknown element (id=231 elen=16)
+wlp8s0: MLD: No Multi-Link element
+wlp8s0: BSS: Add new id 5 BSSID b4:0f:3b:e5:14:99 SSID '\x00\x00\x00\x00' freq 5500
+IEEE 802.11 element parse ignored unknown element (id=7 elen=6)
+IEEE 802.11 element parse ignored unknown element (id=32 elen=1)
+IEEE 802.11 element parse ignored unknown element (id=11 elen=5)
+IEEE 802.11 element parse ignored unknown element (id=149 elen=10)
+IEEE 802.11 element parse ignored unknown element (id=133 elen=30)
+wlp8s0: MLD: No Multi-Link element
+wlp8s0: BSS: Add new id 6 BSSID 34:f8:e7:c2:9c:c5 SSID 'AGH-Events' freq 2437
+IEEE 802.11 element parse ignored unknown element (id=7 elen=6)
+IEEE 802.11 element parse ignored unknown element (id=32 elen=1)
+IEEE 802.11 element parse ignored unknown element (id=11 elen=5)
+IEEE 802.11 element parse ignored unknown element (id=149 elen=10)
+IEEE 802.11 element parse ignored unknown element (id=133 elen=30)
+wlp8s0: MLD: No Multi-Link element
+wlp8s0: BSS: Add new id 7 BSSID 34:f8:e7:c2:9c:c1 SSID 'AGH-Guest' freq 2437
+wlp8s0: MLD: No Multi-Link element
+wlp8s0: BSS: Add new id 8 BSSID 1e:1c:b7:7a:e7:94 SSID 'SiecPQC' freq 2412
+PQC: Found PQC Key Fragment IE in wpa_bss_add (type=0x02), length=207
+PQC_DEBUG: Processing key fragment. Len: 207, FragIdx=0, TotalLen=800, DataLen=200
+PQC_LOG: Fragment 0/4 received (200 bytes at offset 0, total mask=0x1)
+PQC: Found PQC Key Fragment IE in wpa_bss_add (type=0x02), length=207
+PQC_DEBUG: Processing key fragment. Len: 207, FragIdx=1, TotalLen=800, DataLen=200
+PQC_LOG: Fragment 1/4 received (200 bytes at offset 200, total mask=0x3)
+PQC: Found PQC Key Fragment IE in wpa_bss_add (type=0x02), length=207
+PQC_DEBUG: Processing key fragment. Len: 207, FragIdx=2, TotalLen=800, DataLen=200
+PQC_LOG: Fragment 2/4 received (200 bytes at offset 400, total mask=0x7)
+PQC: Found PQC Key Fragment IE in wpa_bss_add (type=0x02), length=207
+PQC_DEBUG: Processing key fragment. Len: 207, FragIdx=3, TotalLen=800, DataLen=200
+PQC_LOG: Fragment 3/4 received (200 bytes at offset 600, total mask=0xf)
+PQC_LOG: received a public key and assembled it (800 bytes)
+BSS: last_scan_res_used=9/32
+wlp8s0: New scan results available (own=1 ext=0)
+wlp8s0: Radio work 'scan'@0x55ba50d1d970 done in 2.606332 seconds
+wlp8s0: radio_work_free('scan'@0x55ba50d1d970): num_active_works --> 0
+wlp8s0: Selecting BSS from priority group 0
+wlp8s0: 0: e4:5f:01:9e:4c:0f ssid='JackSparrow' wpa_ie_len=26 rsn_ie_len=0 caps=0x1511 level=-55 freq=2462 
+wlp8s0:    skip - SSID mismatch
+wlp8s0: 1: 34:f8:e7:c2:9c:c4 ssid='TeleLAB' wpa_ie_len=0 rsn_ie_len=30 caps=0x1431 level=-66 freq=2437 
+wlp8s0:    skip - SSID mismatch
+wlp8s0: 2: 34:f8:e7:c2:9c:c2 ssid='AGH-WPA' wpa_ie_len=0 rsn_ie_len=20 caps=0x1431 level=-66 freq=2437 
+wlp8s0:    skip - SSID mismatch
+wlp8s0: 3: 34:f8:e7:c2:9c:c7 ssid='TeleAGH' wpa_ie_len=0 rsn_ie_len=30 caps=0x1431 level=-67 freq=2437 
+wlp8s0:    skip - SSID mismatch
+wlp8s0: 4: 34:f8:e7:c2:9c:c3 ssid='eduroam' wpa_ie_len=0 rsn_ie_len=20 caps=0x1431 level=-68 freq=2437 
+wlp8s0:    skip - SSID mismatch
+wlp8s0: 5: b4:0f:3b:e5:14:99 ssid='\x00\x00\x00\x00' wpa_ie_len=22 rsn_ie_len=24 caps=0x111 level=-89 freq=5500 
+wlp8s0:    skip - SSID mismatch
+wlp8s0: 6: 34:f8:e7:c2:9c:c5 ssid='AGH-Events' wpa_ie_len=0 rsn_ie_len=0 caps=0x1421 level=-68 freq=2437 
+wlp8s0:    skip - SSID mismatch
+wlp8s0: 7: 34:f8:e7:c2:9c:c1 ssid='AGH-Guest' wpa_ie_len=0 rsn_ie_len=0 caps=0x1421 level=-68 freq=2437 
+wlp8s0:    skip - SSID mismatch
+wlp8s0: 8: 1e:1c:b7:7a:e7:94 ssid='SiecPQC' wpa_ie_len=0 rsn_ie_len=0 caps=0x401 level=-38 freq=2412 
+wlp8s0:    allow in non-WPA/WPA2
+wlp8s0:    selected BSS 1e:1c:b7:7a:e7:94 ssid='SiecPQC'
+wlp8s0: Considering connect request: reassociate: 0  selected: 1e:1c:b7:7a:e7:94  bssid: 00:00:00:00:00:00  pending: 00:00:00:00:00:00  wpa_state: SCANNING  ssid=0x55ba50c3be60  current_ssid=(nil)
+wlp8s0: Request association with 1e:1c:b7:7a:e7:94
+TDLS: TDLS is allowed in the target BSS
+TDLS: TDLS channel switch allowed in the target BSS
+PQC_LOG: Initializing State Machine (choice mask: 0x88)
+PQC_LOG: AP KEM Public Key imported from wpa_s buffer
+wlp8s0: PQC_LOG: State Machine Ready. Starting Authentication.
+wlp8s0: No ongoing scan/p2p-scan found to abort
+wlp8s0: Add radio work 'sme-connect'@0x55ba50d1d970
+wlp8s0: First radio work item in the queue - schedule start immediately
+wlp8s0: Starting radio work 'sme-connect'@0x55ba50d1d970 after 0.000035 second wait
+wlp8s0: WPA: clearing own WPA/RSN IE
+wlp8s0: RSN: clearing own RSNXE
+wlp8s0: Automatic auth_alg selection: 0x1
+wlp8s0: WPA: clearing AP WPA IE
+wlp8s0: WPA: clearing AP RSN IE
+wlp8s0: WPA: clearing AP RSNXE
+wlp8s0: RSN: Clearing AP RSNE Override element
+wlp8s0: RSN: Clearing AP RSNE Override 2 element
+wlp8s0: RSN: Clearing AP RSNXE Override element
+wlp8s0: WPA: clearing own WPA/RSN IE
+wlp8s0: RSN: clearing own RSNXE
+RRM: Determining whether RRM can be used - device support: 0x30
+RRM: No RRM in network
+Cannot determine channel width
+Added supported operating classes IE - hexdump(len=25): 3b 17 51 51 52 53 54 73 74 75 76 77 78 79 7a 7b 7c 7d 7e 7f 80 81 00 82 80
+EAPOL: External notification - EAP success=0
+EAPOL: External notification - EAP fail=0
+EAPOL: External notification - portControl=ForceAuthorized
+wlp8s0: Cancelling scan request
+wlp8s0: SME: Trying to authenticate with 1e:1c:b7:7a:e7:94 (SSID='SiecPQC' freq=2412 MHz)
+EAPOL: External notification - portValid=0
+wlp8s0: State: SCANNING -> AUTHENTICATING
+nl80211: Data frame filter flags=0x4
+wlp8s0: Determining shared radio frequencies (max len 1)
+wlp8s0: Shared frequencies (len=0): completed iteration
+nl80211: Authenticate (ifindex=3)
+  * bssid=1e:1c:b7:7a:e7:94
+  * freq=2412
+  * SSID=SiecPQC
+  * IEs - hexdump(len=0): [NULL]
+  * Auth Type 0
+nl80211: Authentication request send successfully
+nl80211: Event message available
+nl80211: Drv Event 19 (NL80211_CMD_NEW_STATION) received for wlp8s0
+nl80211: New station 1e:1c:b7:7a:e7:94
+nl80211: Event message available
+nl80211: Drv Event 37 (NL80211_CMD_AUTHENTICATE) received for wlp8s0
+nl80211: MLME event 37 (NL80211_CMD_AUTHENTICATE) on wlp8s0(14:ac:60:29:42:fb) A1=14:ac:60:29:42:fb A2=1e:1c:b7:7a:e7:94 on link_id=-1
+nl80211: MLME event frame - hexdump(len=30): b0 00 54 00 14 ac 60 29 42 fb 1e 1c b7 7a e7 94 1e 1c b7 7a e7 94 00 00 00 00 02 00 00 00
+nl80211: Authenticate event
+wlp8s0: Event AUTH (10) received
+PQC_LOG: Received EVENT_AUTH, stopping association for now. Waiting for PAKE phase to end.
+PQC_LOG: Extending SME auth timer to 15 seconds
+wlp8s0: State: AUTHENTICATING -> AUTHENTICATING
+PQC_LOG: State Machine processing Auth Response, preparing PAKE-1 data
+PQC_LOG: KEM Encapsulation successful, K_aes derived
+PQC_DBG STA: K_aes[0:8] - hexdump(len=8): 1b 85 d3 76 e3 7a 74 bb
+PQC_LOG: Rozpoczecie budowy ramki PAKE-1
+PQC_LOG: Sending Public Action frame (PAKE-1) to: 1e:1c:b7:7a:e7:94
+nl80211: Send Action frame (ifindex=3, freq=2412 MHz wait=0 ms no_cck=0 offchanok=1 dst=1e:1c:b7:7a:e7:94 src=14:ac:60:29:42:fb bssid=1e:1c:b7:7a:e7:94, link_id=-1)
+nl80211: CMD_FRAME freq=2412 wait=0 no_cck=0 no_ack=0 offchanok=1
+CMD_FRAME - hexdump(len=819): d0 00 00 00 1e 1c b7 7a e7 94 14 ac 60 29 42 fb 1e 1c b7 7a e7 94 00 00 04 09 00 90 4c 10 01 03 00 9d 84 1f 92 c0 6b 24 ee f6 05 d4 e9 db 4e 5f 7d eb bc 8b 1d e2 eb a3 14 ad 30 fd 79 3a 7d b0 93 e0 e6 c9 a8 3f be 53 fc ee 3b 3f e7 e2 95 be 40 90 c5 61 85 be 69 35 48 dc 9a 1e 1c 51 21 a6 05 85 ff 84 37 ac 7e 76 38 47 1f 9c 80 a1 89 a7 46 06 0d 3e f9 80 12 b7 85 8d 5f 4e c5 50 72 75 49 8b f5 3b 44 22 2d d6 95 91 4d 1e d3 b0 4e b0 53 07 f7 b6 43 09 01 a3 26 76 c5 e9 a0 93 3e 9d a2 d2 5a c6 95 eb 76 02 b0 59 3f 25 1d a5 35 7d 24 bb 03 a4 7c b6 76 c6 71 0a a5 1f 3b de 6f 18 28 84 2d d0 14 e7 90 ad 0d 79 1d 64 b6 dd 31 88 bf 6a 16 e2 f8 e3 bb cb 17 58 a9 7c 6a 96 67 54 f8 5b 7c 26 da aa c3 2f 2b 22 8e 8a e4 59 09 7a ae 74 a3 2a b1 da 09 39 1e bf 3a 21 72 fd 1f 3b 01 10 e2 9c d5 0a 5c f9 aa 10 25 8d 3a 16 17 ec 0e cb d1 b7 11 07 c4 0c 1e 56 82 73 5a b3 a7 e5 0a 30 44 03 95 0f 40 22 c6 60 71 31 55 38 52 85 cd 30 00 79 7e 60 42 11 8d 7b 62 50 10 65 a8 2d 53 8f 44 bb 8c 78 a5 62 62 aa 90 d7 d6 de 73 22 05 90 e0 9c 4f 43 ad ae f1 25 81 e7 59 d8 6c 5c 52 36 01 01 9c c4 3c 15 f4 90 e9 4f 91 f8 96 f2 d1 42 bc a2 e4 19 4e 0f 28 f8 15 71 2f 80 4b cd 21 ff 70 3e 2e 82 62 5a 77 61 1c a4 41 65 8a 7a 11 a6 45 59 be d9 11 84 bc 78 c1 43 fb 6e dd 6d e2 42 38 44 10 58 42 35 5e 93 c5 e3 43 a9 4a a0 ed 51 d5 f1 a2 c4 19 86 94 53 75 98 db 46 de c7 94 49 d7 11 b0 f7 8c 68 a1 ee 8f ea f5 88 18 7c eb da 53 56 8e 5c a6 e8 80 4a 13 fa 34 25 db 4d 02 79 13 54 b1 fa 18 8b c7 a7 4c f9 81 93 48 fb c0 43 64 e2 92 e2 dd 45 6b 9f 50 39 29 41 d6 d0 e2 cc e1 d6 27 2f 31 ef 59 04 c8 4f d6 fd 94 f9 0e 77 44 ec d1 bb 91 84 12 f1 8a 5f b7 ac 0d 8e 2b e2 a1 14 b8 3b c8 13 86 fa 29 55 fa 43 9c 62 7d 33 ad 5e 94 70 77 0f 6c ec 45 e1 cc 48 a6 53 58 e0 cb 4d aa 29 d9 3a 77 54 b2 69 db 38 be b5 00 c9 d0 64 41 51 46 58 1e b1 a4 e4 09 43 a4 bf e4 b9 74 e5 23 d9 f1 7f 15 3c cd 48 ad 62 4d 9d ee 7e ac b3 58 66 5f 30 3d 69 d3 d3 af df 05 7a e5 a5 c3 6a 0f 1b 17 e8 8a 49 2e 13 a5 3f 27 51 ee b5 f7 7a da 06 c9 af ab 06 20 d2 08 e9 77 14 b8 d6 ca ca ae 71 e5 cf 01 a7 c0 d5 2d 6d e8 c1 e5 3e b0 3c 6a d2 fe 86 69 66 60 3d 24 a2 8c ee a5 a7 91 70 94 93 23 2e 49 e7 96 8b 1f 3a a5 2d e3 c5 08 79 ad f0 81 1a 43 a6 29 70 eb 95 0a f8 0c 1a 07 95 7e af 54 13 29 ef 00 3d 21 9c d4 64 94 0a 14 78 ea 60 2b 0b 71 6c ea aa 79 b7 9d 18 06 a7 d3 36 05 fa 96 3c 7e d8 25 47 d9 fa 9a 45 53 4f 86 11 3e 34 2b 40 73 2a 2a f7 e1 54 65 00 6e 00 10 17 00 37 74 95 f0 b0 cd 36 0f 9b 2e ee 96 5d 1f
+nl80211: Frame TX command accepted; cookie 0x1e
+nl80211: Event message available
+nl80211: Drv Event 60 (NL80211_CMD_FRAME_TX_STATUS) received for wlp8s0
+nl80211: MLME event 60 (NL80211_CMD_FRAME_TX_STATUS) on wlp8s0(14:ac:60:29:42:fb) A1=1e:1c:b7:7a:e7:94 A2=14:ac:60:29:42:fb on link_id=-1
+nl80211: MLME event frame - hexdump(len=819): d0 00 00 00 1e 1c b7 7a e7 94 14 ac 60 29 42 fb 1e 1c b7 7a e7 94 00 00 04 09 00 90 4c 10 01 03 00 9d 84 1f 92 c0 6b 24 ee f6 05 d4 e9 db 4e 5f 7d eb bc 8b 1d e2 eb a3 14 ad 30 fd 79 3a 7d b0 93 e0 e6 c9 a8 3f be 53 fc ee 3b 3f e7 e2 95 be 40 90 c5 61 85 be 69 35 48 dc 9a 1e 1c 51 21 a6 05 85 ff 84 37 ac 7e 76 38 47 1f 9c 80 a1 89 a7 46 06 0d 3e f9 80 12 b7 85 8d 5f 4e c5 50 72 75 49 8b f5 3b 44 22 2d d6 95 91 4d 1e d3 b0 4e b0 53 07 f7 b6 43 09 01 a3 26 76 c5 e9 a0 93 3e 9d a2 d2 5a c6 95 eb 76 02 b0 59 3f 25 1d a5 35 7d 24 bb 03 a4 7c b6 76 c6 71 0a a5 1f 3b de 6f 18 28 84 2d d0 14 e7 90 ad 0d 79 1d 64 b6 dd 31 88 bf 6a 16 e2 f8 e3 bb cb 17 58 a9 7c 6a 96 67 54 f8 5b 7c 26 da aa c3 2f 2b 22 8e 8a e4 59 09 7a ae 74 a3 2a b1 da 09 39 1e bf 3a 21 72 fd 1f 3b 01 10 e2 9c d5 0a 5c f9 aa 10 25 8d 3a 16 17 ec 0e cb d1 b7 11 07 c4 0c 1e 56 82 73 5a b3 a7 e5 0a 30 44 03 95 0f 40 22 c6 60 71 31 55 38 52 85 cd 30 00 79 7e 60 42 11 8d 7b 62 50 10 65 a8 2d 53 8f 44 bb 8c 78 a5 62 62 aa 90 d7 d6 de 73 22 05 90 e0 9c 4f 43 ad ae f1 25 81 e7 59 d8 6c 5c 52 36 01 01 9c c4 3c 15 f4 90 e9 4f 91 f8 96 f2 d1 42 bc a2 e4 19 4e 0f 28 f8 15 71 2f 80 4b cd 21 ff 70 3e 2e 82 62 5a 77 61 1c a4 41 65 8a 7a 11 a6 45 59 be d9 11 84 bc 78 c1 43 fb 6e dd 6d e2 42 38 44 10 58 42 35 5e 93 c5 e3 43 a9 4a a0 ed 51 d5 f1 a2 c4 19 86 94 53 75 98 db 46 de c7 94 49 d7 11 b0 f7 8c 68 a1 ee 8f ea f5 88 18 7c eb da 53 56 8e 5c a6 e8 80 4a 13 fa 34 25 db 4d 02 79 13 54 b1 fa 18 8b c7 a7 4c f9 81 93 48 fb c0 43 64 e2 92 e2 dd 45 6b 9f 50 39 29 41 d6 d0 e2 cc e1 d6 27 2f 31 ef 59 04 c8 4f d6 fd 94 f9 0e 77 44 ec d1 bb 91 84 12 f1 8a 5f b7 ac 0d 8e 2b e2 a1 14 b8 3b c8 13 86 fa 29 55 fa 43 9c 62 7d 33 ad 5e 94 70 77 0f 6c ec 45 e1 cc 48 a6 53 58 e0 cb 4d aa 29 d9 3a 77 54 b2 69 db 38 be b5 00 c9 d0 64 41 51 46 58 1e b1 a4 e4 09 43 a4 bf e4 b9 74 e5 23 d9 f1 7f 15 3c cd 48 ad 62 4d 9d ee 7e ac b3 58 66 5f 30 3d 69 d3 d3 af df 05 7a e5 a5 c3 6a 0f 1b 17 e8 8a 49 2e 13 a5 3f 27 51 ee b5 f7 7a da 06 c9 af ab 06 20 d2 08 e9 77 14 b8 d6 ca ca ae 71 e5 cf 01 a7 c0 d5 2d 6d e8 c1 e5 3e b0 3c 6a d2 fe 86 69 66 60 3d 24 a2 8c ee a5 a7 91 70 94 93 23 2e 49 e7 96 8b 1f 3a a5 2d e3 c5 08 79 ad f0 81 1a 43 a6 29 70 eb 95 0a f8 0c 1a 07 95 7e af 54 13 29 ef 00 3d 21 9c d4 64 94 0a 14 78 ea 60 2b 0b 71 6c ea aa 79 b7 9d 18 06 a7 d3 36 05 fa 96 3c 7e d8 25 47 d9 fa 9a 45 53 4f 86 11 3e 34 2b 40 73 2a 2a f7 e1 54 65 00 6e 00 10 17 00 37 74 95 f0 b0 cd 36 0f 9b 2e ee 96 5d 1f
+nl80211: Frame TX status event A1=1e:1c:b7:7a:e7:94 stype=13 cookie=0x1e ack=1
+nl80211: Frame TX status: cookie=0x1e (match) (ack=1)
+wlp8s0: Event TX_STATUS (16) received
+wlp8s0: EVENT_TX_STATUS dst=1e:1c:b7:7a:e7:94 type=0 stype=13
+Off-channel: Ignore Action TX status - no pending operation
+nl80211: Event message available
+nl80211: Drv Event 67 (NL80211_CMD_FRAME_WAIT_CANCEL) received for wlp8s0
+nl80211: TX frame wait expired for cookie 0x1e (match-saved)
+wlp8s0: Event TX_WAIT_EXPIRE (62) received
+nl80211: Event message available
+nl80211: BSS Event 59 (NL80211_CMD_FRAME) received for wlp8s0
+nl80211: MLME event 59 (NL80211_CMD_FRAME) on wlp8s0(14:ac:60:29:42:fb) A1=ff:ff:ff:ff:ff:ff A2=1e:1c:b7:7a:e7:94 on link_id=-1
+nl80211: MLME event frame - hexdump(len=386): d0 00 00 00 ff ff ff ff ff ff 1e 1c b7 7a e7 94 ff ff ff ff ff ff 60 00 04 09 00 90 4c 10 02 00 05 34 01 5e 00 10 c1 d2 fa 06 bf ae 7e be 94 b9 cc 40 d7 23 a7 5c 05 20 61 2b 9f 1f 5f c4 ed d2 a1 24 40 56 5a f5 fb eb 1e c5 0c 72 cd 2d 03 71 98 2d 91 4b 8c fa dc 84 94 7e c4 03 e1 6c a0 1a 17 5a 65 ed 79 ab 92 c9 82 04 67 d6 3e f4 3b 87 fa de 2c 08 93 46 a4 3d 87 79 37 4a 75 60 7e 74 9d 34 44 49 d1 cf 25 18 f5 69 a2 43 fb e1 0c be 8f 0c cf 1d 3b eb 8f bc dd c1 73 07 85 9a d7 c9 b2 f6 90 3c b9 73 f8 0a 0c e9 58 aa 4d ad e5 fd 4d 38 1d 02 3f 3d 6a d0 69 9c ad b8 00 01 18 33 54 6b a2 72 90 8f 0b 5d 5e b5 58 b3 db bf 13 0f 6b 80 be b4 b9 2c de 8e c2 aa 2a 19 b6 d2 4d 08 4d 20 94 72 0d 58 99 fa fc b7 7f 9d 92 a5 e9 55 36 07 59 18 f7 48 70 42 c5 5f be 08 9a fd 48 a0 97 cf 63 ed 70 85 58 a6 45 28 aa 31 a3 98 53 b2 2b 7e 62 51 c5 5c 31 89 b1 0b d8 3d 34 81 1f 9d 18 ae 62 8f 08 af 47 82 6c 47 79 05 ca 85 7d 28 d0 24 80 63 12 50 c5 d5 96 a0 26 8a c5 f0 ed da 8d 36 d2 2a f2 f5 df ec 73 d8 c9 4e 9e bf 97 56 3e 41 31 e2 98 4d 98 41 6d 2d bf a4 cb b7 c1 3c d8 2b f7 74 bc 92 80 17 2c 88 f7 ef ac fb bf fd bd 38 65 2e 18 f6 0b ec ed 5e 30 9e f4 1f f8 46 c1 32
+nl80211: Frame event
+nl80211: RX frame da=ff:ff:ff:ff:ff:ff sa=1e:1c:b7:7a:e7:94 bssid=ff:ff:ff:ff:ff:ff freq=2412 ssi_signal=-39 fc=0xd0 seq_ctrl=0x60 stype=13 (WLAN_FC_STYPE_ACTION) len=386
+wlp8s0: Event RX_MGMT (18) received
+PQC_LOG: Received PAKE-2 frame (Vendor Action), len=355
+PQC_LOG: State Machine processing PAKE-2
+PQC_LOG: Reassembled 350/1332 bytes
+wlp8s0: Received Action frame: SA=1e:1c:b7:7a:e7:94 Category=4 DataLen=361 freq=2412 MHz
+nl80211: Event message available
+nl80211: BSS Event 59 (NL80211_CMD_FRAME) received for wlp8s0
+nl80211: MLME event 59 (NL80211_CMD_FRAME) on wlp8s0(14:ac:60:29:42:fb) A1=ff:ff:ff:ff:ff:ff A2=1e:1c:b7:7a:e7:94 on link_id=-1
+nl80211: MLME event frame - hexdump(len=386): d0 00 00 00 ff ff ff ff ff ff 1e 1c b7 7a e7 94 ff ff ff ff ff ff 70 00 04 09 00 90 4c 10 02 01 05 34 01 5e be ee df 98 7e 49 b8 1f d2 bb 80 be 7d 76 46 0a 32 5d cf f3 a6 b3 9d df d6 58 a1 7d 6a 0c 38 b1 a9 de 9e 65 95 30 55 47 cb 83 9e f3 93 2d 87 c1 26 56 44 13 99 40 d9 4c cd 80 e0 9f cd b4 66 0b c3 19 90 00 fa 67 0a 91 04 48 35 b2 52 51 45 54 6e 7c ba db 24 11 45 7d 28 dd e9 1d e8 64 17 01 9b d2 0c 87 9d e0 61 a4 d9 62 c8 ef 7f 76 17 aa 60 14 95 0a 0c d4 55 94 91 fa d1 11 56 21 e0 65 01 71 8c 1c a8 39 6f a2 d1 70 e6 c6 e3 30 0e 45 c6 39 56 e7 03 ec 45 57 9c 3a 7c ef af de b8 70 eb de 2f 86 20 c9 f8 bb 59 91 be b1 c3 22 73 6a 76 c2 1f b4 c6 56 b0 1a c3 3d ce aa de a6 0a f8 b8 b0 fa 48 b4 a4 22 76 9d de 61 84 03 0d a2 83 e2 b0 3d e3 91 28 bf 4d ae e0 77 16 71 34 ad f9 fa 95 2f 85 31 a0 49 b0 d1 8b 56 e2 38 10 f8 7c c5 96 42 e5 e6 96 dc 9f 3e f9 74 4a 84 86 48 c3 86 f8 1a 08 c9 2f b1 e2 a3 08 42 92 81 12 36 09 cd 49 b6 b8 00 58 9a 2c fa 34 29 3d ce 4e 86 3b 8f 9e 43 64 39 9b d4 52 83 39 8e eb 9a ab 66 91 cb 94 f1 e8 ff e7 64 38 8b ea 4d 2e be be 38 fe 28 c5 cb ea e2 44 2c 34 c9 30 75 7b 56 05 90 7c 97 1c 30 f3 1c 85 85 2a 48 6b af 40 36 35
+nl80211: Frame event
+nl80211: RX frame da=ff:ff:ff:ff:ff:ff sa=1e:1c:b7:7a:e7:94 bssid=ff:ff:ff:ff:ff:ff freq=2412 ssi_signal=-39 fc=0xd0 seq_ctrl=0x70 stype=13 (WLAN_FC_STYPE_ACTION) len=386
+wlp8s0: Event RX_MGMT (18) received
+PQC_LOG: Received PAKE-2 frame (Vendor Action), len=355
+PQC_LOG: State Machine processing PAKE-2
+PQC_LOG: Reassembled 700/1332 bytes
+wlp8s0: Received Action frame: SA=1e:1c:b7:7a:e7:94 Category=4 DataLen=361 freq=2412 MHz
+nl80211: Event message available
+nl80211: BSS Event 59 (NL80211_CMD_FRAME) received for wlp8s0
+nl80211: MLME event 59 (NL80211_CMD_FRAME) on wlp8s0(14:ac:60:29:42:fb) A1=ff:ff:ff:ff:ff:ff A2=1e:1c:b7:7a:e7:94 on link_id=-1
+nl80211: MLME event frame - hexdump(len=386): d0 00 00 00 ff ff ff ff ff ff 1e 1c b7 7a e7 94 ff ff ff ff ff ff 80 00 04 09 00 90 4c 10 02 02 05 34 01 5e d3 7b f3 0e c2 2f dd 17 4f 42 65 62 2e 9b 8f 93 7d d3 44 2d 47 31 5d 41 41 fc 8c 7e f9 28 05 a0 1a cd 26 21 f6 56 73 b2 7a 9a 19 b2 77 e9 25 ca 2b 37 3d d4 34 3c 94 04 f8 4f 5b a1 3e aa 97 ce 29 b6 5f ea df 26 0d 53 65 a1 08 35 3b 51 c1 3e 3e 9f d6 fc 6d d8 07 d2 c4 11 3e c9 73 a4 1e 65 bf d4 46 66 ce 07 bc 98 e9 63 5d fa 93 29 41 f6 3b 8a 6c d9 52 22 10 21 19 de 53 f7 ab 31 94 39 4b 13 e5 d7 cb f3 9a 4f a0 2f 58 a0 21 8b 5f 4a 4b fb b6 d0 ee b4 9e 88 39 d8 0f 09 f8 a6 69 d8 db 92 c5 04 21 ff e1 40 3c d1 59 e7 96 08 ba ea 05 7b e9 6c 95 3c d7 8d 4f d2 f5 f2 ab f1 f9 00 25 65 64 ef f9 eb 5f 31 eb 65 fa b4 f6 44 af ed 4f ed b4 7a 1c f9 09 2f 31 ee 78 43 6f 3c 1c 9b a6 39 56 1a 1f 3b 56 64 3f 3b ec 50 7c 0e de b2 18 b5 f5 9f 36 95 45 91 d0 df 17 42 c8 88 d5 00 58 2b db 75 dd 74 86 51 31 5a 40 f5 73 dc c1 a1 fe d1 d6 39 f6 24 22 cc d7 9b 5e e5 20 81 f2 97 f2 ca 98 71 f1 e0 85 8b 9d f0 a9 38 07 4b bc d9 35 96 a2 49 9b 32 41 76 fa 4d eb da 0b 0d 4f c9 cf 67 c2 8b a2 45 87 0e f8 fa 07 27 cc 4a 38 f2 41 3f 2e e0 29 10 b4 75 cd 3f 99 c9 69 31
+nl80211: Frame event
+nl80211: RX frame da=ff:ff:ff:ff:ff:ff sa=1e:1c:b7:7a:e7:94 bssid=ff:ff:ff:ff:ff:ff freq=2412 ssi_signal=-39 fc=0xd0 seq_ctrl=0x80 stype=13 (WLAN_FC_STYPE_ACTION) len=386
+wlp8s0: Event RX_MGMT (18) received
+PQC_LOG: Received PAKE-2 frame (Vendor Action), len=355
+PQC_LOG: State Machine processing PAKE-2
+PQC_LOG: Reassembled 1050/1332 bytes
+wlp8s0: Received Action frame: SA=1e:1c:b7:7a:e7:94 Category=4 DataLen=361 freq=2412 MHz
+nl80211: Event message available
+nl80211: BSS Event 59 (NL80211_CMD_FRAME) received for wlp8s0
+nl80211: MLME event 59 (NL80211_CMD_FRAME) on wlp8s0(14:ac:60:29:42:fb) A1=ff:ff:ff:ff:ff:ff A2=1e:1c:b7:7a:e7:94 on link_id=-1
+nl80211: MLME event frame - hexdump(len=318): d0 00 00 00 ff ff ff ff ff ff 1e 1c b7 7a e7 94 ff ff ff ff ff ff 90 00 04 09 00 90 4c 10 02 03 05 34 01 1a 35 75 93 ce 8f 17 37 b5 06 77 4d 25 1f b2 2e 67 16 da 5a f4 d3 d7 50 da 4b 16 76 e5 36 12 d9 e5 4a 8e 74 9d 31 3e 57 1e a9 db a4 9b a0 bf a9 dc 75 80 94 db 40 85 21 c5 be 5b 23 64 c0 71 3f 6e ce 49 78 95 cf 66 aa fd 15 6e ee fe 7f 73 de d9 54 0f 56 a0 40 69 d1 21 19 68 77 56 9a 71 27 ac 91 bb 24 49 1b 46 1c 51 b7 23 5c ba 99 1b 64 f9 c0 3a 02 16 44 d0 6e fc ca ed 57 7a d3 2b 61 90 19 4b e4 ea f6 6c 9e 5c ad 76 fe 08 bc ea 02 a5 80 b8 a1 8f 06 6b e2 79 3f 15 3d ca a8 c3 86 d9 60 6d 89 42 a8 9b 6d 45 12 e4 c2 4f 87 1f b9 6d 5c 5f df e5 6e 73 94 27 e2 f9 ff 50 c9 8f 1e 1d 16 44 6d 3f fd 5a 03 a9 52 99 45 32 b7 75 9e 7c a2 65 7e 0c ce 59 17 54 d7 8a f7 6c 13 f5 1d d4 65 3e 43 4f 47 8e f1 80 94 21 17 fb d2 28 9a c8 fb b7 a0 21 a9 9f 84 cf 92 66 0c d7 ef 1b e9 56 c2 ce 60 f8 90 3f d5 95 bc 56 59 23 f3 60 c9 bd 7a fc 13 ed 28 7a 3e 06 20 27
+nl80211: Frame event
+nl80211: RX frame da=ff:ff:ff:ff:ff:ff sa=1e:1c:b7:7a:e7:94 bssid=ff:ff:ff:ff:ff:ff freq=2412 ssi_signal=-39 fc=0xd0 seq_ctrl=0x90 stype=13 (WLAN_FC_STYPE_ACTION) len=318
+wlp8s0: Event RX_MGMT (18) received
+PQC_LOG: Received PAKE-2 frame (Vendor Action), len=287
+PQC_LOG: State Machine processing PAKE-2
+PQC_LOG: Reassembled 1332/1332 bytes
+PQC_LOG: PAKE-2 fully reassembled. Proceeding with decapsulation.
+PQC_LOG: Actual reassembled payload length: 1332 bytes (expected 1332)
+PQC_LOG: Saved AP ML-DSA public key (len=1312)
+PQC_DBG STA: K_aes in rx_pake2[0:8] - hexdump(len=8): 1b 85 d3 76 e3 7a 74 bb
+PQC_DBG STA: enc_sid received - hexdump(len=16): c1 d2 fa 06 bf ae 7e be 94 b9 cc 40 d7 23 a7 5c
+PQC_DBG STA: sid decrypted - hexdump(len=16): e5 26 80 2b d4 d6 bc 3a 37 9b a1 6a cd fe b4 41
+PQC_LOG: PAKE-3 data ready (s_len=32, T_len=800)
+PQC: Sending PAKE-3 Action Frame to 00:00:00:00:00:00 on freq 2412
+nl80211: Send Action frame (ifindex=3, freq=2412 MHz wait=0 ms no_cck=0 offchanok=1 dst=1e:1c:b7:7a:e7:94 src=14:ac:60:29:42:fb bssid=1e:1c:b7:7a:e7:94, link_id=-1)
+nl80211: CMD_FRAME freq=2412 wait=0 no_cck=0 no_ack=0 offchanok=1
+CMD_FRAME - hexdump(len=863): d0 00 00 00 1e 1c b7 7a e7 94 14 ac 60 29 42 fb 1e 1c b7 7a e7 94 00 00 04 09 00 90 4c 10 03 15 92 56 f9 97 aa 02 d3 a6 81 82 8a 01 f9 d3 c2 ab 53 1e b0 75 a2 aa 61 58 1d ad 5a 6f 71 da c9 25 eb 9b 7e cf 0c e8 63 a8 1c 51 63 29 10 5b 9a 0b 43 6b 9d 0f 8b 78 a5 3d a7 79 4b 6e 9c 0c 83 9f 59 df 6d 76 5a e4 02 6f e9 ad e7 01 6c 61 db 71 0b ba 0d 08 e6 64 52 88 41 07 b5 af 0e 4a 7b df ff 4c 38 b5 e2 b0 d7 ee d2 52 55 2a 91 4b 8e 93 c7 9f 4d f7 bb 19 d2 49 5f 32 01 94 07 18 3a 73 1e ab ca 5f 17 19 0c 45 e3 62 8a ca c0 29 be b4 d5 a6 c5 32 c7 95 f7 88 75 f0 ad 89 0a 4f d1 57 f1 f1 62 66 6e a4 02 23 f8 d0 2e 7c a0 34 e6 b3 fb 56 cf a6 ec ab 4f e4 92 78 9a d4 7d 92 71 1c c0 3d 8e 7a c6 54 a9 63 12 0d 08 92 79 15 0e 02 eb 6b 97 52 d3 05 0f 5f 9c ff 71 a3 98 3a 41 6e 62 7f 17 a1 70 39 93 31 68 92 07 29 ce 5a cc 2c 03 a1 51 2c 15 6b 9d 05 81 a5 a6 d3 b5 3a 33 f0 9b 6f 38 20 7d 5f 34 66 31 a8 53 7e 68 4f 31 84 8d 28 91 f8 d9 39 e6 6f 6a 81 26 7b 43 0f 0f e5 67 be 1f 25 be 11 55 e0 b6 b1 56 86 19 1c 07 b4 4e 18 b6 28 ef 1e 3d 17 de ee 39 ef ca 47 43 b4 2e f3 1f f0 3d 61 1a 6d 64 22 5a c2 b3 50 2e 2b 17 cf 80 30 f0 db 38 d4 01 49 c6 23 fb 5e 97 84 29 c9 51 8a 48 d8 7b e3 13 ac 5f 11 ee 91 57 e1 4a c8 6a de f5 0d 74 7e 78 28 32 93 dd 85 d3 c4 5c 6f c2 c8 31 c0 fc 18 a6 82 83 62 ae 8c a5 e4 4d 1e dd 9d 3d 0d 74 84 6c e6 66 c3 60 c7 1e 8a d3 dc 29 8e 32 24 e4 3e 5b a4 3a 17 fd 8a ff 34 f1 d1 a5 e7 0a 8a 6f a0 2e 04 60 2f b1 c6 f9 a8 00 c7 96 5e 52 1f bc a2 08 2c 5d 92 fb 42 56 11 d2 66 6d c5 04 90 b2 7a 2d dd 15 0a ab 54 8a 5b 75 7c d7 59 6c f2 eb 4b 8f 4a 55 99 61 14 b1 34 e9 72 ae 89 1b a3 d3 f9 9b b9 a9 53 9d e9 c4 7f 55 f7 a4 1f 63 c5 34 1b 4c 53 5b c4 76 78 c9 ca 6e b5 51 42 7d d2 1d 7a 7a 80 ac e9 f5 4e 39 70 1d dd 83 eb 2f e9 75 57 ce 8a 89 1b d8 00 71 84 d3 c7 17 69 c1 dc 16 3f 8e ae 7f 47 3b 4d ce e1 16 dd c2 3d 18 d9 91 11 f7 28 d7 b9 6a 2a 91 c9 fa 5a 82 03 6b 0c cc 9a b5 23 da e7 51 6e c0 e7 52 3c dc 53 27 13 00 96 6c d2 12 f9 bb 22 bd 7d 07 b6 05 c9 39 d4 b9 bd e5 ec 03 83 ac 49 ed ec b1 32 a9 87 2e 42 4c 12 29 81 cb 3f 6c 9a 4d 9b 42 c3 2d 4f fe 29 62 6e 05 09 f2 50 0e c8 5f c5 48 7b 36 79 75 5e d9 f7 3d 3b e4 a8 cc dd 85 bd ca 2b 42 3b 45 52 01 e5 10 de 77 f2 38 74 01 ad fc e1 3f 21 82 2b 71 a2 3a 2f 41 e7 20 d4 80 8c 0c 77 33 33 aa 02 2e 2a 8a 8f ee db 22 e0 e1 85 90 e7 ba c5 17 1f a8 e7 4c 05 27 1e cc ed e3 62 cc 04 b0 f1 82 e4 47 23 f1 97 34 25 31 09 c1 86 c5 2f 30 c2 51 f1 b4 bd 70 b3 1b 74 18 d4 ff 11 07 b9 92 59 43 68 8c 1a ae 4b c0 32 63 07 ea 73 39 a9 e2 ef 30 86 ae 1c 25 ef 60 ef 18 5f 53 2f 19 c5 49 f8 f8 56 4b 05 b4 fa 8a 7b d7 c5 9a
+nl80211: Frame TX command accepted; cookie 0x1f
+wlp8s0: Received Action frame: SA=1e:1c:b7:7a:e7:94 Category=4 DataLen=293 freq=2412 MHz
+nl80211: Event message available
+nl80211: Drv Event 60 (NL80211_CMD_FRAME_TX_STATUS) received for wlp8s0
+nl80211: MLME event 60 (NL80211_CMD_FRAME_TX_STATUS) on wlp8s0(14:ac:60:29:42:fb) A1=1e:1c:b7:7a:e7:94 A2=14:ac:60:29:42:fb on link_id=-1
+nl80211: MLME event frame - hexdump(len=863): d0 00 00 00 1e 1c b7 7a e7 94 14 ac 60 29 42 fb 1e 1c b7 7a e7 94 00 00 04 09 00 90 4c 10 03 15 92 56 f9 97 aa 02 d3 a6 81 82 8a 01 f9 d3 c2 ab 53 1e b0 75 a2 aa 61 58 1d ad 5a 6f 71 da c9 25 eb 9b 7e cf 0c e8 63 a8 1c 51 63 29 10 5b 9a 0b 43 6b 9d 0f 8b 78 a5 3d a7 79 4b 6e 9c 0c 83 9f 59 df 6d 76 5a e4 02 6f e9 ad e7 01 6c 61 db 71 0b ba 0d 08 e6 64 52 88 41 07 b5 af 0e 4a 7b df ff 4c 38 b5 e2 b0 d7 ee d2 52 55 2a 91 4b 8e 93 c7 9f 4d f7 bb 19 d2 49 5f 32 01 94 07 18 3a 73 1e ab ca 5f 17 19 0c 45 e3 62 8a ca c0 29 be b4 d5 a6 c5 32 c7 95 f7 88 75 f0 ad 89 0a 4f d1 57 f1 f1 62 66 6e a4 02 23 f8 d0 2e 7c a0 34 e6 b3 fb 56 cf a6 ec ab 4f e4 92 78 9a d4 7d 92 71 1c c0 3d 8e 7a c6 54 a9 63 12 0d 08 92 79 15 0e 02 eb 6b 97 52 d3 05 0f 5f 9c ff 71 a3 98 3a 41 6e 62 7f 17 a1 70 39 93 31 68 92 07 29 ce 5a cc 2c 03 a1 51 2c 15 6b 9d 05 81 a5 a6 d3 b5 3a 33 f0 9b 6f 38 20 7d 5f 34 66 31 a8 53 7e 68 4f 31 84 8d 28 91 f8 d9 39 e6 6f 6a 81 26 7b 43 0f 0f e5 67 be 1f 25 be 11 55 e0 b6 b1 56 86 19 1c 07 b4 4e 18 b6 28 ef 1e 3d 17 de ee 39 ef ca 47 43 b4 2e f3 1f f0 3d 61 1a 6d 64 22 5a c2 b3 50 2e 2b 17 cf 80 30 f0 db 38 d4 01 49 c6 23 fb 5e 97 84 29 c9 51 8a 48 d8 7b e3 13 ac 5f 11 ee 91 57 e1 4a c8 6a de f5 0d 74 7e 78 28 32 93 dd 85 d3 c4 5c 6f c2 c8 31 c0 fc 18 a6 82 83 62 ae 8c a5 e4 4d 1e dd 9d 3d 0d 74 84 6c e6 66 c3 60 c7 1e 8a d3 dc 29 8e 32 24 e4 3e 5b a4 3a 17 fd 8a ff 34 f1 d1 a5 e7 0a 8a 6f a0 2e 04 60 2f b1 c6 f9 a8 00 c7 96 5e 52 1f bc a2 08 2c 5d 92 fb 42 56 11 d2 66 6d c5 04 90 b2 7a 2d dd 15 0a ab 54 8a 5b 75 7c d7 59 6c f2 eb 4b 8f 4a 55 99 61 14 b1 34 e9 72 ae 89 1b a3 d3 f9 9b b9 a9 53 9d e9 c4 7f 55 f7 a4 1f 63 c5 34 1b 4c 53 5b c4 76 78 c9 ca 6e b5 51 42 7d d2 1d 7a 7a 80 ac e9 f5 4e 39 70 1d dd 83 eb 2f e9 75 57 ce 8a 89 1b d8 00 71 84 d3 c7 17 69 c1 dc 16 3f 8e ae 7f 47 3b 4d ce e1 16 dd c2 3d 18 d9 91 11 f7 28 d7 b9 6a 2a 91 c9 fa 5a 82 03 6b 0c cc 9a b5 23 da e7 51 6e c0 e7 52 3c dc 53 27 13 00 96 6c d2 12 f9 bb 22 bd 7d 07 b6 05 c9 39 d4 b9 bd e5 ec 03 83 ac 49 ed ec b1 32 a9 87 2e 42 4c 12 29 81 cb 3f 6c 9a 4d 9b 42 c3 2d 4f fe 29 62 6e 05 09 f2 50 0e c8 5f c5 48 7b 36 79 75 5e d9 f7 3d 3b e4 a8 cc dd 85 bd ca 2b 42 3b 45 52 01 e5 10 de 77 f2 38 74 01 ad fc e1 3f 21 82 2b 71 a2 3a 2f 41 e7 20 d4 80 8c 0c 77 33 33 aa 02 2e 2a 8a 8f ee db 22 e0 e1 85 90 e7 ba c5 17 1f a8 e7 4c 05 27 1e cc ed e3 62 cc 04 b0 f1 82 e4 47 23 f1 97 34 25 31 09 c1 86 c5 2f 30 c2 51 f1 b4 bd 70 b3 1b 74 18 d4 ff 11 07 b9 92 59 43 68 8c 1a ae 4b c0 32 63 07 ea 73 39 a9 e2 ef 30 86 ae 1c 25 ef 60 ef 18 5f 53 2f 19 c5 49 f8 f8 56 4b 05 b4 fa 8a 7b d7 c5 9a
+nl80211: Frame TX status event A1=1e:1c:b7:7a:e7:94 stype=13 cookie=0x1f ack=1
+nl80211: Frame TX status: cookie=0x1f (match) (ack=1)
+wlp8s0: Event TX_STATUS (16) received
+wlp8s0: EVENT_TX_STATUS dst=1e:1c:b7:7a:e7:94 type=0 stype=13
+Off-channel: Ignore Action TX status - no pending operation
+nl80211: Event message available
+nl80211: Drv Event 67 (NL80211_CMD_FRAME_WAIT_CANCEL) received for wlp8s0
+nl80211: TX frame wait expired for cookie 0x1f (match-saved)
+wlp8s0: Event TX_WAIT_EXPIRE (62) received
+nl80211: Event message available
+nl80211: BSS Event 59 (NL80211_CMD_FRAME) received for wlp8s0
+nl80211: MLME event 59 (NL80211_CMD_FRAME) on wlp8s0(14:ac:60:29:42:fb) A1=ff:ff:ff:ff:ff:ff A2=1e:1c:b7:7a:e7:94 on link_id=-1
+nl80211: MLME event frame - hexdump(len=831): d0 00 00 00 ff ff ff ff ff ff 1e 1c b7 7a e7 94 ff ff ff ff ff ff a0 00 04 09 00 90 4c 10 04 17 12 07 ba df a6 a4 d4 14 1a dd 30 3c f4 ec 54 04 dc dc 9b d5 df d2 77 94 a7 99 43 c7 38 cf de 9d e5 fa 80 dd 34 23 ea 48 be 22 da bf a5 d0 41 65 5d ad 37 ae b5 53 cf 31 30 d4 3e a3 44 66 b0 b2 6b 2f 04 94 a6 ba 43 5e bc 6b da 82 a8 45 2c 73 be 4b 28 14 89 a2 88 e6 53 b9 d0 f0 b3 a1 60 93 66 8d 06 d0 d0 6a f7 6b bf 6b 7d bb 55 81 41 8e 16 0b 11 72 6c 9e c6 90 8e 1e 26 bc 77 72 6f b2 82 2f e3 37 54 ff e7 9a 2f 68 0f 37 0b 56 75 6f e6 3c c5 d9 e8 e3 49 77 c8 96 c9 c6 48 2f 1d 89 55 0e e6 c4 4e f8 83 9f 0c 3a f1 dd cc ab b4 27 79 83 72 89 9f 5c d3 37 e4 af dd a2 95 f3 1d 18 0b 51 31 a6 c9 7e f8 8e b5 38 26 4f 0d 02 79 fc 26 1c 22 52 30 87 78 03 4a 00 bc 94 a1 e8 06 1c 95 ef 40 9c e3 d0 91 8e 68 e5 3c 3e 53 eb 1d 4d de 25 ab c7 64 cc ad 6a 16 93 11 59 d9 20 cb 6d df 3c 35 3f bc 99 2d b3 a6 0a c5 6e 1d b7 6a fc f0 a0 a1 17 13 6c fb 13 eb 88 c8 f0 7b 7f 8a 75 02 03 4f 11 49 eb 6b 9d 77 3c c5 b0 8c de 8e 73 b3 a4 49 bf bf 2d 90 b4 6a 8b 33 a4 df c3 bd bf 39 2f 7a 25 27 8d b0 06 09 24 b9 68 c3 34 42 98 30 ec df 0c a6 c7 26 8e b2 e5 c3 79 75 5e f2 ea 07 d9 a0 61 54 5b 2e 1f db 7f d4 ae 2a 1e a0 5f 4c ad 6c 8e dd 0d 8e 25 71 6a 55 3d 7b 3d a7 cf 4f f4 fd 6d c6 45 69 57 08 a3 02 6f 6e af 63 6a da 52 c9 91 26 51 4f 62 f0 bd dc 5d c2 46 e7 99 60 46 63 32 98 99 0e 6a 5c c7 9f 6b 91 ae 57 b8 12 68 6c 8e 5d 80 bc b7 2a d4 ba 06 11 51 eb 05 ee 12 f7 6a 35 4c 58 39 3c dd 09 a9 d1 a4 e5 a3 1e e1 bc 4d e6 95 af 9f 91 91 0e bc e3 8f fa b9 f0 56 41 9d ae 22 c2 27 85 a8 3a 1d e1 8c 5b 05 a1 fd 93 ed 3f 86 25 5e 58 ef 50 3e d5 d6 05 00 dc 9d 5d ef 83 4f 89 30 05 a3 68 81 22 f3 79 a2 e6 29 9e 3e 01 1e 72 d3 e7 3b 97 f7 70 09 d7 b8 18 25 cd 24 3f 62 4d 14 63 6e df 18 78 16 6a cf e0 0a ae 83 f0 45 b4 e6 cb 56 28 d0 2f 78 b4 ab e0 3e c1 90 69 fd 97 c7 93 16 cd 8c 8c f9 b7 75 3b 6f fe 02 60 71 23 6f ec ca 2f 1d bf 62 b2 55 14 bc db 06 b8 cf 1d 27 59 ac ac d8 6b 84 b2 1d 5f 73 b0 69 75 e4 45 d3 ee 85 d7 97 05 fc 6e 61 ec 5f f8 70 f0 48 24 0d 1e 58 73 96 d9 fe ba a3 cc 66 7d b2 3b fd 9b b9 8c 53 8c ae d2 18 1b 7f e6 c2 9a 6b 8a ee d8 24 93 9b 44 e5 25 ce 66 14 12 af 94 97 8c ec 28 37 3c a1 ec 09 4e f9 d0 46 b2 df c6 98 f5 86 38 43 cc 46 80 97 fe b7 af d6 e0 d6 35 fa 3a 7e 83 38 e4 e5 40 ec 5e 6c b1 da 8f 44 ff 43 f0 86 1a 12 82 87 c8 e7 d5 16 79 ba 44 e7 70 5b 95 c9 15 87 55 c5 ef 9b d6 18 76 4e 28 c7 5b bd 01 51 65 5e 85 80 98 55 6c 43 c0 32 6d 4f d3 14 a3 f2 59 3b f9 85 4e d4 a4 8e 24
+nl80211: Frame event
+nl80211: RX frame da=ff:ff:ff:ff:ff:ff sa=1e:1c:b7:7a:e7:94 bssid=ff:ff:ff:ff:ff:ff freq=2412 ssi_signal=-39 fc=0xd0 seq_ctrl=0xa0 stype=13 (WLAN_FC_STYPE_ACTION) len=831
+wlp8s0: Event RX_MGMT (18) received
+PQC_LOG: Received PAKE-4 frame (Vendor Action), len=800
+PQC_LOG: State Machine processing PAKE-4
+PQC_LOG: Saved ciphertext 2 from AP (len=768)
+PQC_DBG STA: fsid[0:16] - hexdump(len=16): e5 26 80 2b d4 d6 bc 3a 37 9b a1 6a cd fe b4 41
+PQC_DBG STA: psk[0:8] - hexdump(len=8): 4b 40 65 58 23 25 10 1b
+PQC_DBG STA: K[0:8] - hexdump(len=8): f6 84 33 6e 1b fa 49 c6
+PQC_DBG STA: computed tag - hexdump(len=32): 4e 28 c7 5b bd 01 51 65 5e 85 80 98 55 6c 43 c0 32 6d 4f d3 14 a3 f2 59 3b f9 85 4e d4 a4 8e 24
+PQC_DBG STA: received tag - hexdump(len=32): 4e 28 c7 5b bd 01 51 65 5e 85 80 98 55 6c 43 c0 32 6d 4f d3 14 a3 f2 59 3b f9 85 4e d4 a4 8e 24
+PQC_LOG: Tag verification success.
+WPA: Set PMK based on external data - hexdump(len=32): b0 35 86 7e 69 41 15 62 ae a9 ad 84 29 7a 9d 63 8d 7f d0 2e 00 37 da 1a 56 a0 17 45 b5 cc d7 72
+RSN: Derive PMKID using HMAC-SHA-1
+RSN: Derived PMKID - hexdump(len=16): 6d 25 f9 25 62 64 4d 8c 6c 03 86 cd fb d5 79 ff
+RSN: Added PMKSA cache entry for 00:00:00:00:00:00 spa=14:ac:60:29:42:fb network_ctx=0x55ba50c3be60 akmp=0x4
+wlp8s0: PMKSA-CACHE-ADDED 00:00:00:00:00:00 0
+nl80211: Add PMKID for 00:00:00:00:00:00
+nl80211: NL80211_CMD_SET_PMKSA with skip_pmk=false pmk_len=32
+nl80211: NL80211_CMD_SET_PMKSA failed: -95 (Operation not supported)
+PQC_LOG: PAKE phase complete. Triggering Association...
+wlp8s0: State: AUTHENTICATING -> ASSOCIATING
+nl80211: Set wlp8s0 operstate 0->0 (DORMANT)
+netlink: Operstate: ifindex=3 linkmode=-1 (no change), operstate=5 (IF_OPER_DORMANT)
+SME: Association Request IEs - hexdump(len=35): 7f 08 00 00 0a 02 01 00 00 40 3b 17 51 51 52 53 54 73 74 75 76 77 78 79 7a 7b 7c 7d 7e 7f 80 81 00 82 80
+wlp8s0: Trying to associate with 1e:1c:b7:7a:e7:94 (SSID='SiecPQC' freq=2412 MHz)
+wlp8s0: State: ASSOCIATING -> ASSOCIATING
+nl80211: Set wlp8s0 operstate 0->0 (DORMANT)
+netlink: Operstate: ifindex=3 linkmode=-1 (no change), operstate=5 (IF_OPER_DORMANT)
+wlp8s0: WPA: clearing own WPA/RSN IE
+wlp8s0: RSN: clearing own RSNXE
+nl80211: Associate (ifindex=3)
+  * bssid=1e:1c:b7:7a:e7:94
+  * freq=2412
+  * SSID=SiecPQC
+  * IEs - hexdump(len=35): 7f 08 00 00 0a 02 01 00 00 40 3b 17 51 51 52 53 54 73 74 75 76 77 78 79 7a 7b 7c 7d 7e 7f 80 81 00 82 80
+nl80211: Association request send successfully
+PQC_LOG: PAKE-4 processed successfully. Association triggered.
+wlp8s0: Received Action frame: SA=1e:1c:b7:7a:e7:94 Category=4 DataLen=806 freq=2412 MHz
+RTM_NEWLINK: ifi_index=3 ifname=wlp8s0 wext ifi_family=0 ifi_flags=0x11003 ([UP][LOWER_UP])
+RTM_NEWLINK: ifi_index=3 ifname=wlp8s0 wext ifi_family=0 ifi_flags=0x11003 ([UP][LOWER_UP])
+RTM_NEWLINK: ifi_index=3 ifname=wlp8s0 wext ifi_family=0 ifi_flags=0x11003 ([UP][LOWER_UP])
+RTM_NEWLINK: ifi_index=3 ifname=wlp8s0 operstate=5 linkmode=1 ifi_family=0 ifi_flags=0x11003 ([UP][LOWER_UP])
+nl80211: Event message available
+nl80211: Drv Event 38 (NL80211_CMD_ASSOCIATE) received for wlp8s0
+nl80211: MLME event 38 (NL80211_CMD_ASSOCIATE) on wlp8s0(14:ac:60:29:42:fb) A1=14:ac:60:29:42:fb A2=1e:1c:b7:7a:e7:94 on link_id=-1
+nl80211: MLME event frame - hexdump(len=56): 10 00 54 00 14 ac 60 29 42 fb 1e 1c b7 7a e7 94 1e 1c b7 7a e7 94 10 00 01 04 00 00 01 c0 01 08 82 84 8b 96 0c 12 18 24 32 04 30 48 60 6c 7f 08 04 00 00 00 00 00 00 40
+nl80211: Associate event
+nl80211: Associated on 2412 MHz
+nl80211: Associated with 1e:1c:b7:7a:e7:94
+nl80211: Set drv->ssid based on scan res info to 'SiecPQC'
+wlp8s0: Event ASSOC (0) received
+wlp8s0: Association info event
+req_ies - hexdump(len=60): 00 07 53 69 65 63 50 51 43 01 08 02 04 0b 16 0c 12 18 24 32 04 30 48 60 6c 7f 08 00 00 0a 02 01 00 00 40 3b 17 51 51 52 53 54 73 74 75 76 77 78 79 7a 7b 7c 7d 7e 7f 80 81 00 82 80
+resp_ies - hexdump(len=26): 01 08 82 84 8b 96 0c 12 18 24 32 04 30 48 60 6c 7f 08 04 00 00 00 00 00 00 40
+wlp8s0: freq=2412 MHz
+wlp8s0: WPA: clearing own WPA/RSN IE
+wlp8s0: RSN: clearing own RSNXE
+wlp8s0: State: ASSOCIATING -> ASSOCIATED
+nl80211: Set wlp8s0 operstate 0->0 (DORMANT)
+netlink: Operstate: ifindex=3 linkmode=-1 (no change), operstate=5 (IF_OPER_DORMANT)
+wlp8s0: Associated to a new BSS: BSSID=1e:1c:b7:7a:e7:94
+wlp8s0: Associated with 1e:1c:b7:7a:e7:94
+wlp8s0: WPA: Association event - clear replay counter
+wlp8s0: WPA: Clear old PTK
+TDLS: Remove peers on association
+EAPOL: External notification - portEnabled=0
+EAPOL: External notification - portValid=0
+EAPOL: External notification - portEnabled=1
+EAPOL: SUPP_PAE entering state S_FORCE_AUTH
+EAPOL: Supplicant port status: Authorized
+nl80211: Set supplicant port authorized for 1e:1c:b7:7a:e7:94
+EAPOL: SUPP_BE entering state IDLE
+wlp8s0: Cancelling authentication timeout
+wlp8s0: State: ASSOCIATED -> COMPLETED
+wlp8s0: Radio work 'sme-connect'@0x55ba50d1d970 done in 0.134047 seconds
+wlp8s0: radio_work_free('sme-connect'@0x55ba50d1d970): num_active_works --> 0
+wlp8s0: CTRL-EVENT-CONNECTED - Connection to 1e:1c:b7:7a:e7:94 completed [id=0 id_str=]
+nl80211: Set wlp8s0 operstate 0->1 (UP)
+netlink: Operstate: ifindex=3 linkmode=-1 (no change), operstate=6 (IF_OPER_UP)
+wlp8s0: Cancelling scan request
+WMM AC: No WMM IE
+PQC_LOG: Association done.
+PQC_LOG: Received Association Response. Generating the second pair of KEM keys
+PQC_LOG: Generation of the second key pair ended successfully
+PQC_LOG: Transitioning to PASN phase. Generating ML-DSA keys...
+PQC_LOG: PASN - Generating ML-DSA key pair
+PQC_LOG: PASN - ML-DSA key pair generated successfully (public_len=1312, secret_len=2560)
+PQC_LOG: Sending PASN-1 frame with ML-DSA public key
+PQC_LOG: PASN - Sending PASN-1 frame to: 1e:1c:b7:7a:e7:94 (ML-KEM pub key len: 800 bytes)
+nl80211: Send Action frame (ifindex=3, freq=2412 MHz wait=0 ms no_cck=0 offchanok=1 dst=1e:1c:b7:7a:e7:94 src=14:ac:60:29:42:fb bssid=1e:1c:b7:7a:e7:94, link_id=-1)
+nl80211: CMD_FRAME freq=2412 wait=0 no_cck=0 no_ack=0 offchanok=1
+CMD_FRAME - hexdump(len=839): d0 00 00 00 1e 1c b7 7a e7 94 14 ac 60 29 42 fb 1e 1c b7 7a e7 94 00 00 04 09 00 90 4c 11 01 03 20 8b 1c a2 b7 6c af 30 c0 a5 a4 dc 45 bc e0 4e 83 ca 49 32 74 10 e5 c2 c4 cd 2a 29 0c d3 59 44 7c 62 4c 5c 18 a6 53 6a 0a 96 0d bb aa 40 6a 7c 04 6d 07 92 5e 1b 08 1e 9b 7c 8a e3 6c 86 a4 cf 44 31 41 90 50 6a e0 60 3a 16 49 05 da d6 17 a3 66 77 89 16 15 92 19 cd 7e 78 a6 63 f7 7f bf ea b0 12 b6 cb 5c 03 1d f4 a2 b9 19 1b af 34 14 a6 79 bc 51 b1 b4 2a ea 71 c9 2c 3b 01 9d 76 08 01 27 24 4b 19 25 d0 e6 85 d9 04 8a ea b7 9b 06 23 19 e0 0c 42 64 48 4e b0 97 43 5a 78 58 be a1 2f 8e 3c 70 19 51 1f 53 3a 3d a5 c8 17 70 25 5b 4f 48 a3 2b cb a3 ac 6a 30 94 8a 97 ca 05 07 23 db 38 af 41 4e 7e cc 91 cc e7 43 46 f4 b1 89 c2 23 9c c2 17 52 7a 9b 81 6a 45 43 98 8b 45 f3 66 e4 29 35 7b 1a 2c 2b 85 26 50 a1 4a a6 21 06 f4 2c 0f a0 fb 10 dd b4 cf 03 00 53 79 ba a6 43 e5 3d 44 f3 83 58 00 b3 84 d1 3a ae 08 9f 5d 26 44 7a 25 34 1a fb 26 20 c4 10 52 ac 16 ec 37 7f 45 f3 54 be 4a c8 44 67 14 84 84 94 58 84 3f ca c1 43 75 b9 35 73 35 94 9a a3 6e 9f 3c b8 9d 53 7d 16 69 3b 16 5c 52 df b2 ca 15 77 9d b3 a6 ab 3f f9 33 48 6b 4e b3 59 93 bd 23 40 4c 64 c4 e0 bc 42 e2 6b c5 74 1c 37 19 95 38 78 07 70 24 14 88 88 52 31 82 75 88 f1 9b a7 cf 91 8a 35 95 70 f5 26 78 e5 0c 67 9b 56 87 19 68 a7 56 18 c6 8a 6a 08 42 20 0b bb b6 c2 07 17 54 bd 95 1e 23 97 a5 22 ec 6d 6e e2 22 1d e9 4f dc 3a 2a b0 b9 8d 3a 50 8e 5e b9 a3 bb 04 6e d5 15 86 4c c6 6b ee 93 c5 88 cb a3 ec 8c 49 d3 b1 a1 b6 b1 17 6a 81 09 02 73 34 89 5c ce 7f a9 03 df f9 92 60 6c 21 4b 85 66 f6 95 50 60 f2 93 0f 52 29 ee c1 bc 9a 74 4a 94 21 33 22 eb 4c 03 6a 0a ad f0 69 a1 ec 0c f6 f7 23 99 01 4c fc 86 98 f5 06 1e e0 57 02 ff 0a 56 18 8b a3 96 6a 32 26 29 95 c3 03 3b 92 2c 88 ea 35 48 59 69 66 7f 75 1f cb 76 83 d3 52 63 7f c6 7f 2f 9c a4 f5 f5 03 3f 6b 1e 04 8c c0 f1 e0 8b ca 86 0b 51 d9 38 66 dc 24 e4 eb 4c aa 00 ab 20 ca 28 1e 95 37 08 b3 00 66 35 82 e9 e9 b7 5a 44 ba 09 1b b1 8b 27 55 79 09 9e 68 a6 27 99 d0 24 dc 21 7e 55 6c af 9c 09 74 3d 92 66 df 55 4f 84 4a 4d 2e cc 45 af d0 88 33 92 87 d0 64 9f 51 c4 ce ca 80 89 97 56 2a 21 e0 b4 f0 21 2e 03 6b 81 39 c7 00 35 00 cf f8 17 8a c9 f6 2a 12 13 9c 87 07 29 ac 48 88 be 0c 07 5f a4 27 ed bc 67 a8 71 9e b2 10 61 65 01 9d 4a 73 9b a0 3b 88 f8 98 cc fb e6 1d db 53 18 28 48 b7 58 e7 b3 0a 84 67 d8 6b 5a 21 ec 8c 58 08 3f 73 c4 1b c3 40 af 76 a7 25 1b 3c 52 3f 76 48 3b 32 56 ae f7 ad 68 11 8f b4 f5 f7 5d 76 1d a6 80 fa d7 de 46 a7 eb 70 79 f7 9d a1 81 26 46 42 61 80 80 55 42 8f 78 68 df 14 ac 60 29 42 fb
+nl80211: Frame TX command accepted; cookie 0x20
+PQC_LOG: PASN - PASN-1 frame sent successfully
+PQC_LOG: PASN-1 frame sent successfully. Waiting for PASN-2...
+wlp8s0: Cancelling authentication timeout
+wlp8s0: State: COMPLETED -> COMPLETED
+PQC_LOG: Port opened
+RTM_NEWLINK: ifi_index=3 ifname=wlp8s0 operstate=6 linkmode=1 ifi_family=0 ifi_flags=0x11043 ([UP][RUNNING][LOWER_UP])
+nl80211: Event message available
+nl80211: Drv Event 46 (NL80211_CMD_CONNECT) received for wlp8s0
+nl80211: Ignore connect event (cmd=46) when using userspace SME
+nl80211: Event message available
+nl80211: Drv Event 60 (NL80211_CMD_FRAME_TX_STATUS) received for wlp8s0
+nl80211: MLME event 60 (NL80211_CMD_FRAME_TX_STATUS) on wlp8s0(14:ac:60:29:42:fb) A1=1e:1c:b7:7a:e7:94 A2=14:ac:60:29:42:fb on link_id=-1
+nl80211: MLME event frame - hexdump(len=839): d0 00 00 00 1e 1c b7 7a e7 94 14 ac 60 29 42 fb 1e 1c b7 7a e7 94 00 00 04 09 00 90 4c 11 01 03 20 8b 1c a2 b7 6c af 30 c0 a5 a4 dc 45 bc e0 4e 83 ca 49 32 74 10 e5 c2 c4 cd 2a 29 0c d3 59 44 7c 62 4c 5c 18 a6 53 6a 0a 96 0d bb aa 40 6a 7c 04 6d 07 92 5e 1b 08 1e 9b 7c 8a e3 6c 86 a4 cf 44 31 41 90 50 6a e0 60 3a 16 49 05 da d6 17 a3 66 77 89 16 15 92 19 cd 7e 78 a6 63 f7 7f bf ea b0 12 b6 cb 5c 03 1d f4 a2 b9 19 1b af 34 14 a6 79 bc 51 b1 b4 2a ea 71 c9 2c 3b 01 9d 76 08 01 27 24 4b 19 25 d0 e6 85 d9 04 8a ea b7 9b 06 23 19 e0 0c 42 64 48 4e b0 97 43 5a 78 58 be a1 2f 8e 3c 70 19 51 1f 53 3a 3d a5 c8 17 70 25 5b 4f 48 a3 2b cb a3 ac 6a 30 94 8a 97 ca 05 07 23 db 38 af 41 4e 7e cc 91 cc e7 43 46 f4 b1 89 c2 23 9c c2 17 52 7a 9b 81 6a 45 43 98 8b 45 f3 66 e4 29 35 7b 1a 2c 2b 85 26 50 a1 4a a6 21 06 f4 2c 0f a0 fb 10 dd b4 cf 03 00 53 79 ba a6 43 e5 3d 44 f3 83 58 00 b3 84 d1 3a ae 08 9f 5d 26 44 7a 25 34 1a fb 26 20 c4 10 52 ac 16 ec 37 7f 45 f3 54 be 4a c8 44 67 14 84 84 94 58 84 3f ca c1 43 75 b9 35 73 35 94 9a a3 6e 9f 3c b8 9d 53 7d 16 69 3b 16 5c 52 df b2 ca 15 77 9d b3 a6 ab 3f f9 33 48 6b 4e b3 59 93 bd 23 40 4c 64 c4 e0 bc 42 e2 6b c5 74 1c 37 19 95 38 78 07 70 24 14 88 88 52 31 82 75 88 f1 9b a7 cf 91 8a 35 95 70 f5 26 78 e5 0c 67 9b 56 87 19 68 a7 56 18 c6 8a 6a 08 42 20 0b bb b6 c2 07 17 54 bd 95 1e 23 97 a5 22 ec 6d 6e e2 22 1d e9 4f dc 3a 2a b0 b9 8d 3a 50 8e 5e b9 a3 bb 04 6e d5 15 86 4c c6 6b ee 93 c5 88 cb a3 ec 8c 49 d3 b1 a1 b6 b1 17 6a 81 09 02 73 34 89 5c ce 7f a9 03 df f9 92 60 6c 21 4b 85 66 f6 95 50 60 f2 93 0f 52 29 ee c1 bc 9a 74 4a 94 21 33 22 eb 4c 03 6a 0a ad f0 69 a1 ec 0c f6 f7 23 99 01 4c fc 86 98 f5 06 1e e0 57 02 ff 0a 56 18 8b a3 96 6a 32 26 29 95 c3 03 3b 92 2c 88 ea 35 48 59 69 66 7f 75 1f cb 76 83 d3 52 63 7f c6 7f 2f 9c a4 f5 f5 03 3f 6b 1e 04 8c c0 f1 e0 8b ca 86 0b 51 d9 38 66 dc 24 e4 eb 4c aa 00 ab 20 ca 28 1e 95 37 08 b3 00 66 35 82 e9 e9 b7 5a 44 ba 09 1b b1 8b 27 55 79 09 9e 68 a6 27 99 d0 24 dc 21 7e 55 6c af 9c 09 74 3d 92 66 df 55 4f 84 4a 4d 2e cc 45 af d0 88 33 92 87 d0 64 9f 51 c4 ce ca 80 89 97 56 2a 21 e0 b4 f0 21 2e 03 6b 81 39 c7 00 35 00 cf f8 17 8a c9 f6 2a 12 13 9c 87 07 29 ac 48 88 be 0c 07 5f a4 27 ed bc 67 a8 71 9e b2 10 61 65 01 9d 4a 73 9b a0 3b 88 f8 98 cc fb e6 1d db 53 18 28 48 b7 58 e7 b3 0a 84 67 d8 6b 5a 21 ec 8c 58 08 3f 73 c4 1b c3 40 af 76 a7 25 1b 3c 52 3f 76 48 3b 32 56 ae f7 ad 68 11 8f b4 f5 f7 5d 76 1d a6 80 fa d7 de 46 a7 eb 70 79 f7 9d a1 81 26 46 42 61 80 80 55 42 8f 78 68 df 14 ac 60 29 42 fb
+nl80211: Frame TX status event A1=1e:1c:b7:7a:e7:94 stype=13 cookie=0x20 ack=1
+nl80211: Frame TX status: cookie=0x20 (match) (ack=1)
+wlp8s0: Event TX_STATUS (16) received
+wlp8s0: EVENT_TX_STATUS dst=1e:1c:b7:7a:e7:94 type=0 stype=13
+Off-channel: Ignore Action TX status - no pending operation
+nl80211: Event message available
+nl80211: BSS Event 59 (NL80211_CMD_FRAME) received for wlp8s0
+nl80211: MLME event 59 (NL80211_CMD_FRAME) on wlp8s0(14:ac:60:29:42:fb) A1=14:ac:60:29:42:fb A2=1e:1c:b7:7a:e7:94 on link_id=-1
+nl80211: MLME event frame - hexdump(len=833): d0 00 54 00 14 ac 60 29 42 fb 1e 1c b7 7a e7 94 1e 1c b7 7a e7 94 20 00 04 09 00 90 4c 11 02 03 00 de 1f ae e9 bf 95 9e 62 27 eb f5 3b 77 54 17 f5 9b 8f 68 d5 55 8e a0 5c 1b 1e 5b 52 7e 29 6e 00 6e e1 e1 68 51 c2 e6 54 e9 07 06 5b b6 1b 6b a2 38 32 7c f6 62 6a b7 d0 d9 0f 97 55 1d 84 ce f9 7b 92 89 37 9f 81 ad b0 8e 6e 20 f9 1f af 83 8c 72 b1 f0 f4 0c 60 6d df 71 19 a2 a6 ed d7 19 8a d4 04 5d 96 2b 4a a4 65 86 5e d6 35 a0 f1 46 20 fc fb 7d 78 f9 fe 74 a3 49 e1 28 de a9 f3 ac a2 65 8d 21 29 5e 47 31 c9 ca ed 9b e0 93 85 dc fe 90 c9 e9 93 5a 07 04 16 a4 fe 7e 08 12 82 88 58 6f 4b 8a a3 6f cd 53 19 8d e6 ad d6 83 4d f9 df 93 76 ea aa 61 eb 4a 9e 2f 32 0c 9c 82 88 32 2c 54 51 38 aa e2 14 fa 5a 04 94 82 fc eb 11 fd 4e 40 72 38 d3 68 80 04 b0 71 4e c3 5d 17 25 1c de 17 2e d7 d6 51 8c 5f 20 0c 7a 29 c0 9e bb c1 d4 70 14 d6 90 43 09 3f bb d3 94 af 67 fa 7f 66 5d f1 23 32 d0 e2 7b 81 e6 95 02 3e b6 ad ff ef 4b 0c 5f 31 91 b4 32 e3 8f e0 17 56 17 16 25 dc bf 48 45 f4 41 cb 66 f0 3f 75 ee 6e 49 c0 7c 8d 30 ff 37 07 f3 31 3e 0b 0f 45 77 4b 8b 5e 9f 91 98 96 5c ea c6 63 c3 ea 70 75 a4 3d 91 ac ce 6e 8c fb a5 0b 13 cb 12 d9 92 02 9d 28 7a 5f 4a d1 ad fe 41 c9 1f 23 6d 38 f6 92 88 9b 54 f7 aa 9e 42 b5 74 07 1b 74 ed 03 ab 79 57 cb 51 86 8e 68 6e a2 b4 ed 8e 9f 8b 7e 3e 02 4b 53 e7 92 7f f7 a3 01 4e 5f c8 c2 96 c2 9f e5 1d 2f af 79 7f ae d0 25 a1 e3 47 d6 ef 0a f3 ad 63 51 d3 2b 70 23 00 24 81 bb f6 c0 de 18 cf c9 cb 56 a6 84 8f 32 c5 e1 70 4c 4e 96 7f 59 66 64 8c f1 e0 da 03 8d b2 18 c8 86 d4 43 d5 1e 24 f1 fb 33 ba 38 e3 9f de 8f 74 ca a0 2f b8 b7 c6 61 54 95 b5 48 45 7e d0 9b da fa 40 13 cb 6d 44 3e 18 ff d6 de a9 5f 02 80 7c 8c 13 5b e7 18 01 d5 14 24 d3 1a ae 62 a8 16 13 82 0b d0 a8 a3 92 f6 8e 32 a9 57 0a e2 03 53 4a 26 25 c1 6f dc e4 76 01 a5 04 99 36 d2 51 c1 09 5a 02 5b bd 20 09 80 31 7f 8a 30 ea cf 8f c3 a8 3d 0f a0 bd 74 c9 cf 16 05 d6 97 1d 92 85 0c 2c b5 bc f4 9d 84 44 51 dc 3c 95 1c 1e df eb ac df db cd 0a b4 d0 8a 79 4c db 78 a5 b5 0b 5a f0 44 1a f3 74 6b 16 b7 d8 18 57 84 5f e3 42 9f a9 b3 7b 96 be 4e 0a 30 15 66 19 e6 5a 1b 65 26 6e b2 56 93 e6 e5 65 3e dd 24 7f 53 a9 a4 bc 30 6f 40 e3 06 b9 81 69 36 a9 1e ea e0 2a d6 0b 66 ab 76 ed f9 5e 5d 6d f6 22 07 57 fd 41 8d ef bd 2d 00 6e 52 89 b7 01 ab 66 94 85 cd a1 2a d4 6f 3b 72 75 06 8f 28 33 b3 12 26 41 69 44 6d c3 a0 9f 98 aa 23 c7 b8 11 01 0e 82 d3 73 8b 42 0c 47 69 f8 ef 2d 1a 9d c4 25 ab 18 15 84 03 b5 d4 98 37 d9 38 f4 8e a7 2a 46 6c e2 4f 9c f2 1a 05 71 79 58 88 41 e5 67 ec 6f ec 9a 89 ef 7e e7 62 29
+nl80211: Frame event
+nl80211: RX frame da=14:ac:60:29:42:fb sa=1e:1c:b7:7a:e7:94 bssid=1e:1c:b7:7a:e7:94 freq=2412 ssi_signal=-27 fc=0xd0 seq_ctrl=0x20 stype=13 (WLAN_FC_STYPE_ACTION) len=833
+wlp8s0: Event RX_MGMT (18) received
+PQC_LOG: Received PASN-2 frame (Vendor Action), len=802
+PQC_LOG: PASN - Processing PASN-2 frame from AP
+PQC_LOG: PASN - PASN-2 payload length: 802 bytes
+PQC_LOG: PASN - PASN-2 saved (ct=768 bytes, MIC1 saved). Waiting for PASN-2-SIG...
+PQC_LOG: PASN-2 processed successfully.
+wlp8s0: Received Action frame: SA=1e:1c:b7:7a:e7:94 Category=4 DataLen=808 freq=2412 MHz
+nl80211: Event message available
+nl80211: BSS Event 59 (NL80211_CMD_FRAME) received for wlp8s0
+nl80211: MLME event 59 (NL80211_CMD_FRAME) on wlp8s0(14:ac:60:29:42:fb) A1=14:ac:60:29:42:fb A2=1e:1c:b7:7a:e7:94 on link_id=-1
+nl80211: MLME event frame - hexdump(len=336): d0 00 54 00 14 ac 60 29 42 fb 1e 1c b7 7a e7 94 1e 1c b7 7a e7 94 30 00 04 09 00 90 4c 11 03 00 09 74 01 2c 72 e4 a0 6b 81 33 d2 32 aa aa e0 2e 74 68 b1 f6 15 81 ec 23 10 0a 8c ed e7 0f 9a bb 5c 50 0b ae c4 2f 6a 94 3a 30 79 43 31 7a 4e d3 86 e6 91 cc f4 34 79 07 59 25 3c be 1e e9 70 d1 f6 1e 08 fa 51 e5 ef fd 02 5f 45 d0 1a e8 16 18 0c 5b 47 20 00 75 c9 c8 6e ed d7 da 33 88 11 48 ad 3b 7b 8b 65 a6 43 b1 7d 81 ea d3 b4 93 55 b4 f7 42 0e c3 0d 6a a9 d4 4a 52 06 a7 44 03 45 3c ca d8 5f 54 09 65 ed 82 77 6e c5 24 66 c3 7f a9 e3 98 ff 4c 65 4d 69 ea b5 01 69 85 99 1b 77 75 ad f2 b2 33 ad 00 7e 3c 76 79 7f 8e 46 a4 e5 36 51 d9 6d 32 6b 9b 06 5f dc 05 77 5c 91 38 73 00 74 fb 44 71 39 14 6c 68 2b fc 19 8e a3 ff 8c d6 f8 f6 73 e9 7c 5b 22 96 5c 4c b8 35 b6 c6 73 fe 8c 99 b6 48 3e 9a 7a ac 4f dc b3 a0 b9 49 51 97 ff 8c d2 15 ad 67 80 7b 22 da 9d 51 db ab f2 b8 0b 9e 4d 94 7e 99 d0 bb 3b 81 88 e7 63 bb d1 f7 c2 e4 96 d5 4e 5e 12 3b 94 66 4c 30 12 1f 30 c3 aa 3e 5f b3 dc 81 fd 0a 3c ef aa 38 55 32 ea cd
+nl80211: Frame event
+nl80211: RX frame da=14:ac:60:29:42:fb sa=1e:1c:b7:7a:e7:94 bssid=1e:1c:b7:7a:e7:94 freq=2412 ssi_signal=-28 fc=0xd0 seq_ctrl=0x30 stype=13 (WLAN_FC_STYPE_ACTION) len=336
+wlp8s0: Event RX_MGMT (18) received
+PQC_LOG: Received PASN-2-SIG frame (Vendor Action), len=305
+PQC_LOG: PASN - PASN-2-SIG frag 0 received (300 bytes, total 300/2420)
+PQC_LOG: PASN-2-SIG processed successfully.
+wlp8s0: Received Action frame: SA=1e:1c:b7:7a:e7:94 Category=4 DataLen=311 freq=2412 MHz
+nl80211: Event message available
+nl80211: BSS Event 59 (NL80211_CMD_FRAME) received for wlp8s0
+nl80211: MLME event 59 (NL80211_CMD_FRAME) on wlp8s0(14:ac:60:29:42:fb) A1=14:ac:60:29:42:fb A2=1e:1c:b7:7a:e7:94 on link_id=-1
+nl80211: MLME event frame - hexdump(len=336): d0 00 54 00 14 ac 60 29 42 fb 1e 1c b7 7a e7 94 1e 1c b7 7a e7 94 40 00 04 09 00 90 4c 11 03 01 09 74 01 2c b2 22 c7 0c 42 2a 21 41 65 b7 d6 c8 81 21 d7 f8 fc ad ca 1f 1d 95 0d f1 56 b7 06 a7 3a e4 0f aa 03 8b e1 ab bb 67 dc a2 95 a9 3a 45 36 e9 bb e8 06 15 f5 58 77 4d 94 c5 cf 77 2b 37 91 5c 24 f0 45 3c 51 be 4c 85 27 58 6e be 15 69 83 6c a1 2f fa ac cb 97 bd 66 92 5c 53 99 0f ab ee 6b 24 0d 34 7d 65 77 a9 50 23 b8 53 4d 7c e3 bd b5 b6 e0 8b 08 17 69 6d 83 b7 75 54 32 f9 40 ac 92 17 8a 6d 66 79 4c 1d 42 34 6c 9a db 10 c1 f0 c7 58 45 df 4b 60 eb ee 15 60 9c 92 6b 81 77 a0 75 f2 fe a9 20 06 f9 1a cb d8 df 70 dc 0a 64 ee 48 c3 f8 5c d0 c4 a9 c6 98 5b c0 e6 10 97 29 bb d0 d6 77 78 34 d0 05 f1 08 53 b0 03 c4 71 9b 00 8f a9 d8 34 d7 71 b3 9b bb 67 fb 3e 25 1c d9 9b 73 5a 00 b8 de 4c 17 39 d0 76 92 99 a6 c2 f6 fc 25 23 28 b9 80 19 54 9e 37 a4 0f da a4 e5 e3 07 da 5b cd e5 7d 00 ff 10 bc 9b 97 95 ae c8 d1 38 65 3f 88 91 4f 58 a6 de c4 47 8f d3 f2 b8 b8 2c 88 c7 a7 e7 ee 03 6b c1 d5 8d af f5 d8 3d 28
+nl80211: Frame event
+nl80211: RX frame da=14:ac:60:29:42:fb sa=1e:1c:b7:7a:e7:94 bssid=1e:1c:b7:7a:e7:94 freq=2412 ssi_signal=-28 fc=0xd0 seq_ctrl=0x40 stype=13 (WLAN_FC_STYPE_ACTION) len=336
+wlp8s0: Event RX_MGMT (18) received
+PQC_LOG: Received PASN-2-SIG frame (Vendor Action), len=305
+PQC_LOG: PASN - PASN-2-SIG frag 1 received (300 bytes, total 600/2420)
+PQC_LOG: PASN-2-SIG processed successfully.
+wlp8s0: Received Action frame: SA=1e:1c:b7:7a:e7:94 Category=4 DataLen=311 freq=2412 MHz
+nl80211: Event message available
+nl80211: BSS Event 59 (NL80211_CMD_FRAME) received for wlp8s0
+nl80211: MLME event 59 (NL80211_CMD_FRAME) on wlp8s0(14:ac:60:29:42:fb) A1=14:ac:60:29:42:fb A2=1e:1c:b7:7a:e7:94 on link_id=-1
+nl80211: MLME event frame - hexdump(len=336): d0 00 54 00 14 ac 60 29 42 fb 1e 1c b7 7a e7 94 1e 1c b7 7a e7 94 50 00 04 09 00 90 4c 11 03 02 09 74 01 2c 6a 95 ed 9c 59 80 6e ed 7d 19 c7 16 cc 13 64 c8 9e e4 73 99 c4 b7 79 65 7d 95 e8 e3 3c c5 65 b0 11 85 cf 0f af 31 f8 38 1a f7 f1 28 e5 2e 6e 44 d8 9f 1c bd 50 48 14 62 c0 9a da b6 bc 70 e5 be 02 66 c3 45 e7 44 9e 78 4d 18 ad 5f 6d 77 65 41 70 6e 7b ae 30 76 f8 a9 1b ab a1 50 5c fb d0 ab ca 78 c2 94 ac 2f 2e 01 29 65 9b 90 e3 de 21 84 1a 7f cf c7 ec 4c 2a 5b d9 18 98 34 15 2c 5c d9 6e 10 6c f9 f2 f6 3a da 19 6b 84 74 7d 27 9b 1b 5f 8b b9 2d 34 b1 94 10 ec 6a 4e ee c1 4f 98 53 ac 46 12 b6 bc cb b5 9e d1 af 65 f6 f0 b5 dc fd cd 46 0a 4f 52 31 29 28 a4 0c dd b6 b6 92 92 17 44 2a 0b 24 65 b5 6a 10 ba f4 d2 0c 61 91 ff ff 2e 4c 5c ec f7 66 11 99 41 79 d8 86 17 59 2d 6d e3 a5 85 60 a5 57 d8 0c c0 bb 36 75 c7 6c 2c be 80 b4 3d d5 4c fc fc c8 91 ff b4 ff 63 f7 5a 93 cc 90 37 03 b9 c5 f5 56 4f d8 a7 7e 4c 0e 4d a6 7c 0a 99 2c b6 69 59 68 a1 bd 0c 3e a4 b2 1c 99 6c 0c 36 db af 71 79 4f ad 76 81 be
+nl80211: Frame event
+nl80211: RX frame da=14:ac:60:29:42:fb sa=1e:1c:b7:7a:e7:94 bssid=1e:1c:b7:7a:e7:94 freq=2412 ssi_signal=-28 fc=0xd0 seq_ctrl=0x50 stype=13 (WLAN_FC_STYPE_ACTION) len=336
+wlp8s0: Event RX_MGMT (18) received
+PQC_LOG: Received PASN-2-SIG frame (Vendor Action), len=305
+PQC_LOG: PASN - PASN-2-SIG frag 2 received (300 bytes, total 900/2420)
+PQC_LOG: PASN-2-SIG processed successfully.
+wlp8s0: Received Action frame: SA=1e:1c:b7:7a:e7:94 Category=4 DataLen=311 freq=2412 MHz
+nl80211: Event message available
+nl80211: BSS Event 59 (NL80211_CMD_FRAME) received for wlp8s0
+nl80211: MLME event 59 (NL80211_CMD_FRAME) on wlp8s0(14:ac:60:29:42:fb) A1=14:ac:60:29:42:fb A2=1e:1c:b7:7a:e7:94 on link_id=-1
+nl80211: MLME event frame - hexdump(len=336): d0 00 54 00 14 ac 60 29 42 fb 1e 1c b7 7a e7 94 1e 1c b7 7a e7 94 60 00 04 09 00 90 4c 11 03 03 09 74 01 2c 05 80 6d 26 c8 8b a5 5e 49 76 4a dd 0e 21 e7 b1 34 38 b7 ca dd d8 11 68 59 80 fd c6 a3 28 c0 b6 93 4f 90 60 fd 40 7c 87 54 56 56 3d b9 cd b8 a0 c2 ef b7 c9 69 c2 5b c7 ef db 53 a5 05 92 26 be 6b 16 98 b9 9e dd e2 58 f3 11 9f 32 27 18 e4 c4 f3 08 68 64 ec c9 e5 97 d7 fa 1b 2c db 9d 9c ab fc e9 3c e6 5d 9f dc 53 5b a6 23 ad 00 32 ac 6c 01 1f 44 91 97 22 10 af b5 19 4d cd fe 4c 93 f3 38 e4 48 51 86 0d 42 9a 0e ab 04 57 14 9f 98 1e e0 da 16 5c 75 a9 ea d5 85 ac 21 a6 ac 5a 15 9d e9 e8 46 72 33 30 de 79 fc 4d a7 3f 06 4d 8c 76 73 04 af 6c 69 7c cc af 0d ad 63 0c 7a 40 76 95 76 24 3c d1 2f 44 c7 98 fd a8 a8 8e ed 6d b0 01 fd 89 c2 88 52 7c 31 c3 62 6c d3 f3 7e 48 9c 21 dc c3 0a 24 3c 89 46 02 52 10 da 21 1f 79 7f cb 40 fd b4 d3 7e 55 8c fd 61 a5 32 d4 a9 80 38 1c 71 c1 80 bf 93 72 88 89 58 42 3b 4c 08 6f a9 0e 36 90 25 eb 3f 83 b3 41 0f 16 da 9b 51 b2 29 43 dd dc de 4a 6b 5c 6d 38 87 e1 fa c0
+nl80211: Frame event
+nl80211: RX frame da=14:ac:60:29:42:fb sa=1e:1c:b7:7a:e7:94 bssid=1e:1c:b7:7a:e7:94 freq=2412 ssi_signal=-28 fc=0xd0 seq_ctrl=0x60 stype=13 (WLAN_FC_STYPE_ACTION) len=336
+wlp8s0: Event RX_MGMT (18) received
+PQC_LOG: Received PASN-2-SIG frame (Vendor Action), len=305
+PQC_LOG: PASN - PASN-2-SIG frag 3 received (300 bytes, total 1200/2420)
+PQC_LOG: PASN-2-SIG processed successfully.
+wlp8s0: Received Action frame: SA=1e:1c:b7:7a:e7:94 Category=4 DataLen=311 freq=2412 MHz
+nl80211: Event message available
+nl80211: BSS Event 59 (NL80211_CMD_FRAME) received for wlp8s0
+nl80211: MLME event 59 (NL80211_CMD_FRAME) on wlp8s0(14:ac:60:29:42:fb) A1=14:ac:60:29:42:fb A2=1e:1c:b7:7a:e7:94 on link_id=-1
+nl80211: MLME event frame - hexdump(len=336): d0 00 54 00 14 ac 60 29 42 fb 1e 1c b7 7a e7 94 1e 1c b7 7a e7 94 70 00 04 09 00 90 4c 11 03 04 09 74 01 2c 3e a6 72 78 a2 51 67 d6 0b 6a 13 5d 7b 68 5c 36 7c c8 00 1d 81 85 71 9a f6 5a 0f 11 4b 88 77 d4 1c fd 15 a2 07 cb 93 e5 4e 87 01 99 50 28 ea 15 eb b5 0f 66 3e ec ff 12 fe 6d 45 8a 16 09 5c 21 2d 38 c0 95 a5 55 eb ff c4 fb 21 5d d3 97 c8 6d c2 b6 21 bc 9f a2 3d 36 42 d8 3b f4 c8 7b f4 03 e1 42 dd 7f 45 e9 2a 1b 4a f2 79 9d 1f fb 8c fe 07 4f 53 96 b0 d2 00 f9 08 c6 7f 4c 33 a8 a1 a2 7d ae f0 f4 75 2e df ee e9 d5 43 a6 db e6 15 73 ed fc 07 32 d7 ce 05 bb 32 25 3f 7d fa a0 45 62 55 b2 5f 2d 7f 27 05 38 18 2b b5 b9 5f 5f cb 75 a9 9f f4 3b 61 9b e5 ce fa f4 a8 c5 8f fd 0a 4e c9 19 2f f4 fe 20 e2 33 53 2e c7 fa 3b fc 67 f0 cc c3 c4 d7 4c 9f 0b 4e ba 36 47 7a 18 f7 b8 22 1d 45 8a ea 00 06 5d 84 7d 04 c4 e9 24 7b 43 dd e3 78 c9 0a ee 61 93 94 5c 82 53 2d d0 0e 1a 96 75 23 9f 41 b8 f4 9e f4 50 34 6a 84 b7 8d 6a 16 75 57 44 2a a4 45 ee 4f 40 86 d2 88 f5 27 21 7a 2f 73 d6 84 88 34 0a 5a 05 69 4a b2
+nl80211: Frame event
+nl80211: RX frame da=14:ac:60:29:42:fb sa=1e:1c:b7:7a:e7:94 bssid=1e:1c:b7:7a:e7:94 freq=2412 ssi_signal=-27 fc=0xd0 seq_ctrl=0x70 stype=13 (WLAN_FC_STYPE_ACTION) len=336
+wlp8s0: Event RX_MGMT (18) received
+PQC_LOG: Received PASN-2-SIG frame (Vendor Action), len=305
+PQC_LOG: PASN - PASN-2-SIG frag 4 received (300 bytes, total 1500/2420)
+PQC_LOG: PASN-2-SIG processed successfully.
+wlp8s0: Received Action frame: SA=1e:1c:b7:7a:e7:94 Category=4 DataLen=311 freq=2412 MHz
+nl80211: Event message available
+nl80211: BSS Event 59 (NL80211_CMD_FRAME) received for wlp8s0
+nl80211: MLME event 59 (NL80211_CMD_FRAME) on wlp8s0(14:ac:60:29:42:fb) A1=14:ac:60:29:42:fb A2=1e:1c:b7:7a:e7:94 on link_id=-1
+nl80211: MLME event frame - hexdump(len=336): d0 00 54 00 14 ac 60 29 42 fb 1e 1c b7 7a e7 94 1e 1c b7 7a e7 94 80 00 04 09 00 90 4c 11 03 05 09 74 01 2c a7 a4 1f 7f 9e 1d 40 7d 72 15 c9 30 4d b6 35 5c 1f 08 9c 48 2d 73 56 c4 c4 07 53 a3 73 46 ea 3b e9 14 0b 13 2c 1f b6 14 b7 ff 79 01 73 2c b0 c4 4c 79 75 4a f6 24 47 7c 4f 5c 4a 52 7f 49 30 f8 45 c3 dd 3c 63 b4 2f 6c 5c 1c f7 5a 1b 4b 9f 6b 68 8a 3e 25 06 fc 53 56 fb f6 61 ef 58 7e 54 90 ee 6e 9d 00 d0 70 b0 5d eb b4 dd c3 5f e2 33 67 0a 99 83 2d 87 5b d6 52 ff 25 f7 8c 6f 47 df 38 48 00 9a 76 0e 91 cd 0d 82 0c 70 6b 61 d9 0c e1 82 ea 79 24 d2 16 6d 4d 67 cf 13 56 31 b6 a4 24 f6 8d ee f5 f6 a1 a5 8b 85 11 16 6d 45 40 fa e5 f0 e4 15 62 a1 23 46 e3 a6 4b 84 1e a5 64 0c 0e 6d e2 6d 54 5b 39 97 85 1e 0d 95 29 62 ea 57 bd 55 b4 8b 51 92 04 fe 5b e7 b7 e0 6f 5f c8 31 fd 71 77 45 c7 ad a2 d7 c7 52 2a 50 98 9a 98 db c8 a2 8e ed ae e9 7b 9a 7b 2b ed 41 91 83 15 7b cd fb 98 a0 4c 96 c9 99 9c 90 e4 1b 5f e8 78 5f 17 b3 2f 20 a9 65 df 86 1c 2b 2a 6b 29 17 af 9e 59 18 92 25 94 48 36 ce 97 88 ed 43 f9
+nl80211: Frame event
+nl80211: RX frame da=14:ac:60:29:42:fb sa=1e:1c:b7:7a:e7:94 bssid=1e:1c:b7:7a:e7:94 freq=2412 ssi_signal=-27 fc=0xd0 seq_ctrl=0x80 stype=13 (WLAN_FC_STYPE_ACTION) len=336
+wlp8s0: Event RX_MGMT (18) received
+PQC_LOG: Received PASN-2-SIG frame (Vendor Action), len=305
+PQC_LOG: PASN - PASN-2-SIG frag 5 received (300 bytes, total 1800/2420)
+PQC_LOG: PASN-2-SIG processed successfully.
+wlp8s0: Received Action frame: SA=1e:1c:b7:7a:e7:94 Category=4 DataLen=311 freq=2412 MHz
+nl80211: Event message available
+nl80211: BSS Event 59 (NL80211_CMD_FRAME) received for wlp8s0
+nl80211: MLME event 59 (NL80211_CMD_FRAME) on wlp8s0(14:ac:60:29:42:fb) A1=14:ac:60:29:42:fb A2=1e:1c:b7:7a:e7:94 on link_id=-1
+nl80211: MLME event frame - hexdump(len=336): d0 00 54 00 14 ac 60 29 42 fb 1e 1c b7 7a e7 94 1e 1c b7 7a e7 94 90 00 04 09 00 90 4c 11 03 06 09 74 01 2c 8c 90 8b e9 64 1a a3 50 bb db c4 96 0e ae 09 28 44 67 84 c8 b5 20 45 39 02 0d f9 7f f7 09 b1 b2 d4 7e cd 62 5f 1c 23 ea 99 bc aa 46 74 3c c3 bf 71 40 7f 0d 4c a3 38 24 da f7 78 8b b0 21 34 39 c9 63 dc d0 cd 0c 6c 26 53 98 14 05 8a e0 42 17 97 d4 3c c4 fe de 0c f2 11 83 40 0b 19 00 8c 09 e0 f2 00 f3 4f 8c 75 42 fa 7e da 56 1e e1 ae f8 10 7b 60 29 52 7f c1 42 49 1a 75 d1 1f d8 86 0f e4 e1 ae 78 16 d6 be 66 17 f5 dc 02 6b 60 f1 75 05 21 93 fa 8a e6 a2 32 98 8a 68 ed 0d 84 15 87 7a 1f 45 67 cb 0e 68 62 95 ce e1 44 eb 18 a1 2b c4 18 2b 9d c7 8a 6b cd 0d 8d 4d a8 a0 3e f9 3e 4f cb 09 ff 3a 67 2b a3 5a 06 4b 37 4b 77 63 1b ab 16 ce 11 f7 44 72 50 bb 9f 93 93 e2 28 a6 84 1f fb 2f 1c 06 e9 93 58 8b 4d 35 96 27 c4 61 d3 4d 2b 95 37 0b 17 55 00 78 15 5c 4c 83 88 71 8d f5 21 50 3b bb 28 06 a3 78 77 4f 4f 95 1d f9 34 33 fc 42 41 24 7c c5 b9 c6 d0 8c 25 0d e2 6e 3e 7c 5a 17 77 13 b9 8a 4e 51 8e 55 63
+nl80211: Frame event
+nl80211: RX frame da=14:ac:60:29:42:fb sa=1e:1c:b7:7a:e7:94 bssid=1e:1c:b7:7a:e7:94 freq=2412 ssi_signal=-27 fc=0xd0 seq_ctrl=0x90 stype=13 (WLAN_FC_STYPE_ACTION) len=336
+wlp8s0: Event RX_MGMT (18) received
+PQC_LOG: Received PASN-2-SIG frame (Vendor Action), len=305
+PQC_LOG: PASN - PASN-2-SIG frag 6 received (300 bytes, total 2100/2420)
+PQC_LOG: PASN-2-SIG processed successfully.
+wlp8s0: Received Action frame: SA=1e:1c:b7:7a:e7:94 Category=4 DataLen=311 freq=2412 MHz
+nl80211: Event message available
+nl80211: BSS Event 59 (NL80211_CMD_FRAME) received for wlp8s0
+nl80211: MLME event 59 (NL80211_CMD_FRAME) on wlp8s0(14:ac:60:29:42:fb) A1=14:ac:60:29:42:fb A2=1e:1c:b7:7a:e7:94 on link_id=-1
+nl80211: MLME event frame - hexdump(len=336): d0 00 54 00 14 ac 60 29 42 fb 1e 1c b7 7a e7 94 1e 1c b7 7a e7 94 a0 00 04 09 00 90 4c 11 03 07 09 74 01 2c cd f2 bb 5c f3 65 e6 c5 b6 ac 1b 32 04 03 b7 96 e6 c6 a9 d4 0a 56 6a 92 17 21 d0 10 5d a7 fe a4 4f 25 b2 3c 4d e8 32 46 95 2f 0f d3 9d 8c 8b 9d 08 a8 f3 e3 db ff b8 2b ce c7 f1 6b 15 a7 9a ac 8f a7 81 a1 30 2a b8 c2 ef d1 67 79 5e cf 1b d1 87 17 fb 1e 54 1d cd 12 cf 47 38 aa 03 61 01 02 3f 1c f8 92 99 4d d8 fc 2c 61 66 f7 5c 75 0a ca 2c 98 e2 f6 e7 46 99 96 86 72 16 b5 93 5f 52 74 de 03 89 45 03 85 38 9a 96 59 44 be f2 08 2b b2 95 0f 83 56 ec ed d8 05 bc 36 4d 38 88 0c a5 5b f7 47 42 e4 86 15 0c 17 81 1b e8 c9 67 6c 6f 65 9f 91 b2 64 62 4b bb ee 9b 19 ed b3 38 41 c1 3b f9 50 05 d3 cd 2e 00 b9 9a c7 06 91 d2 75 41 8c c7 fb 61 c2 6f 02 5c 6b 6b 5a e5 f8 9c af f1 bd 17 d4 17 b6 10 08 fa 45 49 e1 15 cc 05 0f 15 27 39 3d 5e 64 65 69 6d 76 7e a2 b8 e6 12 1f 2b 2c 32 42 88 8c 8e ac b2 b6 b8 c0 f1 fe ff 30 39 3a 41 47 52 5f 63 7a 7d 85 87 a9 c4 c8 d9 f3 f7 16 1e 5d 6c 7e 87 92 98 af ce d0 d6 df
+nl80211: Frame event
+nl80211: RX frame da=14:ac:60:29:42:fb sa=1e:1c:b7:7a:e7:94 bssid=1e:1c:b7:7a:e7:94 freq=2412 ssi_signal=-28 fc=0xd0 seq_ctrl=0xa0 stype=13 (WLAN_FC_STYPE_ACTION) len=336
+wlp8s0: Event RX_MGMT (18) received
+PQC_LOG: Received PASN-2-SIG frame (Vendor Action), len=305
+PQC_LOG: PASN - PASN-2-SIG frag 7 received (300 bytes, total 2400/2420)
+PQC_LOG: PASN-2-SIG processed successfully.
+wlp8s0: Received Action frame: SA=1e:1c:b7:7a:e7:94 Category=4 DataLen=311 freq=2412 MHz
+nl80211: Event message available
+nl80211: BSS Event 59 (NL80211_CMD_FRAME) received for wlp8s0
+nl80211: MLME event 59 (NL80211_CMD_FRAME) on wlp8s0(14:ac:60:29:42:fb) A1=14:ac:60:29:42:fb A2=1e:1c:b7:7a:e7:94 on link_id=-1
+nl80211: MLME event frame - hexdump(len=56): d0 00 78 00 14 ac 60 29 42 fb 1e 1c b7 7a e7 94 1e 1c b7 7a e7 94 b0 00 04 09 00 90 4c 11 03 08 09 74 00 14 e7 f0 00 00 00 00 00 00 00 00 00 00 00 00 00 00 10 21 33 42
+nl80211: Frame event
+nl80211: RX frame da=14:ac:60:29:42:fb sa=1e:1c:b7:7a:e7:94 bssid=1e:1c:b7:7a:e7:94 freq=2412 ssi_signal=-27 fc=0xd0 seq_ctrl=0xb0 stype=13 (WLAN_FC_STYPE_ACTION) len=56
+wlp8s0: Event RX_MGMT (18) received
+PQC_LOG: Received PASN-2-SIG frame (Vendor Action), len=25
+PQC_LOG: PASN - PASN-2-SIG frag 8 received (20 bytes, total 2420/2420)
+PQC_LOG: PASN - All PASN-2-SIG fragments received (2420 bytes). Verifying...
+PQC_LOG: PASN - ML-DSA signature verification successful
+PQC_LOG: PASN - ML-KEM decapsulation successful (shared secret len: 32)
+PQC_DEBUG_STA: PMK - hexdump(len=16): b0 35 86 7e 69 41 15 62 ae a9 ad 84 29 7a 9d 63
+PQC_LOG: PASN - PTK derived successfully
+PQC_LOG: PASN - generated MIC2 and saved in state machine
+PQC_LOG: Sending PASN-3 frame with MIC2
+PQC_LOG: PASN - Sending PASN-3 frame to: 1e:1c:b7:7a:e7:94
+nl80211: Send Action frame (ifindex=3, freq=2412 MHz wait=0 ms no_cck=0 offchanok=1 dst=1e:1c:b7:7a:e7:94 src=14:ac:60:29:42:fb bssid=1e:1c:b7:7a:e7:94, link_id=-1)
+nl80211: CMD_FRAME freq=2412 wait=0 no_cck=0 no_ack=0 offchanok=1
+CMD_FRAME - hexdump(len=63): d0 00 00 00 1e 1c b7 7a e7 94 14 ac 60 29 42 fb 1e 1c b7 7a e7 94 00 00 04 09 00 90 4c 11 04 2c 1d 63 c2 19 47 5f 24 46 95 66 70 91 c2 bf e5 1b 44 88 e1 b2 72 5e e0 09 96 3e 40 4c d5 a2 86
+nl80211: Frame TX command accepted; cookie 0x21
+PQC_LOG: PASN - PASN-3 frame sent successfully
+PQC_LOG: PASN-3 frame sent successfully. Waiting for group keys...
+PQC_LOG: PASN-2-SIG processed successfully.
+wlp8s0: Received Action frame: SA=1e:1c:b7:7a:e7:94 Category=4 DataLen=31 freq=2412 MHz
+nl80211: Event message available
+nl80211: Drv Event 60 (NL80211_CMD_FRAME_TX_STATUS) received for wlp8s0
+nl80211: MLME event 60 (NL80211_CMD_FRAME_TX_STATUS) on wlp8s0(14:ac:60:29:42:fb) A1=1e:1c:b7:7a:e7:94 A2=14:ac:60:29:42:fb on link_id=-1
+nl80211: MLME event frame - hexdump(len=63): d0 00 00 00 1e 1c b7 7a e7 94 14 ac 60 29 42 fb 1e 1c b7 7a e7 94 00 00 04 09 00 90 4c 11 04 2c 1d 63 c2 19 47 5f 24 46 95 66 70 91 c2 bf e5 1b 44 88 e1 b2 72 5e e0 09 96 3e 40 4c d5 a2 86
+nl80211: Frame TX status event A1=1e:1c:b7:7a:e7:94 stype=13 cookie=0x21 ack=1
+nl80211: Frame TX status: cookie=0x21 (match) (ack=1)
+wlp8s0: Event TX_STATUS (16) received
+wlp8s0: EVENT_TX_STATUS dst=1e:1c:b7:7a:e7:94 type=0 stype=13
+Off-channel: Ignore Action TX status - no pending operation
+nl80211: Event message available
+nl80211: BSS Event 59 (NL80211_CMD_FRAME) received for wlp8s0
+nl80211: MLME event 59 (NL80211_CMD_FRAME) on wlp8s0(14:ac:60:29:42:fb) A1=14:ac:60:29:42:fb A2=1e:1c:b7:7a:e7:94 on link_id=-1
+nl80211: MLME event frame - hexdump(len=103): d0 00 78 00 14 ac 60 29 42 fb 1e 1c b7 7a e7 94 1e 1c b7 7a e7 94 c0 00 04 09 00 90 4c 11 05 c9 13 49 1a 8c ad 0f d3 51 52 fa fa 2d 7d a6 db 24 d5 1a cd 4b 23 a5 1f c1 3f a9 2e 23 22 70 64 a8 ba a5 60 72 76 77 19 b3 74 00 40 4e 15 6f 89 3f 9b 1d 24 ef b6 cf c6 9c 77 5c 72 48 20 c4 bb 61 fe 21 70 fa 1c ed 47
+nl80211: Frame event
+nl80211: RX frame da=14:ac:60:29:42:fb sa=1e:1c:b7:7a:e7:94 bssid=1e:1c:b7:7a:e7:94 freq=2412 ssi_signal=-27 fc=0xd0 seq_ctrl=0xc0 stype=13 (WLAN_FC_STYPE_ACTION) len=103
+wlp8s0: Event RX_MGMT (18) received
+PQC_LOG: Received PASN-4 frame (Vendor Action), len=72
+PQC_LOG: PASN - Processing PASN-4 frame from AP
+PQC_LOG: PASN - MIC3 verified successfully
+PQC_LOG: PASN - Group keys decrypted successfully
+PQC_DEBUG_STA: TK - hexdump(len=16): 36 f4 20 e4 35 9f 0a 14 29 1a 1b 3e 67 20 56 ac
+PQC_DEBUG_STA: KEK - hexdump(len=16): 98 97 d0 e9 53 c6 37 0d 6d 39 10 d2 c7 16 c3 d5
+PQC_DEBUG_STA: KCK - hexdump(len=16): bc c6 e7 71 48 9b 0b 08 06 f4 df 75 7e a9 ce 0a
+PQC_DEBUG_STA: PTK - hexdump(len=48): 98 97 d0 e9 53 c6 37 0d 6d 39 10 d2 c7 16 c3 d5 bc c6 e7 71 48 9b 0b 08 06 f4 df 75 7e a9 ce 0a 36 f4 20 e4 35 9f 0a 14 29 1a 1b 3e 67 20 56 ac
+wpa_driver_nl80211_set_key: ifindex=3 (wlp8s0) alg=3 addr=0x55ba50c387f8 key_idx=0 set_tx=1 seq_len=0 key_len=16 key_flag=0x20 link_id=-1
+nl80211: NEW_KEY
+nl80211: KEY_DATA - hexdump(len=16): 36 f4 20 e4 35 9f 0a 14 29 1a 1b 3e 67 20 56 ac
+   addr=1e:1c:b7:7a:e7:94
+   pairwise key
+PQC_LOG: PASN - TK installed successfully
+PQC_DEBUG_STA: GTK - hexdump(len=16): b5 18 9f 88 6e 5b d1 6d a8 df 8b 9e 04 52 f0 82
+wpa_driver_nl80211_set_key: ifindex=3 (wlp8s0) alg=3 addr=0x7ffd0c95954a key_idx=1 set_tx=0 seq_len=0 key_len=16 key_flag=0x10 link_id=-1
+nl80211: NEW_KEY
+nl80211: KEY_DATA - hexdump(len=16): b5 18 9f 88 6e 5b d1 6d a8 df 8b 9e 04 52 f0 82
+   broadcast key
+PQC_LOG: PASN - GTK installed successfully
+PQC_DEBUG_STA: IGTK - hexdump(len=16): 9d ce 7c 1d ec 17 95 92 aa df f3 7a 07 b4 9a 90
+wpa_driver_nl80211_set_key: ifindex=3 (wlp8s0) alg=4 addr=0x7ffd0c95954a key_idx=4 set_tx=0 seq_len=0 key_len=16 key_flag=0x10 link_id=-1
+nl80211: NEW_KEY
+nl80211: KEY_DATA - hexdump(len=16): 9d ce 7c 1d ec 17 95 92 aa df f3 7a 07 b4 9a 90
+   broadcast key
+PQC_LOG: PASN - IGTK installed successfully
+nl80211: Set supplicant port authorized for 1e:1c:b7:7a:e7:94
+PQC_LOG: PASN - Port authorized successfully!
+wlp8s0: State: COMPLETED -> COMPLETED
+PQC_LOG: *** PASN PHASE COMPLETE! Fully connected and secure. ***
+PQC_LOG: PASN-4 processed successfully.
+wlp8s0: Received Action frame: SA=1e:1c:b7:7a:e7:94 Category=4 DataLen=78 freq=2412 MHz
+wlp8s0: Removing interface wlp8s0
+nl80211: Getting wowlan status
+nl80211: wowlan is disabled
+wlp8s0: Request to deauthenticate - bssid=1e:1c:b7:7a:e7:94 pending_bssid=00:00:00:00:00:00 reason=3 (DEAUTH_LEAVING) state=COMPLETED valid_links=0x0 ap_mld_addr=00:00:00:00:00:00
+TDLS: Tear down peers
+wpa_driver_nl80211_deauthenticate(addr=1e:1c:b7:7a:e7:94 reason_code=3)
+wlp8s0: Event DEAUTH (11) received
+wlp8s0: Deauthentication notification
+wlp8s0:  * reason 3 (DEAUTH_LEAVING) locally_generated=1
+Deauthentication frame IE(s) - hexdump(len=0): [NULL]
+wlp8s0: CTRL-EVENT-DISCONNECTED bssid=1e:1c:b7:7a:e7:94 reason=3 locally_generated=1
+wlp8s0: Auto connect disabled: do not try to re-connect
+wlp8s0: Ignore connection failure indication since interface has been put into disconnected state
+RSN: Clear current PMKSA entry selection
+TDLS: Remove peers on disassociation
+wlp8s0: WPA: Clear old PMK and PTK
+Disconnect event of DFS AP
+wlp8s0: Disconnect event - remove keys
+wpa_driver_nl80211_set_key: ifindex=3 (wlp8s0) alg=0 addr=(nil) key_idx=0 set_tx=0 seq_len=0 key_len=0 key_flag=0x10 link_id=-1
+nl80211: DEL_KEY
+   broadcast key
+wpa_driver_nl80211_set_key: ifindex=3 (wlp8s0) alg=0 addr=(nil) key_idx=1 set_tx=0 seq_len=0 key_len=0 key_flag=0x10 link_id=-1
+nl80211: DEL_KEY
+   broadcast key
+wpa_driver_nl80211_set_key: ifindex=3 (wlp8s0) alg=0 addr=(nil) key_idx=4 set_tx=0 seq_len=0 key_len=0 key_flag=0x10 link_id=-1
+nl80211: DEL_KEY
+   broadcast key
+wpa_driver_nl80211_set_key: ifindex=3 (wlp8s0) alg=0 addr=0x55ba50c387f8 key_idx=0 set_tx=0 seq_len=0 key_len=0 key_flag=0x20 link_id=-1
+nl80211: DEL_KEY
+   addr=1e:1c:b7:7a:e7:94
+   pairwise key
+nl80211: Data frame filter flags=0x0
+wlp8s0: State: COMPLETED -> DISCONNECTED
+nl80211: Set wlp8s0 operstate 1->0 (DORMANT)
+netlink: Operstate: ifindex=3 linkmode=-1 (no change), operstate=5 (IF_OPER_DORMANT)
+EAPOL: External notification - portEnabled=0
+EAPOL: SUPP_PAE entering state DISCONNECTED
+EAPOL: Supplicant port status: Unauthorized
+nl80211: Skip set_supp_port(unauthorized) while not associated
+EAPOL: SUPP_BE entering state INITIALIZE
+EAPOL: External notification - portValid=0
+PQC_LOG: Deinitializing State Machine
+nl80211: Data frame filter flags=0x0
+wlp8s0: State: DISCONNECTED -> DISCONNECTED
+nl80211: Set wlp8s0 operstate 0->0 (DORMANT)
+netlink: Operstate: ifindex=3 linkmode=-1 (no change), operstate=5 (IF_OPER_DORMANT)
+EAPOL: External notification - portEnabled=0
+EAPOL: External notification - portValid=0
+QM: Clear all active DSCP policies
+wlp8s0: CTRL-EVENT-DSCP-POLICY clear_all
+RSN: Flush PMKSA cache entry for 00:00:00:00:00:00
+wlp8s0: PMKSA-CACHE-REMOVED 00:00:00:00:00:00 0
+nl80211: Delete PMKID for 00:00:00:00:00:00
+nl80211: NL80211_CMD_DEL_PMKSA failed: -95 (Operation not supported)
+wlp8s0: RSN: PMKSA cache entry free_cb: 00:00:00:00:00:00 reason=0
+wlp8s0: WPA: Clear old PMK and PTK
+wlp8s0: BSS: Remove id 0 BSSID e4:5f:01:9e:4c:0f SSID 'JackSparrow' due to wpa_bss_flush
+wlp8s0: BSS: Remove id 1 BSSID 34:f8:e7:c2:9c:c4 SSID 'TeleLAB' due to wpa_bss_flush
+wlp8s0: BSS: Remove id 2 BSSID 34:f8:e7:c2:9c:c2 SSID 'AGH-WPA' due to wpa_bss_flush
+wlp8s0: BSS: Remove id 3 BSSID 34:f8:e7:c2:9c:c7 SSID 'TeleAGH' due to wpa_bss_flush
+wlp8s0: BSS: Remove id 4 BSSID 34:f8:e7:c2:9c:c3 SSID 'eduroam' due to wpa_bss_flush
+wlp8s0: BSS: Remove id 5 BSSID b4:0f:3b:e5:14:99 SSID '\x00\x00\x00\x00' due to wpa_bss_flush
+wlp8s0: BSS: Remove id 6 BSSID 34:f8:e7:c2:9c:c5 SSID 'AGH-Events' due to wpa_bss_flush
+wlp8s0: BSS: Remove id 7 BSSID 34:f8:e7:c2:9c:c1 SSID 'AGH-Guest' due to wpa_bss_flush
+wlp8s0: BSS: Remove id 8 BSSID 1e:1c:b7:7a:e7:94 SSID 'SiecPQC' due to wpa_bss_flush
+wlp8s0: Cancelling delayed sched scan
+wlp8s0: Cancelling scan request
+wlp8s0: Cancelling authentication timeout
+Off-channel: Clear pending Action frame TX (pending_action_tx=(nil)
+nl80211: Data frame filter flags=0x0
+Off-channel: Action frame sequence done notification: pending_action_tx=(nil) drv_offchan_tx=1 action_tx_wait_time=0 off_channel_freq=0 roc_waiting_drv_freq=0
+QM: Clear all active DSCP policies
+wlp8s0: CTRL-EVENT-DSCP-POLICY clear_all
+Remove interface wlp8s0 from radio phy0
+Remove radio phy0
+nl80211: deinit ifname=wlp8s0 disabled_11b_rates=0
+netlink: Operstate: ifindex=3 linkmode=0 (kernel-control), operstate=6 (IF_OPER_UP)
+nl80211: Set mode ifindex 3 iftype 2 (STATION)
+nl80211: Unsubscribe mgmt frames handle 0x8888dd32d84b3049 (mode change)
+wlp8s0: CTRL-EVENT-TERMINATING 

@@ -2992,7 +2992,7 @@ void wpa_supplicant_associate(struct wpa_supplicant *wpa_s,
             if (!wpa_s->pqc) {
                 wpa_msg(wpa_s, MSG_ERROR, "PQC_LOG: Failed to initialize State Machine");
             } else {
-                wpa_msg(wpa_s, MSG_INFO, "PQC_LOG: State Machine Ready. Starting Authentication.");
+                wpa_msg(wpa_s, MSG_INFO, "PQC_LOG: State Machine Ready. Starting Authentication. [PQC_STAGE_1_END]");
             }
         }
         /* END PQC  */

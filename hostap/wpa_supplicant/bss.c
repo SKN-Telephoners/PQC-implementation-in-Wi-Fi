@@ -20,6 +20,7 @@
 #include "scan.h"
 #include "bssid_ignore.h"
 #include "bss.h"
+#include "common/pqc_help.h"
 
 static void wpa_bss_set_hessid(struct wpa_bss *bss)
 {
@@ -653,12 +654,15 @@ static struct wpa_bss * wpa_bss_add(struct wpa_supplicant *wpa_s,
 				break;
 
 			if (id == WLAN_EID_VENDOR_SPECIFIC && elen >= 5 &&
-			    os_memcmp(&pqc_pos[2], "\x00\x90\x4c", 3) == 0) {
+                pqc_pos[2] == PQC_OUI_0 && 
+                pqc_pos[3] == PQC_OUI_1 && 
+                pqc_pos[4] == PQC_OUI_2) {
+
 				u8 pqc_type = pqc_pos[5];
 
 				if (pqc_type == 0x02) {
 					wpa_printf(MSG_DEBUG,
-						   "PQC: Found PQC Key Fragment IE in wpa_bss_add (type=0x02), length=%u",
+						   "PQC: Found PQC Key Fragment IE in wpa_bss_add (type=0x02), length=%u [PQC_STAGE_1_START]",
 						   elen);
 					pqc_process_vendor_ie(wpa_s, &pqc_pos[2], elen);
 				}
@@ -949,7 +953,10 @@ wpa_bss_update(struct wpa_supplicant *wpa_s, struct wpa_bss *bss,
 				break;
 
 			if (id == WLAN_EID_VENDOR_SPECIFIC && elen >= 5 &&
-			    os_memcmp(&pqc_pos[2], "\x00\x90\x4c", 3) == 0) {
+                pqc_pos[2] == PQC_OUI_0 && 
+                pqc_pos[3] == PQC_OUI_1 && 
+                pqc_pos[4] == PQC_OUI_2) {
+					
 				u8 pqc_type = pqc_pos[5];
 
 				if (pqc_type == 0x01) {

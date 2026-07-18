@@ -57,6 +57,7 @@
 #include "pqc_sm.h"
 #include "pqc_pake.h"
 #include "pqc_pasn.h"
+#include "common/pqc_help.h"
 
 
 #define MAX_OWE_TRANSITION_BSS_SELECT_COUNT 5
@@ -2003,6 +2004,25 @@ int wpa_supplicant_connect(struct wpa_supplicant *wpa_s,
 			   struct wpa_bss *selected,
 			   struct wpa_ssid *ssid)
 {
+	/* --- PQC GATEKEEPER & PULL TRIGGER --- */
+    if (ssid->pqc_enabled && !wpa_s->pqc_kem_complete) {
+        /* We want to connect, but the key isn't finished. Find the next missing fragment. */
+        if (wpa_s->pqc_kem_expected_frags > 0) {
+            u8 next_frag = 0xFF;
+            for (u8 i = 0; i < wpa_s->pqc_kem_expected_frags; i++) {
+                if (!(wpa_s->pqc_fragments_mask & (1U << i))) {
+                    next_frag = i;
+                    break;
+                }
+            }
+            
+            if (next_frag != 0xFF) {
+                pqc_request_next_fragment(wpa_s, selected, next_frag);
+                return -1; /* Abort auth and wait for the fragment to arrive */
+            }
+        }
+    }
+    /* --- END PQC GATEKEEPER --- */
 #ifdef IEEE8021X_EAPOL
 	if ((eap_is_wps_pbc_enrollee(&ssid->eap) &&
 	     wpas_wps_partner_link_overlap_detect(wpa_s)) ||
@@ -6725,11 +6745,6 @@ void wpa_supplicant_event(void *ctx, enum wpa_event_type event,
                 break; 
             }
 
-            /* TODO
-             * There has to be PTK gen heree
-             * wpa_drv_set_key(wpa_s, alg, addr, key_idx, set_tx, seq, seq_len, key, key_len);
-             */
-
             wpa_supplicant_cancel_auth_timeout(wpa_s);
             wpa_supplicant_set_state(wpa_s, WPA_COMPLETED);
             
@@ -7185,100 +7200,113 @@ void wpa_supplicant_event(void *ctx, enum wpa_event_type event,
 #endif /* CONFIG_IBSS_RSN */
 
 			if (stype == WLAN_FC_STYPE_ACTION) {
-                /* PQC PAKE*/
-                /* Min len: header MAC(24) + Category(1) + OUI(3) + Subtype(1) = 29 bytes */
-                if (data->rx_mgmt.frame_len >= 31) {
-                    const u8 *pos = data->rx_mgmt.frame + 24;
-                    
-                    /* checking whether category/type is correct */
-                    if (pos[0] == WLAN_ACTION_PUBLIC && 
-                        pos[1] == WLAN_PA_VENDOR_SPECIFIC && 
-                        pos[2] == PQC_OUI_0 && 
-                        pos[3] == PQC_OUI_1 && 
-                        pos[4] == PQC_OUI_2) {
+				/* PQC PAKE / PASN Interception */
+				/* Min len: MAC(24) + Cat(2) + OUI(3) + Type(1) + Subtype(1) + FragHdr(8) (total_len + offset)= 39 bytes */
+				size_t min_pqc_len = IEEE80211_HDRLEN + 7 + PQC_FRAG_HDR_LEN;
+				if (data->rx_mgmt.frame_len >= min_pqc_len) {
+					const u8 *pos = data->rx_mgmt.frame + IEEE80211_HDRLEN;
+					
+					/* Check if it's our Public Vendor-Specific Action frame */
+					if (pos[0] == WLAN_ACTION_PUBLIC && 
+						pos[1] == WLAN_PA_VENDOR_SPECIFIC && 
+						pos[2] == PQC_OUI_0 && 
+						pos[3] == PQC_OUI_1 && 
+						pos[4] == PQC_OUI_2) {
 
-                        u8 type = pos[5];
-                        u8 subtype = pos[6];
-                        const u8 *payload = pos + 7;
-                        size_t payload_len = data->rx_mgmt.frame_len - 24 - 7;
+						u8 type = pos[5];
+						u8 subtype = pos[6];
+						
+						/* Extract Fragmentation Header (Big Endian -> Host Order) */
+						u32 frag_total_len = WPA_GET_BE32(&pos[7]);
+						u32 frag_offset = WPA_GET_BE32(&pos[7 + 4]); /* offset is 4 bytes after total_len, this is unsigned int so 4B */
+						
+						/* Payload starts strictly after the OUI block and Frag Header */
+						const u8 *chunk_payload = pos + 7 + PQC_FRAG_HDR_LEN;
+            			size_t chunk_len = data->rx_mgmt.frame_len - min_pqc_len;
 
-                        if (type == PQC_OUI_TYPE_PAKE) {
-                            /* checking Subtype. 0x02 means PAKE-2 frame */
-                            if (subtype == PQC_PAKE_TYPE_2) {
-                                wpa_printf(MSG_DEBUG, "PQC_LOG: Received PAKE-2 frame (Vendor Action), len=%zu", payload_len);
-                                
-                                if (wpa_s->pqc) {
-                                    pqc_sm_rx_pake2(wpa_s->pqc, payload, payload_len);
-                                } else {
-                                    wpa_printf(MSG_ERROR, "PQC_LOG: Error - no initialize PQC session found");
-                                }
-                            }
-                            /* checking Subtype. 0x04 means PAKE-4 frame */
-                            if (subtype == PQC_PAKE_TYPE_4) {
-                                wpa_printf(MSG_DEBUG, "PQC_LOG: Received PAKE-4 frame (Vendor Action), len=%zu", payload_len);
-                                
-                                if (wpa_s->pqc) {
-                                    if (pqc_sm_rx_pake4(wpa_s->pqc, payload, payload_len) == 0) {
-                                        wpa_printf(MSG_INFO, "PQC_LOG: PAKE-4 processed successfully. Association triggered.");
-                                    } else {
-                                        wpa_printf(MSG_ERROR, "PQC_LOG: Error processing PAKE-4! Aborting.");
-                                        wpa_supplicant_set_state(wpa_s, WPA_DISCONNECTED);
-                                    }
-                                } else {
-                                    wpa_printf(MSG_ERROR, "PQC_LOG: Error - no initialize PQC session found");
-                                }
-                            }
-                        } else if (type == PQC_OUI_TYPE_PASN) {
-                            if (subtype == PQC_PASN_TYPE_2) {
-                                wpa_printf(MSG_DEBUG, "PQC_LOG: Received PASN-2 frame (Vendor Action), len=%zu", payload_len);
-                                if (wpa_s->pqc) {
-                                    if (pqc_sm_rx_pasn2(wpa_s->pqc, payload, payload_len) == 0) {
-                                        wpa_printf(MSG_INFO, "PQC_LOG: PASN-2 processed successfully.");
-                                    } else {
-                                        wpa_printf(MSG_ERROR, "PQC_LOG: Error processing PASN-2!");
-                                    }
-                                } else {
-                                    wpa_printf(MSG_ERROR, "PQC_LOG: Error - no PQC session found");
-                                }
-                            }
-                            if (subtype == PQC_PASN_TYPE_2_SIG) {
-                                wpa_printf(MSG_DEBUG, "PQC_LOG: Received PASN-2-SIG frame (Vendor Action), len=%zu", payload_len);
-                                if (wpa_s->pqc) {
-                                    if (pqc_sm_rx_pasn2_sig(wpa_s->pqc, payload, payload_len) == 0) {
-                                        wpa_printf(MSG_INFO, "PQC_LOG: PASN-2-SIG processed successfully.");
-                                    } else {
-                                        wpa_printf(MSG_ERROR, "PQC_LOG: Error processing PASN-2-SIG!");
-                                    }
-                                } else {
-                                    wpa_printf(MSG_ERROR, "PQC_LOG: Error - no PQC session found");
-                                }
-                            }
-							if (subtype == PQC_PASN_TYPE_4) {
-                                wpa_printf(MSG_DEBUG, "PQC_LOG: Received PASN-4 frame (Vendor Action), len=%zu", payload_len);
-                                if (wpa_s->pqc) {
-                                    if (pqc_sm_rx_pasn4(wpa_s->pqc, payload, payload_len) == 0) {
-                                        wpa_printf(MSG_INFO, "PQC_LOG: PASN-4 processed successfully.");
-                                    } else {
-                                        wpa_printf(MSG_ERROR, "PQC_LOG: Error processing PASN-4");
-                                    }
-                                } else {
-                                    wpa_printf(MSG_ERROR, "PQC_LOG: Error - no PQC session found");
-                                }
-                            }
-                        }
-                    }
-                }
-                /* PQC PAKE/PASN end */
+						if (!wpa_s->pqc) {
+							wpa_printf(MSG_ERROR, "PQC_LOG: Error - received PQC fragment but no session exists");
+							goto skip_standard_rx; /* Pass to standard wpas_event_rx_mgmt_action if needed */
+						}
 
-                /* In case it was not PQC frame */
-                wpas_event_rx_mgmt_action(
-                    wpa_s, data->rx_mgmt.frame,
-                    data->rx_mgmt.frame_len,
-                    data->rx_mgmt.freq,
-                    data->rx_mgmt.ssi_signal);
-                break;
-            }
+						/* Attempt Reassembly */
+						struct wpabuf *complete_payload = pqc_reassemble_fragment(
+															&wpa_s->pqc->rx_reassembly_buf,
+															frag_total_len, frag_offset,
+															chunk_payload, chunk_len);
+						
+						if (!complete_payload) {
+							/* Still waiting for more chunks. Silently consume this frame. */
+							wpa_printf(MSG_DEBUG, "PQC_LOG: Reassembling fragment offset %u / %u [PQC_RX_DEFRAG_START]", 
+									frag_offset, frag_total_len);
+							goto skip_standard_rx; 
+						}
 
+						/* reassembly complete */
+						const u8 *payload = wpabuf_head(complete_payload);
+						size_t payload_len = wpabuf_len(complete_payload);
+						wpa_printf(MSG_DEBUG, "PQC_LOG: Reassembly complete! Total size: %zu [PQC_RX_DEFRAG_END]", payload_len);
+
+						/* PQC PAKE */
+						if (type == PQC_OUI_TYPE_PAKE) {
+							if (subtype == PQC_PAKE_TYPE_2) {
+								wpa_printf(MSG_DEBUG, "PQC_LOG: Processing complete PAKE-2 [PQC_STAGE_3_START]");
+								pqc_sm_rx_pake2(wpa_s->pqc, payload, payload_len);
+							}
+							else if (subtype == PQC_PAKE_TYPE_4) {
+								wpa_printf(MSG_DEBUG, "PQC_LOG: Processing complete PAKE-4 [PQC_STAGE_4_START]");
+								if (pqc_sm_rx_pake4(wpa_s->pqc, payload, payload_len) == 0) {
+									wpa_printf(MSG_INFO, "PQC_LOG: PAKE-4 processed successfully. Association triggered. [PQC_STAGE_4_END]");
+								} else {
+									wpa_printf(MSG_ERROR, "PQC_LOG: Error processing PAKE-4! Aborting.");
+									wpa_supplicant_set_state(wpa_s, WPA_DISCONNECTED);
+								}
+							}
+						} 
+						/* PQC PASN */
+						else if (type == PQC_OUI_TYPE_PASN) {
+							if (subtype == PQC_PASN_TYPE_2) {
+								wpa_printf(MSG_DEBUG, "PQC_LOG: Processing complete PASN-2 [PQC_STAGE_6_START]");
+								if (pqc_sm_rx_pasn2(wpa_s->pqc, payload, payload_len) == 0) {
+									wpa_printf(MSG_INFO, "PQC_LOG: PASN-2 processed successfully.");
+								} else {
+									wpa_printf(MSG_ERROR, "PQC_LOG: Error processing PASN-2!");
+								}
+							}
+							else if (subtype == PQC_PASN_TYPE_2_SIG) {
+								wpa_printf(MSG_DEBUG, "PQC_LOG: Processing complete PASN-2-SIG [PQC_STAGE_6_SIG_START]");
+								if (pqc_sm_rx_pasn2_sig(wpa_s->pqc, payload, payload_len) == 0) {
+									wpa_printf(MSG_INFO, "PQC_LOG: PASN-2-SIG processed successfully.");
+								} else {
+									wpa_printf(MSG_ERROR, "PQC_LOG: Error processing PASN-2-SIG!");
+								}
+							}
+							else if (subtype == PQC_PASN_TYPE_4) {
+								wpa_printf(MSG_DEBUG, "PQC_LOG: Processing complete PASN-4 [PQC_STAGE_7_START]");
+								if (pqc_sm_rx_pasn4(wpa_s->pqc, payload, payload_len) == 0) {
+									wpa_printf(MSG_INFO, "PQC_LOG: PASN-4 processed successfully.");
+								} else {
+									wpa_printf(MSG_ERROR, "PQC_LOG: Error processing PASN-4");
+								}
+							}
+						}
+
+						/* Clean up the reassembled buffer */
+						wpabuf_free(complete_payload);
+						
+			skip_standard_rx:
+						break; /* Do not pass PQC frames to standard action processing */
+					}
+				}
+
+				/* In case it was not a PQC frame */
+				wpas_event_rx_mgmt_action(
+					wpa_s, data->rx_mgmt.frame,
+					data->rx_mgmt.frame_len,
+					data->rx_mgmt.freq,
+					data->rx_mgmt.ssi_signal);
+				break;
+			}
 			if (wpa_s->ifmsh) {
 				mesh_mpm_mgmt_rx(wpa_s, &data->rx_mgmt);
 				break;
@@ -7321,6 +7349,33 @@ void wpa_supplicant_event(void *ctx, enum wpa_event_type event,
 
 		ap_mgmt_rx(wpa_s, &data->rx_mgmt);
 #endif /* CONFIG_AP */
+		/* --- PQC LIVE INTERCEPT --- */
+        if (wpa_s->current_ssid->pqc_enabled && 
+            WLAN_FC_GET_STYPE(WPA_GET_LE16(data->rx_mgmt.frame)) == WLAN_FC_STYPE_PROBE_RESP) {
+            
+            /* Probe Response MAC header + Fixed Params is 36 bytes long */
+            if (data->rx_mgmt.frame_len > 36) {
+                const u8 *pos = data->rx_mgmt.frame + 36;
+                size_t left = data->rx_mgmt.frame_len - 36;
+                
+                /* Scan through all IEs in the payload */
+                while (left >= 2) {
+                    u8 ie_id = pos[0];
+                    u8 ie_len = pos[1];
+                    
+                    if (2 + ie_len > left) break; /* Bounds check */
+                    
+                    /* Feed our Vendor Specific IEs directly to the parser */
+                    if (ie_id == WLAN_EID_VENDOR_SPECIFIC) {
+                        pqc_process_vendor_ie(wpa_s, pos, 2 + ie_len);
+                    }
+                    
+                    pos += 2 + ie_len;
+                    left -= 2 + ie_len;
+                }
+            }
+        }
+        /* --- END PQC LIVE INTERCEPT --- */
 		break;
 		}
 	case EVENT_RX_PROBE_REQ:
@@ -7801,79 +7856,108 @@ static void pqc_try_start_auth(struct wpa_supplicant *wpa_s)
 	wpa_supplicant_associate(wpa_s, wpa_s->current_bss, wpa_s->current_ssid);
 }
 
+void pqc_request_next_fragment(struct wpa_supplicant *wpa_s, struct wpa_bss *target, u8 next_frag) {
+    struct wpa_driver_scan_params params;
+    struct wpabuf *extra_ie;
 
-void pqc_process_vendor_ie(struct wpa_supplicant *wpa_s, const u8 *ie, size_t ie_len)
-{
-	u8 type, frag_idx;
-	u16 total_len;
-	const u8 *data;
-	size_t data_len, offset, expected_frags, expected_mask;
+    os_memset(&params, 0, sizeof(params));
+    
+    /* Lock the scan explicitly to the AP we want to authenticate with */
+    params.num_ssids = 1;
+    params.ssids[0].ssid = target->ssid;
+    params.ssids[0].ssid_len = target->ssid_len;
+    params.bssid = target->bssid;
+    
+    /* Lock frequency */
+    params.freqs = os_zalloc(sizeof(int) * 2);
+    if (params.freqs) {
+        params.freqs[0] = target->freq;
+        params.freqs[1] = 0;
+    }
 
-	if (ie_len < 7 || os_memcmp(ie, "\x00\x90\x4c", 3) != 0) {
-		wpa_printf(MSG_INFO, "PQC_LOG: IE validation failed (len=%zu, OUI check=%d)",
-			   ie_len, ie_len >= 3 ? (os_memcmp(ie, "\x00\x90\x4c", 3) == 0) : -1);
-		return;
-	}
+    /* Ask for the missing fragment (Type 0x03) */
+    extra_ie = wpabuf_alloc(7);
+    if (extra_ie) {
+        wpabuf_put_u8(extra_ie, WLAN_EID_VENDOR_SPECIFIC);
+        wpabuf_put_u8(extra_ie, 5);
+        wpabuf_put_u8(extra_ie, PQC_OUI_0);
+        wpabuf_put_u8(extra_ie, PQC_OUI_1);
+        wpabuf_put_u8(extra_ie, PQC_OUI_2);
+        wpabuf_put_u8(extra_ie, 0x03); 
+        wpabuf_put_u8(extra_ie, next_frag);
+        
+        params.extra_ies = wpabuf_head(extra_ie);
+        params.extra_ies_len = wpabuf_len(extra_ie);
+    }
 
-	type = ie[3];
+    wpa_printf(MSG_DEBUG, "PQC_LOG: STA - Pulling missing Fragment %u from AP...", next_frag);
+    wpa_drv_scan(wpa_s, &params);
+    
+    if (extra_ie) wpabuf_free(extra_ie);
+    if (params.freqs) os_free(params.freqs);
+}
 
-	if (type != 0x02) {
-		wpa_printf(MSG_INFO, "PQC_LOG: Not a key fragment (type=0x%02x)", type);
-		return;
-	}
+void pqc_process_vendor_ie(struct wpa_supplicant *wpa_s, const u8 *ie, size_t ie_len) {
+    u8 type, frag_idx;
+    u16 total_len;
+    const u8 *data;
+    size_t data_len, offset, expected_frags, expected_mask;
 
-	frag_idx = ie[4];
-	total_len = WPA_GET_LE16(&ie[5]);
-	data = &ie[7];
-	data_len = ie_len - 7;
+    if (ie_len < 7 || ie[0] != PQC_OUI_0 || ie[1] != PQC_OUI_1 || ie[2] != PQC_OUI_2) return;
 
-	wpa_printf(MSG_INFO, "PQC_DEBUG: Processing key fragment. Len: %zu, FragIdx=%u, TotalLen=%u, DataLen=%zu",
-			   ie_len, frag_idx, total_len, data_len);
+    type = ie[3];
+    if (type != 0x02) return;
 
-	if (frag_idx == 0) {
-		wpa_s->pqc_fragments_mask = 0;
-		wpa_s->pqc_kem_received_len = 0;
-		wpa_s->pqc_kem_expected_len = total_len;
-		wpa_s->pqc_kem_expected_frags =
-			(total_len + PQC_FRAGMENT_MAX_LEN - 1) / PQC_FRAGMENT_MAX_LEN;
-		wpa_s->pqc_kem_complete = false;
-		wpa_s->pqc_auth_started = false;
-	} else if (wpa_s->pqc_kem_expected_len != total_len) {
-		wpa_printf(MSG_INFO, "PQC_LOG: inconsistent total length");
-		return;
-	}
+    if (wpa_s->pqc_kem_complete) return; /* Ignore duplicates if already finished */
 
-	offset = (size_t) frag_idx * PQC_FRAGMENT_MAX_LEN;
-	if (offset >= sizeof(wpa_s->pqc_kem_buffer) ||
-	    data_len > sizeof(wpa_s->pqc_kem_buffer) - offset ||
-	    offset + data_len > total_len) {
-		wpa_printf(MSG_INFO, "PQC_LOG: Buffer overflow check failed");
-		return;
-	}
+    frag_idx = ie[4];
+    total_len = WPA_GET_LE16(&ie[5]);
+    data = &ie[7];
+    data_len = ie_len - 7;
 
-	os_memcpy(wpa_s->pqc_kem_buffer + offset, data, data_len);
-	wpa_s->pqc_fragments_mask |= (1U << frag_idx);
-	if (offset + data_len > wpa_s->pqc_kem_received_len)
-		wpa_s->pqc_kem_received_len = offset + data_len;
+    wpa_printf(MSG_DEBUG, "PQC_LOG: STA - Processing key frag %u (DataLen=%zu, TotalLen=%u) [PQC_RX_FRAG_START]", 
+               frag_idx, data_len, total_len);
 
-	expected_frags = wpa_s->pqc_kem_expected_frags;
-	if (expected_frags == 0)
-		expected_frags = (total_len + PQC_FRAGMENT_MAX_LEN - 1) / PQC_FRAGMENT_MAX_LEN;
+    if (wpa_s->pqc_kem_buffer && wpa_s->pqc_kem_expected_len != total_len) {
+        os_free(wpa_s->pqc_kem_buffer);
+        wpa_s->pqc_kem_buffer = NULL;
+    }
 
-	wpa_printf(MSG_DEBUG,
-		   "PQC_LOG: Fragment %u/%zu received (%zu bytes at offset %zu, total mask=0x%x)",
-		   frag_idx, expected_frags, data_len, offset, wpa_s->pqc_fragments_mask);
-	if (expected_frags >= 32)
-		expected_mask = 0xffffffffU;
-	else
-		expected_mask = (1U << expected_frags) - 1;
+    if (!wpa_s->pqc_kem_buffer) {
+        wpa_s->pqc_kem_buffer = os_malloc(total_len);
+        if (!wpa_s->pqc_kem_buffer) return;
+        
+        wpa_s->pqc_kem_buffer_size = total_len;
+        wpa_s->pqc_fragments_mask = 0;
+        wpa_s->pqc_kem_received_len = 0;
+        wpa_s->pqc_kem_expected_len = total_len;
+        wpa_s->pqc_kem_expected_frags = (total_len + 199) / PQC_FRAGMENT_MAX_LEN; /* PQC_FRAGMENT_MAX_LEN is 200 */
+    }
 
-	if (wpa_s->pqc_kem_received_len >= wpa_s->pqc_kem_expected_len &&
-	    wpa_s->pqc_fragments_mask == expected_mask) {
-		wpa_s->pqc_kem_complete = true;
-		wpa_printf(MSG_INFO,
-			   "PQC_LOG: received a public key and assembled it (%zu bytes)",
-			   wpa_s->pqc_kem_received_len);
-		pqc_try_start_auth(wpa_s);
-	}
+    offset = (size_t) frag_idx * PQC_FRAGMENT_MAX_LEN;
+
+    if (offset >= wpa_s->pqc_kem_buffer_size || data_len > wpa_s->pqc_kem_buffer_size - offset || offset + data_len > total_len) {
+        return; /* Bounds check failed */
+    }
+
+    if (wpa_s->pqc_fragments_mask & (1U << frag_idx)) return; /* Already have this frag */
+
+    os_memcpy(wpa_s->pqc_kem_buffer + offset, data, data_len);
+    wpa_s->pqc_fragments_mask |= (1U << frag_idx);
+    wpa_s->pqc_kem_received_len += data_len;
+
+    expected_frags = wpa_s->pqc_kem_expected_frags;
+    expected_mask = (expected_frags >= 32) ? 0xffffffffU : (1U << expected_frags) - 1;
+
+    /* --- THE COMPLETION CHECK --- */
+    if (wpa_s->pqc_fragments_mask == expected_mask) {
+        wpa_s->pqc_kem_complete = true;
+        wpa_printf(MSG_INFO, "PQC_LOG: STA - Assembled ML-KEM public key. (%zu bytes), [PQC_RX_FRAG_END]", wpa_s->pqc_kem_received_len);
+        pqc_try_start_auth(wpa_s);
+    } 
+    /* If missing fragments AND we are actively trying to connect to this AP */
+    else if (wpa_s->current_bss && wpa_s->wpa_state >= WPA_ASSOCIATING) {
+        /* Re-trigger the Gatekeeper to pull the next missing piece */
+        wpa_supplicant_connect(wpa_s, wpa_s->current_bss, wpa_s->current_ssid);
+    }
 }

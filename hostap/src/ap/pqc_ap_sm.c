@@ -37,7 +37,7 @@ struct hostapd_pqc_sm * pqc_ap_sm_init(struct hostapd_data *hapd, struct sta_inf
 
     /* saving earlier generated keys from sta_info struct to state machine */
     
-    // ML-KEM
+    // ML-KEM - delete from sta_info struct after copying TODO
     if (sta->ml_kem_512_pub && sta->ml_kem_secr) {
         sm->kem_pub_key_len = sta->ml_kem_512_pub_len;
         sm->kem_pub_key = os_malloc(sm->kem_pub_key_len);
@@ -77,7 +77,7 @@ void pqc_ap_sm_deinit(struct hostapd_pqc_sm *sm) {
         OQS_MEM_secure_free(sm->kem_secret_key, sm->kem_secret_key_len);
     }
     
-    if (sm->dsa_secret_key) { // Uwaga na literowke 'sexret' z definicji struktury
+    if (sm->dsa_secret_key) {
         OQS_MEM_secure_free(sm->dsa_secret_key, sm->dsa_secret_key_len);
     }
 
@@ -118,7 +118,7 @@ int pqc_ap_sm_derive_pmk(struct hostapd_pqc_sm *sm, u8 *pmk_out) {
     /* Generating PMK - 32 bytes*/
     hmac_sha256_kdf(sm->shared_secret_K, sm->shared_secret_K_len, 
                     key_prefix, wpabuf_head(Hkey_data), wpabuf_len(Hkey_data), 
-                    pmk_out, 32);
+                    pmk_out, PMK_LEN);
 
     wpabuf_free(Hkey_data);
     return 0;

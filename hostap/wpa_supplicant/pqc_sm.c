@@ -28,22 +28,32 @@ struct wpa_pqc_sm * pqc_sm_init(struct wpa_supplicant *wpa_s, struct wpa_ssid *s
 
     sm->wpa_s = wpa_s;
     sm->pqc_choice = ssid->pqc_choice;
-    sm->pqc_enabled = 1;
+    sm->pqc_enabled = ssid->pqc_enabled;
 
     // AP's pub KEM key (probe response)
-    sm->ap_kem_pub_len = 800; 
-    sm->ap_kem_public_key = os_malloc(sm->ap_kem_pub_len);
-
-    if (sm->ap_kem_public_key) {
-        os_memcpy(sm->ap_kem_public_key, wpa_s->pqc_kem_buffer, sm->ap_kem_pub_len);
-        wpa_printf(MSG_DEBUG, "PQC_LOG: AP KEM Public Key imported from wpa_s buffer");
+    sm->ap_kem_pub_len = get_oqs_kem_pub_len(sm->pqc_choice); 
+    if (sm->ap_kem_pub_len > 0 && wpa_s->pqc_kem_buffer != NULL){
+        sm->ap_kem_public_key = os_malloc(sm->ap_kem_pub_len);
+        if (sm->ap_kem_public_key) {
+            os_memcpy(sm->ap_kem_public_key, wpa_s->pqc_kem_buffer, sm->ap_kem_pub_len);
+            wpa_printf(MSG_DEBUG, "PQC_LOG: AP KEM Public Key imported from wpa_s buffer");
+        }
+    } else {
+        wpa_printf(MSG_ERROR, "PQC_LOG: Failed to import AP KEM Key (Buffer NULL or Invalid Length)");
+        os_free(sm);
+        return NULL;
     }
-
+    
+    /* password copy with bounds checking */
     if(ssid->passphrase){
         sm->pwd_len = os_strlen(ssid->passphrase);
+        if (sm->pwd_len >= sizeof(sm->pwd)) {
+            sm->pwd_len = sizeof(sm->pwd) -1;
+        }
         os_memcpy(sm->pwd, ssid->passphrase, sm->pwd_len);
     } else {
         wpa_printf(MSG_ERROR, "PQC_LOG: Missing password in STA network config");
+        return NULL;
     }
 
     /* initialize liboqs */
@@ -56,6 +66,12 @@ void pqc_sm_deinit(struct wpa_pqc_sm *sm) {
 
     wpa_printf(MSG_DEBUG, "PQC_LOG: Deinitializing State Machine");
 
+    /* Fragmentation Buffer Cleanup */
+    if (sm->rx_reassembly_buf) {
+        wpabuf_free(sm->rx_reassembly_buf);
+    }
+
+    /* PAKE cleanup */
     if (sm->fsid) os_free(sm->fsid);
     if (sm->T) os_free(sm->T);
     
@@ -63,6 +79,7 @@ void pqc_sm_deinit(struct wpa_pqc_sm *sm) {
     if (sm->sta_kem_public_key) os_free(sm->sta_kem_public_key);
     if (sm->sta_second_pub_key) os_free(sm->sta_second_pub_key);
     if (sm->dsa_public_key) os_free(sm->dsa_public_key);
+    if (sm->ap_ciphertext_2) os_free(sm->ap_ciphertext_2);
 
     /* liboqs safe delete */
     if (sm->kem_secret_key) {
@@ -71,23 +88,13 @@ void pqc_sm_deinit(struct wpa_pqc_sm *sm) {
     if (sm->sta_second_secret_key) {
         OQS_MEM_secure_free(sm->sta_second_secret_key, sm->sta_second_secret_len);
     }
-
-    /* ML-DSA cleanup */
-    if (sm->sta_mldsa_public_key) {
-        os_free(sm->sta_mldsa_public_key);
-    }
-    if (sm->sta_mldsa_secret_key) {
-        OQS_MEM_secure_free(sm->sta_mldsa_secret_key, sm->sta_mldsa_secret_len);
+    if (sm->shared_secret_K) {
+        OQS_MEM_secure_free(sm->shared_secret_K, sm->shared_secret_K_len);
     }
 
     /* PASN cleanup */
-    if (sm->pasn_ciphertext)
-        os_free(sm->pasn_ciphertext);
-    if (sm->pasn_sig_buf)
-        os_free(sm->pasn_sig_buf);
-    if (sm->pasn_dsa_signature) {
-        os_free(sm->pasn_dsa_signature);
-    }
+    if (sm->pasn_ciphertext) os_free(sm->pasn_ciphertext);
+    if (sm->pasn_dsa_signature) os_free(sm->pasn_dsa_signature);
     if (sm->pasn_shared_secret) {
         OQS_MEM_secure_free(sm->pasn_shared_secret, sm->pasn_shared_secret_len);
     }
@@ -97,13 +104,13 @@ void pqc_sm_deinit(struct wpa_pqc_sm *sm) {
     forced_memzero(sm->pasn_kck, sizeof(sm->pasn_kck));
     forced_memzero(sm->pasn_tk, sizeof(sm->pasn_tk));
     forced_memzero(sm->pasn_mic1, sizeof(sm->pasn_mic1));
-
+    forced_memzero(sm->pasn_mic2, sizeof(sm->pasn_mic2));
+    
     forced_memzero(sm->pwd, sizeof(sm->pwd));
     forced_memzero(sm->K_aes, sizeof(sm->K_aes));
     forced_memzero(sm->pmk, sizeof(sm->pmk));
 
     os_free(sm);
-
     OQS_destroy();
 }
 
@@ -114,7 +121,7 @@ int pqc_sm_rx_auth_req(struct wpa_pqc_sm *sm) {
     u8 enc_id[PQC_SID_LEN]; // 16B
     int ret = -1;
 
-    wpa_printf(MSG_DEBUG, "PQC_LOG: State Machine processing Auth Response, preparing PAKE-1 data");
+    wpa_printf(MSG_DEBUG, "PQC_LOG: State Machine processing Auth Response, preparing PAKE-1 data [PQC_STAGE_2_START]");
 
     if (!sm || !sm->ap_kem_public_key) {
         wpa_printf(MSG_ERROR, "PQC_LOG: Missing AP KEM public key");
@@ -144,8 +151,9 @@ int pqc_sm_rx_auth_req(struct wpa_pqc_sm *sm) {
     }
 
     /* Encryption of id */
-    void *aes_ctx = aes_encrypt_init(sm->K_aes, 32);
+    void *aes_ctx = aes_encrypt_init(sm->K_aes, AES_KEY_LEN);
     if (!aes_ctx) goto cleanup;
+
     aes_encrypt(aes_ctx, sm->id, enc_id);
     aes_encrypt_deinit(aes_ctx);
 
@@ -164,13 +172,17 @@ int pqc_sm_assoc_success(struct wpa_pqc_sm *sm) {
 
     if (!sm || !sm->pqc_enabled) return -1;
 
-    wpa_printf(MSG_DEBUG, "PQC_LOG: Received Association Response. Generating the second pair of KEM keys");
+    wpa_printf(MSG_DEBUG, "PQC_LOG: Received Association Response. Generating the second pair of KEM keys [PQC_STAGE_5_START]");
 
     const char *alg_name = get_oqs_kem_alg(sm->pqc_choice);
     if (!alg_name) return -1;
 
     kem = OQS_KEM_new(alg_name);
     if (!kem) return -1;
+
+    /* Prevent memory leaks on state machine retries */
+    if (sm->sta_second_pub_key) os_free(sm->sta_second_pub_key);
+    if (sm->sta_second_secret_key) OQS_MEM_secure_free(sm->sta_second_secret_key, sm->sta_second_secret_len);
 
     /* Memory allocation */
     sm->sta_second_pub_len = kem->length_public_key;
@@ -193,17 +205,10 @@ int pqc_sm_assoc_success(struct wpa_pqc_sm *sm) {
     wpa_printf(MSG_INFO, "PQC_LOG: Generation of the second key pair ended successfully");
 
     OQS_KEM_free(kem);
+    kem = NULL;
 
-    /* PASN Phase: Generate ML-DSA keys and send PASN-1 */
-    wpa_printf(MSG_DEBUG, "PQC_LOG: Transitioning to PASN phase. Generating ML-DSA keys...");
-
-    if (pqc_pasn_generate_mldsa_keys(sm) != 0) {
-        wpa_printf(MSG_ERROR, "PQC_LOG: Failed to generate ML-DSA keys for PASN");
-        return -1;
-    }
-
-    /* Send PASN-1 frame with ML-DSA public key */
-    wpa_printf(MSG_DEBUG, "PQC_LOG: Sending PASN-1 frame with ML-DSA public key");
+    /* Send PASN-1 frame with ML-KEM public key */
+    wpa_printf(MSG_DEBUG, "PQC_LOG: Sending PASN-1 frame with ML-KEM public key");
 
     if (wpas_pqc_send_pasn1(sm) != 0) {
         wpa_printf(MSG_ERROR, "PQC_LOG: Failed to send PASN-1 frame");
